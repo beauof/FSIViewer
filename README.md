@@ -3,9 +3,7 @@ FSIViewer - simple visualizer for FSI data
 
 !===============================================================================================
 
-To install, open a shell in the installation directory and do:
-    make user
-    make
+To install, open a shell in the installation directory and do: make user && make
 
 Now, you should be able to start the visualizer with:
     python main.py
