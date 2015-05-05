@@ -1,0 +1,13 @@
+!== general
+add support to determine mesh type from mesh headers, e.g. X, T, B files // implemented, check
+
+!== 2D
+tesselate quad-tris to enable vorticity computation
+add mesh quality computation to replace vtkMeshQuality
+
+!== 3D
+mesh quality for hex meshes
+speedup pressure interpolation on hex grid // temporary fix (inaccurate interpolation)
+make grid from sampling plane points or convert ugrid to strucgrid
+add quality measure as option for sampling
+fix slicing issue - visualization artefacts
