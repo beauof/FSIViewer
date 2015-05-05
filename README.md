@@ -1,17 +1,17 @@
 # FSIViewer
 FSIViewer - simple visualizer for FSI data
 
-################################################################################################
+!===============================================================================================
 
 To install, open a shell in the installation directory and do:
-	make user
-	make
+    make user
+    make
 
 Now, you should be able to start the visualizer with:
-	python main.py
+    python main.py
 
 In the subdirectory, there is a default and personal configuration file of the following format:
-################################################################################################
+!===============================================================================================
 Installation directiory of FSI visualizer
 Default directory
 Data folder (where you keep your *.D files)
@@ -36,7 +36,7 @@ Visualize fluid
 Visualize solid
 Visualize interface
 Filename for domain velocity *.D files
-################################################################################################
+!===============================================================================================
 
 Further, cython files (*.pyx) can be profiled e.g.:
   cython -a cythonfile.pyx
