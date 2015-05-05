@@ -3,6 +3,20 @@ FSIViewer - simple visualizer for FSI data  <br />
  <br />
 !=============================================================================================== <br />
  <br />
+The software has only been tested with Linux operating systems. <br />
+ <br />
+Make sure that the following packages are installed: <br />
+gcc <br />
+python2.x <br />
+python-tk <br />
+python-imaging-tk <br />
+python-dev <br />
+python-numpy <br />
+cython <br />
+vtk <br />
+ <br />
+Note: This software has been developed with VTK 5.8.0 <br />
+ <br />
 To install, open a shell in the installation directory and do: <br />
     make user && make <br />
  <br />
