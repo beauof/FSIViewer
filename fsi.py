@@ -223,9 +223,9 @@ class fsi(object):
         self.cameraUp0Str     = []
         self.cameraUp1Str     = []
         self.cameraUp2Str     = []
-        self.cameraPos0       = -2.0
-        self.cameraPos1       = 2.0
-        self.cameraPos2       = 2.0
+        self.cameraPos0       = -10.0#-2
+        self.cameraPos1       = 0.0#2
+        self.cameraPos2       = 0.0#2
         self.cameraPos0Str    = []
         self.cameraPos1Str    = []
         self.cameraPos2Str    = []
@@ -1851,29 +1851,54 @@ class fsi(object):
         if self.ugridI == []:
             self.ugridI      = vtk.vtkUnstructuredGrid()
             if self.numberOfDimensions == 3:
-                # quadratic triangle mesh
-                self.cellTypesI = vtk.vtkQuadraticTriangle().GetCellType()
-                divby = 7
-                # read triangles
-                self.tempElemI = readCheartData.readInterfaceElements( \
-                    self.baseDirectory \
-                    +self.meshFolder \
-                    +self.filenameTopoQuadI, \
-                    self.numberOfDimensions)
-                # create cells for unstructured grid
-                tempElemLinI, cellstypesI, cellslocationsI = \
-                    readCheartData.createTopologyInterface3Dquad(self.tempElemI, \
-                    self.cellTypesI)
-                cellsI = vtk.vtkCellArray()
-                cellsI.SetCells(int(tempElemLinI.shape[0]/divby), \
-                    numpy_to_vtk(tempElemLinI, deep=1, \
-                    array_type=vtk.vtkIdTypeArray().GetDataType()))
-                # assign cells
-                self.ugridI.SetCells(numpy_to_vtk(cellstypesI, deep=1, \
-                    array_type=vtk.vtkUnsignedCharArray().GetDataType()),
-                               numpy_to_vtk(cellslocationsI, deep = 1, \
-                               array_type=vtk.vtkIdTypeArray().GetDataType()),
-                               cellsI)
+                if self.meshTypeI == 22:
+                    # quadratic triangle mesh
+                    self.cellTypesI = vtk.vtkQuadraticTriangle().GetCellType()
+                    divby = 7
+                    # read triangles
+                    self.tempElemI = readCheartData.readInterfaceElementsQuad( \
+                        self.baseDirectory \
+                        +self.meshFolder \
+                        +self.filenameTopoQuadI, \
+                        self.numberOfDimensions)
+                    # create cells for unstructured grid
+                    tempElemLinI, cellstypesI, cellslocationsI = \
+                        readCheartData.createTopologyInterface3Dquad(self.tempElemI, \
+                        self.cellTypesI)
+                    cellsI = vtk.vtkCellArray()
+                    cellsI.SetCells(int(tempElemLinI.shape[0]/divby), \
+                        numpy_to_vtk(tempElemLinI, deep=1, \
+                        array_type=vtk.vtkIdTypeArray().GetDataType()))
+                    # assign cells
+                    self.ugridI.SetCells(numpy_to_vtk(cellstypesI, deep=1, \
+                        array_type=vtk.vtkUnsignedCharArray().GetDataType()),
+                                   numpy_to_vtk(cellslocationsI, deep = 1, \
+                                   array_type=vtk.vtkIdTypeArray().GetDataType()),
+                                   cellsI)
+                elif self.meshTypeI == 5:
+                    # linear triangle mesh
+                    self.cellTypesI = vtk.vtkTriangle().GetCellType()
+                    divby = 4
+                    # read triangles
+                    self.tempElemI = readCheartData.readInterfaceElementsLin( \
+                        self.baseDirectory \
+                        +self.meshFolder \
+                        +self.filenameTopoQuadI, \
+                        self.numberOfDimensions)
+                    # create cells for unstructured grid
+                    tempElemLinI, cellstypesI, cellslocationsI = \
+                        readCheartData.createTopologyInterface3Dlin(self.tempElemI, \
+                        self.cellTypesI)
+                    cellsI = vtk.vtkCellArray()
+                    cellsI.SetCells(int(tempElemLinI.shape[0]/divby), \
+                        numpy_to_vtk(tempElemLinI, deep=1, \
+                        array_type=vtk.vtkIdTypeArray().GetDataType()))
+                    # assign cells
+                    self.ugridI.SetCells(numpy_to_vtk(cellstypesI, deep=1, \
+                        array_type=vtk.vtkUnsignedCharArray().GetDataType()),
+                                   numpy_to_vtk(cellslocationsI, deep = 1, \
+                                   array_type=vtk.vtkIdTypeArray().GetDataType()),
+                                   cellsI)
             else:
                 print "interface mesh for 2D case not implemented."
         if self.boolUpdateSpaceI:
@@ -1936,23 +1961,48 @@ class fsi(object):
     # update fluid node coordinates
     def updateSpaceF(self):
         logging.debug("update fluid space")
+        if self.boolUpdateSpaceF:
+            # read points
+            tempCoord, self.numberOfDimensions = \
+                readCheartData.readVectors(self.baseDirectory \
+                                           +self.dataFolder \
+                                           +self.filenameSpaceF \
+                                           +str(self.currentT) \
+                                           +self.filenameSuffix)
         if self.ugridF == []:
             self.ugridF      = vtk.vtkUnstructuredGrid()
             self.ugridCellsF = vtk.vtkUnstructuredGrid()
             if self.numberOfDimensions == 3:
-                # quadratic tetrahedral mesh
-                self.cellTypesF = vtk.vtkQuadraticTetra().GetCellType()
-                divby = 11
-                # read tetrahedrons
-                self.tempElemF = readCheartData.readTriQuadAsLin( \
-                    self.baseDirectory \
-                    +self.meshFolder \
-                    +self.filenameTopoQuadF, \
-                    self.numberOfDimensions)
-                # create cells for unstructured grid
-                tempElemLinF, cellstypesF, cellslocationsF = \
-                    readCheartData.createTopology3Dquad(self.tempElemF, \
-                    self.cellTypesF)
+                if self.meshTypeF == 24:
+                    # quadratic tetrahedral mesh
+                    self.cellTypesF = vtk.vtkQuadraticTetra().GetCellType()
+                    divby = 11
+                    # read tetrahedrons
+                    self.tempElemF = readCheartData.readTriQuadAsLin( \
+                        self.baseDirectory \
+                        +self.meshFolder \
+                        +self.filenameTopoQuadF, \
+                        self.numberOfDimensions)
+                    # create cells for unstructured grid
+                    tempElemLinF, cellstypesF, cellslocationsF = \
+                        readCheartData.createTopology3Dquad(self.tempElemF, \
+                        self.cellTypesF)
+                elif self.meshTypeF == 10:
+                    # linear tetrahedral mesh
+                    self.cellTypesF = vtk.vtkTetra().GetCellType()
+                    divby = 5
+                    # read tetrahedrons
+                    self.tempElemF = readCheartData.readTriTetLin( \
+                        self.baseDirectory \
+                        +self.meshFolder \
+                        +self.filenameTopoQuadF, \
+                        self.numberOfDimensions)
+                    self.tempElemF = readCheartData.flipTets(self.tempElemF, \
+                        tempCoord)
+                    # create cells for unstructured grid
+                    tempElemLinF, cellstypesF, cellslocationsF = \
+                        readCheartData.createTopology3Dcells(self.tempElemF, \
+                        self.cellTypesF)
                 cellsF = vtk.vtkCellArray()
                 cellsF.SetCells(int(tempElemLinF.shape[0]/divby), \
                     numpy_to_vtk(tempElemLinF, deep=1, \
@@ -2026,12 +2076,6 @@ class fsi(object):
         if self.boolUpdateSpaceF:
             # read points
             pointsF = vtk.vtkPoints()
-            tempCoord, self.numberOfDimensions = \
-                readCheartData.readVectors(self.baseDirectory \
-                                           +self.dataFolder \
-                                           +self.filenameSpaceF \
-                                           +str(self.currentT) \
-                                           +self.filenameSuffix)
             pointsF.SetData(numpy_to_vtk(tempCoord, \
                 deep=1, array_type=vtk.VTK_DOUBLE))
             # assign points
@@ -2197,7 +2241,7 @@ class fsi(object):
     # update fluid pressure
     def updatePresF(self):
         logging.debug("update fluid pressure")
-        if self.tempMappingF == []:
+        if self.tempMappingF == [] and not(self.meshTypeF == 10):
             self.tempMappingF = readCheartData.findMappingLinQuad( \
                 self.baseDirectory \
                 +self.meshFolder \
@@ -2221,17 +2265,24 @@ class fsi(object):
                 +self.filenamePresF \
                 +str(self.currentT) \
                 +self.filenameSuffix)
-            tempPresQuadF = readCheartData.interpolateLinToQuad( \
-                self.tempElemF, \
-                vtk_to_numpy(self.ugridF.GetPoints().GetData()), \
-                tempPresLinF, \
-                self.tempMappingF, \
-                self.numberOfDimensions)
-            if self.boolEffectiveG.get():
-                tempPresQuadF = readCheartData.changeOfVariables( \
+            if not(self.meshTypeF == 10):
+                tempPresQuadF = readCheartData.interpolateLinToQuad( \
+                    self.tempElemF, \
                     vtk_to_numpy(self.ugridF.GetPoints().GetData()), \
-                    tempPresQuadF, self.densityF, \
-                    self.gravity_x, self.gravity_y, self.gravity_z, self.PO)
+                    tempPresLinF, \
+                    self.tempMappingF, \
+                    self.numberOfDimensions)
+                if self.boolEffectiveG.get():
+                    tempPresQuadF = readCheartData.changeOfVariables( \
+                        vtk_to_numpy(self.ugridF.GetPoints().GetData()), \
+                        tempPresQuadF, self.densityF, \
+                        self.gravity_x, self.gravity_y, self.gravity_z, self.PO)
+            else:
+                if self.boolEffectiveG.get():
+                    tempPresQuadF = readCheartData.changeOfVariables( \
+                        vtk_to_numpy(self.ugridF.GetPoints().GetData()), \
+                        tempPresLinF, self.densityF, \
+                        self.gravity_x, self.gravity_y, self.gravity_z, self.PO)
             self.ugridF.GetPointData().SetScalars( \
                 numpy_to_vtk(tempPresQuadF, deep=1, array_type=vtk.VTK_DOUBLE))
             self.ugridF.GetPointData().GetScalars().SetName("pressure")
@@ -2972,6 +3023,16 @@ class fsi(object):
                 + self.filenameSpaceS \
                 + str(self.currentT) \
                 + self.filenameSuffix), 'r')
+        elif os.path.exists(str(self.baseDirectory \
+                + self.dataFolder \
+                + self.filenameSpaceI \
+                + str(self.currentT) \
+                + self.filenameSuffix)):
+            getNumberOfDimensions = open(str(self.baseDirectory \
+                + self.dataFolder \
+                + self.filenameSpaceI \
+                + str(self.currentT) \
+                + self.filenameSuffix), 'r')
         firstLine = getNumberOfDimensions.readline()
         getNumberOfDimensions.close()
         temp = firstLine.split()
@@ -2997,7 +3058,17 @@ class fsi(object):
                 self.meshTypeF = 23
                 print "  fluid: "+str(self.meshTypeF)+" (quad)"
             elif len(temp) == 4 and self.numberOfDimensions == 3:
-                self.meshTypeF = 24
+                getMeshType = open(str(self.baseDirectory \
+                    + self.meshFolder \
+                    + self.filenameTopoQuadF), 'r')
+                firstLine = getMeshType.readline()
+                firstLine = getMeshType.readline()
+                getMeshType.close()
+                temp = firstLine.split()
+                if len(temp) == 4:
+                    self.meshTypeF = 10
+                else:
+                    self.meshTypeF = 24
                 print "  fluid: "+str(self.meshTypeF)+" (tet)"
             elif len(temp) == 8 and self.numberOfDimensions == 3:
                 self.meshTypeF = 25
@@ -3038,9 +3109,12 @@ class fsi(object):
             getMeshType.close()
             temp = firstLine.split()
             # quad lines
-            if len(temp) == 3:
+            if len(temp) == 3 and self.numberOfDimensions == 2:
                 self.meshTypeI = 21
                 print "  interface: "+str(self.meshTypeI)+" (line)"
+            elif len(temp) == 3 and self.numberOfDimensions == 3:
+                self.meshTypeI = 5
+                print "  interface: "+str(self.meshTypeI)+" (tri)"
             # quad tris
             elif len(temp) == 6:
                 self.meshTypeI = 22

@@ -334,7 +334,45 @@ def readTriQuadAsLin(str filename, int numDim=2):
     
     return elements
 
-def readInterfaceElements(str filename, int numDim=2):
+def readTriTetLin(str filename, int numDim=2):
+    filename_byte_string = filename.encode("UTF-8")
+    cdef char* fname = filename_byte_string
+    cdef FILE* cfile
+    cdef ndarray[numpy.int_t, ndim=2] elements
+    cdef unsigned int numberOfElements, numberOfNodes, i
+    cdef char * line = NULL
+    cdef size_t l = 0
+    cdef ssize_t read
+    cdef int s0, s1, s2, s3
+    
+    cfile = fopen(fname, "rb")
+    if cfile == NULL:
+        print "No such file or directory: '%s'" % filename
+    
+    # first line
+    read = getline(&line, &l, cfile)
+    s0, s1, s2, s3 = splitLine4(line)
+    numberOfElements = int(s0)
+    numberOfNodes = int(s1)
+    # duplicate code here rather than if/else inside for loop (TODO: more clever way?)
+    if numDim == 2:
+        print "Linear tris not implemented!"
+    else:
+        elements = numpy.empty((numberOfElements, 4)).astype(int)
+        # read all subsequent lines
+        for i in range(numberOfElements):
+            read = getline(&line, &l, cfile)
+            if read == -1: break
+            s0, s1, s2, s3 = splitLine4(line)
+            elements[i, 0] = int(s0-1)
+            elements[i, 1] = int(s2-1)
+            elements[i, 2] = int(s1-1)
+            elements[i, 3] = int(s3-1)
+    fclose(cfile)
+    
+    return elements
+
+def readInterfaceElementsQuad(str filename, int numDim=2):
     filename_byte_string = filename.encode("UTF-8")
     cdef char* fname = filename_byte_string
     cdef FILE* cfile
@@ -371,6 +409,44 @@ def readInterfaceElements(str filename, int numDim=2):
             elements[i, 3] = int(s3-1)
             elements[i, 4] = int(s5-1)
             elements[i, 5] = int(s4-1)
+    fclose(cfile)
+    
+    return elements
+
+def readInterfaceElementsLin(str filename, int numDim=2):
+    filename_byte_string = filename.encode("UTF-8")
+    cdef char* fname = filename_byte_string
+    cdef FILE* cfile
+    cdef ndarray[numpy.int_t, ndim=2] elements
+    cdef unsigned int numberOfElements, numberOfNodes, i
+    cdef char * line = NULL
+    cdef size_t l = 0
+    cdef ssize_t read
+    cdef int s0, s1, s2
+    
+    cfile = fopen(fname, "rb")
+    if cfile == NULL:
+        print "No such file or directory: '%s'" % filename
+    
+    # first line
+    read = getline(&line, &l, cfile)
+    s0, s1, s2 = splitLine3(line)
+    numberOfElements = int(s0)
+    numberOfNodes = int(s1)
+    # duplicate code here rather than if/else inside for loop (TODO: more clever way?)
+    if numDim == 2:
+        print "not implemented"
+    else:
+        elements = numpy.empty((numberOfElements, 3)).astype(int)
+        # read all subsequent lines
+        for i in range(numberOfElements):
+            read = getline(&line, &l, cfile)
+            if read == -1: break
+            s0, s1, s2 = splitLine3(line)
+            # vtk and cheart node numbers: one has to swap vtk nodes ? and ?
+            elements[i, 0] = int(s0-1)
+            elements[i, 1] = int(s1-1)
+            elements[i, 2] = int(s2-1)
     fclose(cfile)
     
     return elements
@@ -1185,6 +1261,13 @@ def computeHexVolumes(ndarray[numpy.double_t, ndim=2] h):
     v3 = oneSixth * (dotProduct(differenceVector(h[7, :], h[0, :]), crossProduct(differenceVector(h[4, :], h[1, :]), differenceVector(h[0, :], h[5, :]))) + 0.5 * dotProduct(differenceVector(h[0, :], h[2, :]), crossProduct(differenceVector(h[0, :], h[1, :]), differenceVector(h[0, :], h[3, :]))))
     return v1, v2, v3
 
+def computeTetVolumes(ndarray[numpy.double_t, ndim=2] tet):
+    cdef double result
+    result = dotProduct(differenceVector(tet[:, 0], tet[:, 3]), \
+        crossProduct(differenceVector(tet[:, 1], tet[:, 3]), \
+        differenceVector(tet[:, 2], tet[:, 3]))) / 6.0
+    return result
+
 # tip - 0; from bottom counter-clockwise 1-2-3-4 for positive volume
 # DaviesSalmond1984.pdf
 # http://arc.aiaa.org/doi/pdf/10.2514/3.9013
@@ -1316,7 +1399,7 @@ def createTopology3D(ndarray[numpy.int_t, ndim=2] elements, int ct):
     return elementsLin, cellstypes, cellslocations
 
 def createTopology3Dcells(ndarray[numpy.int_t, ndim=2] elements, int ct):
-    cdef unsigned int numRows, numCols, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, i, k
+    cdef unsigned int numRows, numCols, i
     cdef ndarray[numpy.int_t, ndim=1] elementsLin
     cdef ndarray[numpy.int_t, ndim=1] cellslocations
     cdef ndarray[numpy.int_t, ndim=1] cellstypes
@@ -1328,7 +1411,7 @@ def createTopology3Dcells(ndarray[numpy.int_t, ndim=2] elements, int ct):
     cellstypes = numpy.empty(numRows).astype(int)
     
     for i in range(numRows):
-        cellslocations[i]   = i
+        cellslocations[i]   = 5*i
         
         cellstypes[i]   = ct
         
@@ -1425,6 +1508,38 @@ def createTopologyInterface3Dquad(ndarray[numpy.int_t, ndim=2] elements, int ct)
         elementsLinearIndex[k+4]  = elements[i, 3]
         elementsLinearIndex[k+5]  = elements[i, 4]
         elementsLinearIndex[k+6]  = elements[i, 5]
+        
+    return elementsLinearIndex, cellstypes, cellslocations
+
+def createTopologyInterface3Dlin(ndarray[numpy.int_t, ndim=2] elements, int ct):
+    cdef unsigned int numRows, numCols, i, k
+    cdef ndarray[numpy.int_t, ndim=1] elementsLinearIndex
+    cdef ndarray[numpy.int_t, ndim=1] cellslocations
+    cdef ndarray[numpy.int_t, ndim=1] cellstypes
+    
+    # number of elements
+    numRows = elements.shape[0]
+    # number of nodes per element
+    numCols = elements.shape[1]
+    
+    # quadratic triangles
+    # allocate memory
+    elementsLinearIndex = numpy.empty(numRows*4).astype(int)
+    cellslocations = numpy.empty(numRows).astype(int)
+    cellstypes = numpy.empty(numRows).astype(int)
+    
+    # for all elements
+    for i in range(numRows):
+        # set cell locations in linearly indexed array
+        k = (numCols + 1) * i
+        cellslocations[i]   = k
+        # set cell type
+        cellstypes[i]   = ct
+        # set elements
+        elementsLinearIndex[k]    = numCols
+        elementsLinearIndex[k+1]  = elements[i, 0]
+        elementsLinearIndex[k+2]  = elements[i, 1]
+        elementsLinearIndex[k+3]  = elements[i, 2]
         
     return elementsLinearIndex, cellstypes, cellslocations
 
@@ -1560,11 +1675,38 @@ def computeMagnitude(ndarray[numpy.double_t, ndim=2] field):
     
     return magnitude
 
+# flip tets such that tet volume has consistent sign, which is equivalent to
+# consistent node number order
+def flipTets(ndarray[numpy.int_t, ndim=2] elem, ndarray[numpy.double_t, ndim=2] coord):
+    cdef unsigned int numElems, numNodesPerElement, numNodes, numDim, i, temp
+    cdef ndarray[numpy.double_t, ndim=2] tet
+    numElems           = elem.shape[0]
+    numNodesPerElement = elem.shape[1]
+    numNodes           = coord.shape[0]
+    numDim             = coord.shape[1]
+    tet                = numpy.zeros((numDim, numNodesPerElement)).astype(float)
+    
+    for i in range(numElems):
+        for j in range(numNodesPerElement):
+            for k in range(numDim):
+                tet[k, j] = coord[elem[i, j], k]
+        if computeTetVolumes(tet) < 0:
+            temp = elem[i, 1]
+            elem[i, 1] = elem[i, 2]
+            elem[i, 2] = temp
+            #for j in range(numNodesPerElement):
+            #    for k in range(numDim):
+            #        tet[k, j] = coord[elem[i, j], k]
+            #if computeTetVolumes(tet) < 0:
+            #    print "flipTets: Didn't work."
+    
+    return elem
+
 # http://people.sc.fsu.edu/~jburkardt/m_src/tet_mesh_quality/tet_mesh_quality.html
 def computeTetQuality(ndarray[numpy.double_t, ndim=2] coord, ndarray[numpy.int_t, ndim=2] elem, int qualityMeasure=0):
     cdef Py_ssize_t i, j, k
     cdef unsigned int numElems, numNodesPerElement, numNodes, numDim
-    cdef double circumradius, inradius, l123, l124, l134, l234, divby, gamma
+    cdef double circumradius, inradius, l123, l124, l134, l234, divby, gamma, vol
     cdef ndarray[numpy.double_t, ndim=2] tet, a, b
     cdef ndarray[numpy.double_t, ndim=1] v21, v31, v41, v32, v42, n123, n124, n134, n234, pc, quality
     
@@ -1592,6 +1734,13 @@ def computeTetQuality(ndarray[numpy.double_t, ndim=2] coord, ndarray[numpy.int_t
             for j in range(numNodesPerElement):
                 for k in range(numDim):
                     tet[k, j] = coord[elem[i, j], k]
+            
+            ## TET VOLUME ######################################################
+            #if numNodesPerElement == 4:
+            #    vol = dotProduct(differenceVector(tet[:, 0], tet[:, 3]), \
+            #        crossProduct(differenceVector(tet[:, 1], tet[:, 3]), \
+            #        differenceVector(tet[:, 2], tet[:, 3]))) / 6.0
+            #    print "elem "+str(i)+": V = "+str(vol)
             
             ## CIRCUMSPHERE ####################################################
             
