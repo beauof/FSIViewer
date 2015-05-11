@@ -31,6 +31,7 @@ class fsi(object):
         self.boolUpdateVort   = True
         self.boolUpdatePhiF   = True
         self.boolUpdateDisp   = True
+        self.boolUpdateSolVel = True
         self.boolUpdatePresS  = True
         self.boolUpdateSpaceS = True
         self.boolUpdateQualityF = True
@@ -57,6 +58,7 @@ class fsi(object):
         self.boolEffectiveG   = []
         self.filenameSpaceS   = "SolidSpace-"
         self.filenameDisp     = "Disp-"
+        self.filenameSolVel   = "SolVel-"
         self.filenamePresS    = "SolidPres-"
         self.filenameQualityS = "SolidMeshQuality-"
         self.filenameSpaceI   = "BndrySpace-"
@@ -116,6 +118,7 @@ class fsi(object):
         self.boolShowPhiF     = False
         self.boolShowQualityF = False
         self.boolShowDisp     = False
+        self.boolShowSolVel   = False
         self.boolShowPresS    = True
         self.boolShowQualityS = False
         self.boolShowLMult    = True
@@ -183,6 +186,14 @@ class fsi(object):
         self.maxDisp1         = 1.0
         self.minDisp2         = 0.0
         self.maxDisp2         = 1.0
+        self.minMagSolVel     = 0.0
+        self.maxMagSolVel     = 1.0
+        self.minSolVel0       = 0.0
+        self.maxSolVel0       = 1.0
+        self.minSolVel1       = 0.0
+        self.maxSolVel1       = 1.0
+        self.minSolVel2       = 0.0
+        self.maxSolVel2       = 1.0
         self.userMinS         = 0.0
         self.userMaxS         = 1.0
         self.minMagLMult      = 0.0
@@ -911,6 +922,7 @@ class fsi(object):
             self.boolUpdatePhiF   = True
         if self.visualizeSolid.get():
             self.boolUpdateDisp   = True
+            self.boolUpdateSolVel = True
             self.boolUpdatePresS  = True
             self.boolUpdateSpaceS = True
             self.boolUpdateQualityS = True
@@ -944,6 +956,7 @@ class fsi(object):
             if self.showS.get() == "disp": self.updateDisp()
             self.progress["value"] = 90
             self.progress.update()
+            if self.showS.get() == "vel": self.updateSolVel()
             if self.showS.get() == "presS": self.updatePresS()
             if self.showS.get() == "quality": self.updateQualityS()
             self.scalarBarOnOffS()
@@ -1147,22 +1160,32 @@ class fsi(object):
             if not(self.dataSetActorS == []):
                 self.renderer.RemoveActor(self.dataSetActorS)
             self.boolShowDisp  = False
+            self.boolShowSolVel = False
             self.boolShowPresF = False
             self.boolShowQualityS = False
             self.boolShowScalarBarS.set(False)
         else:
             if self.showS.get() == "disp":
                 self.boolShowDisp  = True
+                self.boolShowSolVel = False
                 self.boolShowPresS = False
+                self.boolShowQualityS = False
+                self.updateDisp()
+            elif self.showS.get() == "vel":
+                self.boolShowDisp   = False
+                self.boolShowSolVel = True
+                self.boolShowPresS  = False
                 self.boolShowQualityS = False
                 self.updateDisp()
             elif self.showS.get() == "presS":
                 self.boolShowDisp  = False
+                self.boolShowSolVel = False
                 self.boolShowPresS = True
                 self.boolShowQualityS = False
                 self.updatePresS()
             elif self.showS.get() == "quality":
                 self.boolShowDisp  = False
+                self.boolShowSolVel = False
                 self.boolShowPresS = False
                 self.boolShowQualityS = True
                 self.updateQualityS()
@@ -1322,6 +1345,9 @@ class fsi(object):
         if self.boolShowDisp:
             self.dataSetMapperS.SetScalarModeToUsePointFieldData()
             self.dataSetMapperS.SelectColorArray("displacement")
+        elif self.boolShowSolVel:
+            self.dataSetMapperS.SetScalarModeToUsePointFieldData()
+            self.dataSetMapperS.SelectColorArray("velocity")
         elif self.boolShowPresS:
             self.dataSetMapperS.SetScalarModeToUsePointData()
             self.dataSetMapperS.SetUseLookupTableScalarRange(True)
@@ -1447,6 +1473,8 @@ class fsi(object):
         if self.boolShowScalarBarS.get():
             if self.boolShowDisp:
                 self.scalarBarS.SetTitle("Solid displacement")
+            elif self.boolShowSolVel:
+                self.scalarBarS.SetTitle("Solid velocity")
             elif self.boolShowPresS:
                 self.scalarBarS.SetTitle("Solid pressure")
             elif self.boolShowQualityS:
@@ -1677,6 +1705,19 @@ class fsi(object):
                     elif self.colorCompS == 2:
                         self.userMinScalarBarS = self.minDisp2
                         self.userMaxScalarBarS = self.maxDisp2
+                elif self.boolShowSolVel:
+                    if self.colorCompS == -1:
+                        self.userMinScalarBarS = self.minMagSolVel
+                        self.userMaxScalarBarS = self.maxMagSolVel
+                    elif self.colorCompS == 0:
+                        self.userMinScalarBarS = self.minSolVel0
+                        self.userMaxScalarBarS = self.maxSolVel0
+                    elif self.colorCompS == 1:
+                        self.userMinScalarBarS = self.minSolVel1
+                        self.userMaxScalarBarS = self.maxSolVel1
+                    elif self.colorCompS == 2:
+                        self.userMinScalarBarS = self.minSolVel2
+                        self.userMaxScalarBarS = self.maxSolVel2
                 elif self.boolShowQualityS:
                     self.colorCompS = -1
                     self.colorCompSstr.set(str(self.colorCompS))
@@ -2122,13 +2163,13 @@ class fsi(object):
                 logging.debug("ERROR: number of fluid velocity components is " \
                               % numberOfDimensions)
             self.minMagVel, self.maxMagVel = \
-                self.ugridF.GetPointData().GetVectors('velocity').GetRange(-1)
+                self.ugridF.GetPointData().GetVectors("velocity").GetRange(-1)
             self.minVel0, self.maxVel0 = \
-                self.ugridF.GetPointData().GetVectors().GetRange(0)
+                self.ugridF.GetPointData().GetVectors("velocity").GetRange(0)
             self.minVel1, self.maxVel1 = \
-                self.ugridF.GetPointData().GetVectors().GetRange(1)
+                self.ugridF.GetPointData().GetVectors("velocity").GetRange(1)
             self.minVel2, self.maxVel2 = \
-                self.ugridF.GetPointData().GetVectors().GetRange(2)
+                self.ugridF.GetPointData().GetVectors("velocity").GetRange(2)
             logging.debug("fluid velocity magnitude range: [%.2f, %.2f]" \
                           % (self.minMagVel, self.maxMagVel))
             logging.debug("fluid velocity x-range: [%.2f, %.2f]" \
@@ -2521,7 +2562,7 @@ class fsi(object):
     def updateDisp(self):
         logging.debug("update solid displacement")
         if ((self.ugridS == []) or (self.sgridS == [])) or self.boolUpdateSpaceS:
-            logging.debug("unstructured grid for fluid will be updated first")
+            logging.debug("unstructured grid for solid will be updated first")
             self.updateSpaceS()
         if self.boolUpdateDisp:
             tempDisp, numberOfDimensions = \
@@ -2539,13 +2580,13 @@ class fsi(object):
                     logging.debug("ERROR: number of solid displacement components is " \
                                   % numberOfDimensions)
                 self.minMagDisp, self.maxMagDisp = \
-                    self.ugridS.GetPointData().GetVectors().GetRange(-1)
+                    self.ugridS.GetPointData().GetVectors("displacement").GetRange(-1)
                 self.minDisp0, self.maxDisp0 = \
-                    self.ugridS.GetPointData().GetVectors().GetRange(0)
+                    self.ugridS.GetPointData().GetVectors("displacement").GetRange(0)
                 self.minDisp1, self.maxDisp1 = \
-                    self.ugridS.GetPointData().GetVectors().GetRange(1)
+                    self.ugridS.GetPointData().GetVectors("displacement").GetRange(1)
                 self.minDisp2, self.maxDisp2 = \
-                    self.ugridS.GetPointData().GetVectors().GetRange(2)
+                    self.ugridS.GetPointData().GetVectors("displacement").GetRange(2)
             else:
                 self.sgridS.GetPointData().SetVectors( \
                     organiseData.numpy2vtkDataArray(tempDisp, "displacement"))
@@ -2555,13 +2596,13 @@ class fsi(object):
                     logging.debug("ERROR: number of solid displacement components is " \
                                   % numberOfDimensions)
                 self.minMagDisp, self.maxMagDisp = \
-                    self.sgridS.GetPointData().GetVectors().GetRange(-1)
+                    self.sgridS.GetPointData().GetVectors("displacement").GetRange(-1)
                 self.minDisp0, self.maxDisp0 = \
-                    self.sgridS.GetPointData().GetVectors().GetRange(0)
+                    self.sgridS.GetPointData().GetVectors("displacement").GetRange(0)
                 self.minDisp1, self.maxDisp1 = \
-                    self.sgridS.GetPointData().GetVectors().GetRange(1)
+                    self.sgridS.GetPointData().GetVectors("displacement").GetRange(1)
                 self.minDisp2, self.maxDisp2 = \
-                    self.sgridS.GetPointData().GetVectors().GetRange(2)
+                    self.sgridS.GetPointData().GetVectors("displacement").GetRange(2)
             logging.debug("solid displacement magnitude range: [%.2f, %.2f]" \
                           % (self.minMagDisp, self.maxMagDisp))
             logging.debug("solid displacement x-range: [%.2f, %.2f]" \
@@ -2572,6 +2613,67 @@ class fsi(object):
                           % (self.minDisp2, self.maxDisp2))
             self.boolUpdateDisp = False
         logging.debug("update solid displacement completed")
+    
+    # update solid displacement
+    def updateSolVel(self):
+        logging.debug("update solid velocity")
+        if ((self.ugridS == []) or (self.sgridS == [])) or self.boolUpdateSpaceS:
+            logging.debug("unstructured grid for solid will be updated first")
+            self.updateSpaceS()
+        if self.boolUpdateSolVel \
+            and (os.path.exists(self.baseDirectory \
+                 +self.dataFolder \
+                 +self.filenameSolVel \
+                 +str(self.currentT) \
+                 +self.filenameSuffix)):
+            tempSolVel, numberOfDimensions = \
+                readCheartData.readVectors(self.baseDirectory \
+                                           +self.dataFolder \
+                                           +self.filenameSolVel \
+                                           +str(self.currentT) \
+                                           +self.filenameSuffix)
+            if not(self.ugridS == []):
+                self.ugridS.GetPointData().AddArray( \
+                    organiseData.numpy2vtkDataArray(tempSolVel, "velocity"))
+                if self.numberOfDimensions != numberOfDimensions:
+                    logging.debug("ERROR: number of dimensions of solid space is " \
+                                  % self.numberOfDimensions)
+                    logging.debug("ERROR: number of solid velocity components is " \
+                                  % numberOfDimensions)
+                self.minMagSolVel, self.maxMagSolVel = \
+                    self.ugridS.GetPointData().GetVectors("velocity").GetRange(-1)
+                self.minSolVel0, self.maxSolVel0 = \
+                    self.ugridS.GetPointData().GetVectors("velocity").GetRange(0)
+                self.minSolVel1, self.maxSolVel1 = \
+                    self.ugridS.GetPointData().GetVectors("velocity").GetRange(1)
+                self.minSolVel2, self.maxSolVel2 = \
+                    self.ugridS.GetPointData().GetVectors("velocity").GetRange(2)
+            else:
+                self.sgridS.GetPointData().AddArray( \
+                    organiseData.numpy2vtkDataArray(tempSolVel, "velocity"))
+                if self.numberOfDimensions != numberOfDimensions:
+                    logging.debug("ERROR: number of dimensions of solid space is " \
+                                  % self.numberOfDimensions)
+                    logging.debug("ERROR: number of solid velocity components is " \
+                                  % numberOfDimensions)
+                self.minMagSolVel, self.maxMagSolVel = \
+                    self.sgridS.GetPointData().GetVectors("velocity").GetRange(-1)
+                self.minSolVel0, self.maxSolVel0 = \
+                    self.sgridS.GetPointData().GetVectors("velocity").GetRange(0)
+                self.minSolVel1, self.maxSolVel1 = \
+                    self.sgridS.GetPointData().GetVectors("velocity").GetRange(1)
+                self.minSolVel2, self.maxSolVel2 = \
+                    self.sgridS.GetPointData().GetVectors("velocity").GetRange(2)
+            logging.debug("solid velocity magnitude range: [%.2f, %.2f]" \
+                          % (self.minMagSolVel, self.maxMagSolVel))
+            logging.debug("solid velocity x-range: [%.2f, %.2f]" \
+                          % (self.minSolVel0, self.maxSolVel0))
+            logging.debug("solid velocity y-range: [%.2f, %.2f]" \
+                          % (self.minSolVel1, self.maxSolVel1))
+            logging.debug("solid velocity z-range: [%.2f, %.2f]" \
+                          % (self.minSolVel2, self.maxSolVel2))
+            self.boolUpdateSolVel = False
+        logging.debug("update solid velocity completed")
     
     # update solid pressure
     def updatePresS(self):
@@ -3162,6 +3264,7 @@ class fsi(object):
         else:
             self.updateSpaceS()
             self.updateDisp()
+            self.updateSolVel()
             self.updatePresS()
             self.progress["value"] = 80
             self.progress.update()

@@ -309,45 +309,50 @@ def main():
     window.notebook.add(window.subframeS, text="S", state="disabled")
     visualization.showS = Tkinter.StringVar()
     visualization.showS.set("presS")
-    ttk.Radiobutton(window.subframeS, text='pressure', \
+    ttk.Radiobutton(window.subframeS, text="pressure", \
         command=visualization.updateSolid, \
-        variable=visualization.showS, value='presS', \
+        variable=visualization.showS, value="presS", \
         style='My.TRadiobutton').grid(column=0, row = 0, \
         sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
-    ttk.Radiobutton(window.subframeS, text='displacement', \
+    ttk.Radiobutton(window.subframeS, text="displacement", \
         command=visualization.updateSolid, \
-        variable=visualization.showS, value='disp', \
+        variable=visualization.showS, value="disp", \
         style='My.TRadiobutton').grid(column=0, row = 1, \
+        sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
+    ttk.Radiobutton(window.subframeS, text="velocity", \
+        command=visualization.updateSolid, \
+        variable=visualization.showS, value="vel", \
+        style='My.TRadiobutton').grid(column=0, row = 2, \
         sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
     ttk.Radiobutton(window.subframeS, text="tet quality", \
         command=visualization.updateSolid, \
         variable=visualization.showS, value="quality", \
-        style='My.TRadiobutton').grid(column=0, row = 2, \
-        sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
-    ttk.Radiobutton(window.subframeS, text='none', \
-        command=visualization.updateSolid, \
-        variable=visualization.showS, value='none', \
         style='My.TRadiobutton').grid(column=0, row = 3, \
         sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
+    ttk.Radiobutton(window.subframeS, text="none", \
+        command=visualization.updateSolid, \
+        variable=visualization.showS, value="none", \
+        style='My.TRadiobutton').grid(column=0, row = 4, \
+        sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
     ttk.Separator(window.subframeS, \
-        orient=Tkinter.HORIZONTAL).grid(column=0, row = 4, \
+        orient=Tkinter.HORIZONTAL).grid(column=0, row = 5, \
         sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
     visualization.boolEdgesS = Tkinter.BooleanVar()
     visualization.boolEdgesS.set(False)
     ttk.Checkbutton(window.subframeS, \
         variable=visualization.boolEdgesS, text='Show tri/tet edges', \
         command=visualization.edgesOnOffS, \
-        style='My.TCheckbutton').grid(column=0, row = 5, \
+        style='My.TCheckbutton').grid(column=0, row = 6, \
         sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
     visualization.boolShowScalarBarS = Tkinter.BooleanVar()
     visualization.boolShowScalarBarS.set(False)
     ttk.Checkbutton(window.subframeS, \
         variable=visualization.boolShowScalarBarS, text='Show scalarbar', \
         command=visualization.scalarBarOnOffS, \
-        style='My.TCheckbutton').grid(column=0, row = 6, \
+        style='My.TCheckbutton').grid(column=0, row = 7, \
         sticky=(Tkinter.W, Tkinter.E))
     window.componentFrameS = ttk.Frame(window.subframeS, style='My.TFrame')
-    window.componentFrameS.grid(column=0, row=7, \
+    window.componentFrameS.grid(column=0, row=8, \
         sticky=(Tkinter.W, Tkinter.S, Tkinter.E))
     ttk.Label(window.componentFrameS, width=15, text="use component:", \
         style='My.TLabel').grid(column=0, row=0, sticky=Tkinter.S)
