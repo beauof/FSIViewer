@@ -99,8 +99,6 @@ def main():
     else:
         print "No configuration file found. Please create one."
     
-    print "\nPlease ignore the following error:\n"
-    
     if visualization.DEBUG: logging.basicConfig(level=logging.DEBUG)
     else: logging.basicConfig(level=logging.INFO)
     
@@ -547,8 +545,7 @@ def main():
         from_=visualization.fromT, to=visualization.toT, \
         resolution=visualization.increment, \
         orient=Tkinter.HORIZONTAL, \
-        command=visualization.timeSliderUpdate, \
-        showvalue=0, \
+        showvalue=0, state=Tkinter.DISABLED, \
         background=window.linuxMintHEX, foreground='black', \
         relief='flat', borderwidth=0)
     visualization.timeSlider.set(visualization.currentT)

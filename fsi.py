@@ -80,7 +80,7 @@ class fsi(object):
         self.incrementStr     = []
         self.animateFromStr   = []
         self.animateToStr     = []
-        self.incrementStr     = []
+        self.animateIncrementStr = []
         self.screenshotFolderStr = []
         self.filenameSuffix   = ".D"
         self.PO               = 0.0
@@ -892,18 +892,25 @@ class fsi(object):
     # t - dt
     def previousT(self):
         if self.currentT-self.increment >= self.fromT:
-            self.timeSlider.set(self.timeSlider.get()-self.increment)
             self.currentT -= self.increment
+            self.timeSlider.set(self.currentT)
             self.currentIndexT -= 1
         self.timeSliderUpdate()
     
     # t + dt
     def nextT(self):
         if self.currentT+self.increment <= self.toT:
-            self.timeSlider.set(self.timeSlider.get()+self.increment)
             self.currentT += self.increment
+            self.timeSlider.set(self.currentT)
             self.currentIndexT += 1
         self.timeSliderUpdate()
+    
+    # we need this function, otherwise the data sets are not updated if the
+    # slider is moved
+    def updateScaleValue(self, newvalue):
+        if not(self.currentT == int(newvalue)):
+            self.currentT = int(newvalue)
+            self.timeSliderUpdate()
     
     # current time has changed --> update time slider and data sets
     def timeSliderUpdate(self):
@@ -1836,6 +1843,7 @@ class fsi(object):
         self.filenamePhiF       = config[25]
         self.filenameSpaceI     = config[26]
         self.filenameLMult      = config[27]
+        self.filenameSolVel     = config[28]
         # other hard-coded defaults
         self.boolAutoRangeF     = Tkinter.BooleanVar()
         self.boolAutoRangeF.set(True)
@@ -3097,10 +3105,10 @@ class fsi(object):
         t0 = time.time()
         self.renderer.RemoveActor(self.sphereActor)
         
-        print "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n" \
-              " data:   ", self.baseDirectory+self.dataFolder, \
+        print " data:   ", self.baseDirectory+self.dataFolder, \
               "\n meshes: ", self.baseDirectory+self.meshFolder, \
-              "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+              "\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" \
+              ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n"
         
         win.root.title("FSIViewer: "+self.baseDirectory+self.dataFolder)
         
@@ -3152,13 +3160,13 @@ class fsi(object):
             temp = firstLine.split()
             if len(temp) == 2:
                 self.meshTypeF = 21
-                print "  fluid: "+str(self.meshTypeF)+" (line)"
+                print "  F: "+str(self.meshTypeF)+" (line)"
             elif len(temp) == 3:
                 self.meshTypeF = 22
-                print "  fluid: "+str(self.meshTypeF)+" (tri)"
+                print "  F: "+str(self.meshTypeF)+" (tri)"
             elif len(temp) == 4 and self.numberOfDimensions == 2:
                 self.meshTypeF = 23
-                print "  fluid: "+str(self.meshTypeF)+" (quad)"
+                print "  F: "+str(self.meshTypeF)+" (quad)"
             elif len(temp) == 4 and self.numberOfDimensions == 3:
                 getMeshType = open(str(self.baseDirectory \
                     + self.meshFolder \
@@ -3171,10 +3179,10 @@ class fsi(object):
                     self.meshTypeF = 10
                 else:
                     self.meshTypeF = 24
-                print "  fluid: "+str(self.meshTypeF)+" (tet)"
+                print "  F: "+str(self.meshTypeF)+" (tet)"
             elif len(temp) == 8 and self.numberOfDimensions == 3:
                 self.meshTypeF = 25
-                print "  fluid: "+str(self.meshTypeF)+" (hex)"
+                print "  F: "+str(self.meshTypeF)+" (hex)"
         if self.visualizeSolid.get():
             getMeshType = open(str(self.baseDirectory \
                 + self.meshFolder \
@@ -3186,22 +3194,22 @@ class fsi(object):
             # lines
             if len(temp) == 2:
                 self.meshTypeS = 21
-                print "  solid: "+str(self.meshTypeS)+" (line)"
+                print "  S: "+str(self.meshTypeS)+" (line)"
             # tris
             elif len(temp) == 3:
                 self.meshTypeS = 22
-                print "  solid: "+str(self.meshTypeS)+" (tri)"
+                print "  S: "+str(self.meshTypeS)+" (tri)"
             # quads
             elif len(temp) == 4 and self.numberOfDimensions == 2:
                 self.meshTypeS = 23
-                print "  solid: "+str(self.meshTypeS)+" (quad)"
+                print "  S: "+str(self.meshTypeS)+" (quad)"
             # tets
             elif len(temp) == 4 and self.numberOfDimensions == 3:
                 self.meshTypeS = 24
-                print "  solid: "+str(self.meshTypeS)+" (tet)"
+                print "  S: "+str(self.meshTypeS)+" (tet)"
             elif len(temp) == 8 and self.numberOfDimensions == 3:
                 self.meshTypeS = 29
-                print "  solid: "+str(self.meshTypeS)+" (hex)"
+                print "  S: "+str(self.meshTypeS)+" (hex)"
         if self.visualizeInterface.get():
             getMeshType = open(str(self.baseDirectory \
                 + self.meshFolder \
@@ -3213,21 +3221,21 @@ class fsi(object):
             # quad lines
             if len(temp) == 3 and self.numberOfDimensions == 2:
                 self.meshTypeI = 21
-                print "  interface: "+str(self.meshTypeI)+" (line)"
+                print "  I: "+str(self.meshTypeI)+" (line)"
             elif len(temp) == 3 and self.numberOfDimensions == 3:
                 self.meshTypeI = 5
-                print "  interface: "+str(self.meshTypeI)+" (tri)"
+                print "  I: "+str(self.meshTypeI)+" (tri)"
             # quad tris
             elif len(temp) == 6:
                 self.meshTypeI = 22
-                print "  interface: "+str(self.meshTypeI)+" (tri)"
+                print "  I: "+str(self.meshTypeI)+" (tri)"
             elif len(temp) == 8:
                 self.meshTypeI = 23
-                print "  interface: "+str(self.meshTypeI)+" (hex)"
+                print "  I: "+str(self.meshTypeI)+" (hex)"
             # else
             else:
                 self.meshTypeI = 14000
-                print "  interface: -1 (unknown)"
+                print "  I: -1 (unknown)"
         
         self.progress.grid()
         self.progress["value"] = 2
@@ -3286,6 +3294,17 @@ class fsi(object):
         win.notebook.enable_traversal()
         t1 = time.time()
         logging.debug("data import completed in %.2f seconds" % (t1-t0))
+        self.timeSlider = Tkinter.Scale(win.mainframe, \
+            from_=self.fromT, to=self.toT, \
+            resolution=self.increment, \
+            orient=Tkinter.HORIZONTAL, \
+            command=self.updateScaleValue, \
+            showvalue=0, \
+            background=win.linuxMintHEX, foreground='black', \
+            relief='flat', borderwidth=0)
+        self.timeSlider.set(self.currentT)
+        self.timeSlider.grid(padx=0, pady=5, column=2, row=win.gridy-1, \
+            columnspan=win.gridx-3, sticky = (Tkinter.W, Tkinter.E))
         self.renderWindow.Render()
     
     def readFluidPoints(self, filename):
