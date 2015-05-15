@@ -1,5 +1,7 @@
 !== general
 add support to determine mesh type from mesh headers, e.g. X, T, B files // implemented, check
+add entry to track a solid nodes displacement value
+replace entry for color mapping component by drop down menu
 
 !== 2D
 tesselate quad-tris to enable vorticity computation

@@ -384,6 +384,13 @@ def main():
         command=visualization.outlineOnOffS, \
         style='My.TCheckbutton').grid(column=0, row = 16, \
         sticky=(Tkinter.W, Tkinter.E))
+    visualization.boolShowOnReferenceS = Tkinter.BooleanVar()
+    visualization.boolShowOnReferenceS.set(False)
+    ttk.Checkbutton(window.subframeS, \
+        variable=visualization.boolShowOnReferenceS, text='Use reference configuration', \
+        command=visualization.referenceOnOffS, \
+        style='My.TCheckbutton').grid(column=0, row = 16, \
+        sticky=(Tkinter.W, Tkinter.E))
     
     # interface tab
     window.subframeI = ttk.Frame(window.notebook, style='My.TNotebook.Tab')
@@ -523,7 +530,16 @@ def main():
         text="Animate & save", style='My.TButton')
     saveButton.grid(column=1, row = 0, \
         sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
-    
+    phasesFrame = ttk.Frame(window.subframeV, style='My.TFrame')
+    phasesFrame.grid(column=0, row=15, sticky=(Tkinter.W, Tkinter.E))
+    probeButtonI = ttk.Button(phasesFrame, \
+        command=lambda:visualization.phaseIorII(window, 1), \
+        text="Phase I", style='My.TButton').grid(column=0, row = 0, \
+        sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
+    probeButtonII = ttk.Button(phasesFrame, \
+        command=lambda:visualization.phaseIorII(window, 2), \
+        text="Phase II", style='My.TButton').grid(column=1, row = 0, \
+        sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
     
     visualization.configureCamera()
     visualization.renderer = vtk.vtkRenderer()

@@ -41,11 +41,17 @@ class fsi(object):
         self.DEBUG            = True
         self.installDirectory = ""
         self.baseDirectory    = ""
+        self.dispI            = ""
+        self.solvelI          = ""
+        self.velI             = ""
         self.dataFolder       = "data/"
         self.meshFolder       = "meshes/"
         self.submitFolder     = "submit/"
         self.installDirectoryStr = []
         self.baseDirectoryStr    = []
+        self.dispIStr            = []
+        self.solvelIStr          = []
+        self.velIStr             = []
         self.dataFolderStr       = []
         self.meshFolderStr       = []
         self.filenameSpaceF   = "FluidSpace-"
@@ -72,12 +78,18 @@ class fsi(object):
         self.currentIndexT    = 0
         self.fromT            = 1
         self.toT              = 1
+        self.fromTI           = 1
+        self.toTI             = 1
         self.animateFromT     = 1
         self.animateToT       = 1
         self.increment        = 1
+        self.incrementI       = 1
         self.fromTStr         = []
         self.toTStr           = []
         self.incrementStr     = []
+        self.fromTIStr        = []
+        self.toTIStr          = []
+        self.incrementIStr    = []
         self.animateFromStr   = []
         self.animateToStr     = []
         self.animateIncrementStr = []
@@ -85,6 +97,7 @@ class fsi(object):
         self.filenameSuffix   = ".D"
         self.PO               = 0.0
         self.popup            = []
+        self.popupPhaseI      = []
         self.camera           = []
         self.renderer         = []
         self.renderWindow     = []
@@ -344,11 +357,16 @@ class fsi(object):
         self.cutMapperF       = []
         self.cutActorF        = []
         self.parallelProjection = []
-        self.fluidPoints      = []
+        self.dispPointsI      = []
+        self.solvelPointsI    = []
+        self.velPointsI       = []
         self.planeSourceF     = []
         self.probeFilterF     = []
         self.probeMapperF     = []
         self.probeActorF      = []
+        self.probeFilterFPhaseI = []
+        self.probeMapperFPhaseI = []
+        self.probeActorFPhaseI  = []
         self.numberOfCellsF   = -1
         self.numberOfCellsS   = -1
         self.numberOfCellsI   = -1
@@ -363,13 +381,15 @@ class fsi(object):
         self.meshTypeI        = []
         self.samplePointsF    = []
         self.samplePolyDataF  = []
+        self.phaseIPolyDataF  = []
         self.enclosedSamplePointsF = []
         self.surfaceF         = []
         self.pointsInsideF    = []
         self.polyDataForDelaunayF  = []
         self.delnyF           = []
         self.probeFilterF     = []
-        self.ugridProbeF      = []
+        self.probeFilterFPhaseI = []
+        self.ugridProbeFPhaseI  = []
         self.numSampleFX      = 101
         self.numSampleFY      = 101
         self.numSampleFZ      = 101
@@ -377,6 +397,8 @@ class fsi(object):
         self.sampleFdx        = 1
         self.sampleFdy        = 1
         self.sampleFdz        = 1
+        self.probeWhichPhase  = 0
+        self.boolShowOnReferenceS = []
         
         
     
@@ -655,6 +677,207 @@ class fsi(object):
             self.probeActorF = vtk.vtkActor()
             self.probeActorF.SetMapper(self.probeMapperF)
     
+    # probe at positions corresponding to Phase I
+    # everything done within the scope of the function
+    def probePhaseIorIIdisp(self):
+        logging.debug("probe displacement")
+        # sample points
+        phaseIPoints = vtk.vtkPoints()
+        phaseIPoints.SetData(numpy_to_vtk(self.dispPointsI, \
+            deep=1, array_type=vtk.VTK_DOUBLE))
+        # polydata container
+        phaseIPolyDataF = vtk.vtkPolyData()
+        phaseIPolyDataF.SetPoints(phaseIPoints)
+        
+        # probe data set to get scalar data
+        probeFilterF = vtk.vtkProbeFilter()
+        if self.ugridS == []:
+            probeFilterF.SetSource(self.sgridS)
+        else:
+            probeFilterF.SetSource(self.ugridS)
+        probeFilterF.SetInput(phaseIPolyDataF)
+        probeFilterF.Update()
+        
+        # create unstructured grid from probed data set
+        ugridProbeF = vtk.vtkUnstructuredGrid()
+        ugridProbeF.SetPoints(phaseIPolyDataF.GetPoints())
+        ugridProbeF.GetPointData().SetVectors( \
+            probeFilterF.GetOutput().GetPointData().GetVectors("displacement"))
+        
+        logging.debug(str("probe Disp-" \
+            +str(self.currentT) \
+            +".D: Found " \
+            +str(ugridProbeF.GetPoints().GetNumberOfPoints()) \
+            +" nodes in solid domain."))
+        if self.probeWhichPhase == 1:
+            fout = open(str(self.baseDirectory \
+                        +self.submitFolder \
+                        +"SolidPoints-Phase-I-" \
+                        +str(self.currentT) \
+                        +".txt"), "w")
+        elif self.probeWhichPhase == 2:
+            fout = open(str(self.baseDirectory \
+                        +self.submitFolder \
+                        +"SolidPoints-Phase-II-" \
+                        +str(self.currentT) \
+                        +".txt"), "w")
+        else:
+            print "ERROR: unknown probe phase "+str(self.probeWhichPhase)
+        for i in range(ugridProbeF.GetPoints().GetNumberOfPoints()):
+            a = ugridProbeF.GetPoints().GetPoint(i)
+            b = ugridProbeF.GetPointData().GetVectors("displacement").GetTuple(i)
+            fout.write("% .16f % .16f % .16f % .16f % .16f % .16f\n" \
+                % (a[0], a[1], a[2], b[0], b[1], b[2]))
+        fout.close()
+        logging.debug("probe displacement completed")
+    
+    # probe at positions corresponding to Phase I
+    # everything done within the scope of the function
+    def probePhaseIorIIsolvel(self):
+        
+        logging.debug("probe solid velocity")
+        # sample points
+        phaseIPoints = vtk.vtkPoints()
+        phaseIPoints.SetData(numpy_to_vtk(self.solvelPointsI, \
+            deep=1, array_type=vtk.VTK_DOUBLE))
+        # polydata container
+        phaseIPolyDataF = vtk.vtkPolyData()
+        phaseIPolyDataF.SetPoints(phaseIPoints)
+        # reduce sample points --> we only want points inside the volume
+        # extract surface of volume
+        surfaceF = vtk.vtkDataSetSurfaceFilter()
+        if self.ugridS == []:
+            surfaceF.SetInput(self.sgridS)
+        else:
+            surfaceF.SetInput(self.ugridS)
+        # get enclosed sample points
+        enclosedSamplePointsF = vtk.vtkSelectEnclosedPoints()
+        enclosedSamplePointsF.SetInput(phaseIPolyDataF)
+        enclosedSamplePointsF.SetSurface(surfaceF.GetOutput())
+        enclosedSamplePointsF.SetTolerance(0.00001)#10e-5
+        enclosedSamplePointsF.Update()
+        # threshold points inside/outside
+        pointsInsideF = vtk.vtkThresholdPoints()
+        pointsInsideF.SetInput(enclosedSamplePointsF.GetOutput())
+        pointsInsideF.SetInputArrayToProcess(0, 0, 0, \
+            vtk.vtkDataObject.FIELD_ASSOCIATION_POINTS, "SelectedPoints")
+        pointsInsideF.ThresholdByUpper(1.0)
+        pointsInsideF.Update()
+        
+        numKeptNodes = pointsInsideF.GetOutput().GetNumberOfPoints()
+        
+        # probe data set to get scalar data
+        probeFilterF = vtk.vtkProbeFilter()
+        if self.ugridS == []:
+            probeFilterF.SetSource(self.sgridS)
+        else:
+            probeFilterF.SetSource(self.ugridS)
+        probeFilterF.SetInput(pointsInsideF.GetOutput())
+        probeFilterF.Update()
+        
+        # create unstructured grid from probed data set
+        ugridProbeF = vtk.vtkUnstructuredGrid()
+        ugridProbeF.SetPoints(pointsInsideF.GetOutput().GetPoints())
+        ugridProbeF.GetPointData().SetVectors( \
+            probeFilterF.GetOutput().GetPointData().GetVectors("velocity"))
+        
+        logging.debug("probe SolVel-" \
+            +str(self.currentT) \
+            +".D: Found " \
+            +str(ugridProbeF.GetPoints().GetNumberOfPoints()) \
+            +" nodes in solid domain.")
+        if self.probeWhichPhase == 1:
+            fout = open(str(self.baseDirectory \
+                        +self.submitFolder \
+                        +"FluidPoints-Phase-I-" \
+                        +str(self.currentT) \
+                        +".txt"), "w")
+        elif self.probeWhichPhase == 2:
+            fout = open(str(self.baseDirectory \
+                        +self.submitFolder \
+                        +"FluidPoints-Phase-II-" \
+                        +str(self.currentT) \
+                        +".txt"), "w")
+        else:
+            print "ERROR: unknown probe phase "+str(self.probeWhichPhase)
+        for i in range(numKeptNodes):
+            a = ugridProbeF.GetPoints().GetPoint(i)
+            b = ugridProbeF.GetPointData().GetVectors("velocity").GetTuple(i)
+            fout.write("% .16f % .16f % .16f % .16f % .16f % .16f\n" \
+                % (a[0], a[1], a[2], b[0], b[1], b[2]))
+        fout.close()
+        logging.debug("probe solid velocity completed")
+    
+    # probe at positions corresponding to Phase I
+    # everything done within the scope of the function
+    def probePhaseIorIIvel(self):
+        
+        logging.debug("probe fluid velocity")
+        # sample points
+        phaseIPoints = vtk.vtkPoints()
+        phaseIPoints.SetData(numpy_to_vtk(self.solvelPointsI, \
+            deep=1, array_type=vtk.VTK_DOUBLE))
+        # polydata container
+        phaseIPolyDataF = vtk.vtkPolyData()
+        phaseIPolyDataF.SetPoints(phaseIPoints)
+        # reduce sample points --> we only want points inside the volume
+        # extract surface of volume
+        surfaceF = vtk.vtkDataSetSurfaceFilter()
+        surfaceF.SetInput(self.ugridF)
+        # get enclosed sample points
+        enclosedSamplePointsF = vtk.vtkSelectEnclosedPoints()
+        enclosedSamplePointsF.SetInput(phaseIPolyDataF)
+        enclosedSamplePointsF.SetSurface(surfaceF.GetOutput())
+        enclosedSamplePointsF.SetTolerance(0.00001)#10e-5
+        enclosedSamplePointsF.Update()
+        # threshold points inside/outside
+        pointsInsideF = vtk.vtkThresholdPoints()
+        pointsInsideF.SetInput(enclosedSamplePointsF.GetOutput())
+        pointsInsideF.SetInputArrayToProcess(0, 0, 0, \
+            vtk.vtkDataObject.FIELD_ASSOCIATION_POINTS, "SelectedPoints")
+        pointsInsideF.ThresholdByUpper(1.0)
+        pointsInsideF.Update()
+        
+        numKeptNodes = pointsInsideF.GetOutput().GetNumberOfPoints()
+        
+        # probe data set to get scalar data
+        probeFilterF = vtk.vtkProbeFilter()
+        probeFilterF.SetSource(self.ugridF)
+        probeFilterF.SetInput(pointsInsideF.GetOutput())
+        probeFilterF.Update()
+        
+        # create unstructured grid from probed data set
+        ugridProbeF = vtk.vtkUnstructuredGrid()
+        ugridProbeF.SetPoints(pointsInsideF.GetOutput().GetPoints())
+        ugridProbeF.GetPointData().SetVectors( \
+            probeFilterF.GetOutput().GetPointData().GetVectors("velocity"))
+        
+        logging.debug("probe Vel-"+str(self.currentT) \
+            +".D: Found " \
+            +str(ugridProbeF.GetPoints().GetNumberOfPoints()) \
+            +" nodes in fluid domain.")
+        if self.probeWhichPhase == 1:
+            fout = open(str(self.baseDirectory \
+                        +self.submitFolder \
+                        +"FluidPoints-Phase-I-" \
+                        +str(self.currentT) \
+                        +".txt"), "a")
+        elif self.probeWhichPhase == 2:
+            fout = open(str(self.baseDirectory \
+                        +self.submitFolder \
+                        +"FluidPoints-Phase-II-" \
+                        +str(self.currentT) \
+                        +".txt"), "a")
+        else:
+            print "ERROR: unknown probe phase "+str(self.probeWhichPhase)
+        for i in range(numKeptNodes):
+            a = ugridProbeF.GetPoints().GetPoint(i)
+            b = ugridProbeF.GetPointData().GetVectors("velocity").GetTuple(i)
+            fout.write("% .16f % .16f % .16f % .16f % .16f % .16f\n" \
+                % (a[0], a[1], a[2], b[0], b[1], b[2]))
+        fout.close()
+        logging.debug("probe fluid velocity completed")
+    
     # clip a 3D volume slicing through elements
     def clipFxyz(self):
         if self.extractGridClipF == []:
@@ -822,7 +1045,7 @@ class fsi(object):
             self.numberOfCellsF = \
                 self.ugridF.GetCellData().GetArray("Quality").GetNumberOfTuples()
             logging.debug("number of cells: %i" % self.numberOfCellsF)
-            logging.debug("cell quality range: [%.2f, %.2f]" \
+            logging.debug("fluid cell quality range: [%.2f, %.2f]" \
                 % (self.minQualityF, self.maxQualityF))
         logging.debug("update fluid mesh quality complete")
     
@@ -885,7 +1108,7 @@ class fsi(object):
                 self.numberOfCellsS = \
                     self.sgridS.GetCellData().GetArray("Quality").GetNumberOfTuples()
             logging.debug("number of cells: %i" % self.numberOfCellsS)
-            logging.debug("cell quality range: [%.2f, %.2f]" \
+            logging.debug("solid cell quality range: [%.2f, %.2f]" \
                 % (self.minQualityS, self.maxQualityS))
         logging.debug("update solid mesh quality complete")
     
@@ -1183,7 +1406,7 @@ class fsi(object):
                 self.boolShowSolVel = True
                 self.boolShowPresS  = False
                 self.boolShowQualityS = False
-                self.updateDisp()
+                self.updateSolVel()
             elif self.showS.get() == "presS":
                 self.boolShowDisp  = False
                 self.boolShowSolVel = False
@@ -1417,6 +1640,11 @@ class fsi(object):
             self.renderer.AddActor(self.outlineActorI)
         else:
             self.renderer.RemoveActor(self.outlineActorI)
+        self.renderWindow.Render()
+    
+    # show solid fields on reference configuration
+    def referenceOnOffS(self):
+        self.timeSliderUpdate()
         self.renderWindow.Render()
     
     # show/hide scalar bar for fluid data set
@@ -2132,6 +2360,12 @@ class fsi(object):
             self.ugridCellsF.SetPoints(pointsF)
             self.minXF, self.maxXF, self.minYF, self.maxYF, self.minZF, self.maxZF = \
                 self.ugridF.GetPoints().GetBounds()
+            logging.debug("fluid space x-range: [%.2f, %.2f]" \
+                          % (self.minXF, self.maxXF))
+            logging.debug("fluid space y-range: [%.2f, %.2f]" \
+                          % (self.minYF, self.maxYF))
+            logging.debug("fluid space z-range: [%.2f, %.2f]" \
+                          % (self.minZF, self.maxZF))
             # now set increments for moving plane and sampling resolution
             self.movePlaneByX = (self.maxXF - self.minXF) * 0.01
             self.movePlaneByY = (self.maxYF - self.minYF) * 0.01
@@ -2332,6 +2566,8 @@ class fsi(object):
                         vtk_to_numpy(self.ugridF.GetPoints().GetData()), \
                         tempPresLinF, self.densityF, \
                         self.gravity_x, self.gravity_y, self.gravity_z, self.PO)
+                else:
+                    tempPresQuadF = tempPresLinF
             self.ugridF.GetPointData().SetScalars( \
                 numpy_to_vtk(tempPresQuadF, deep=1, array_type=vtk.VTK_DOUBLE))
             self.ugridF.GetPointData().GetScalars().SetName("pressure")
@@ -2497,7 +2733,7 @@ class fsi(object):
         if self.boolUpdateSpaceS:
             # read points
             pointsS = vtk.vtkPoints()
-            if self.boolVarDispSpace.get():
+            if self.boolVarDispSpace.get() and not(self.boolShowOnReferenceS.get()):
                 filename1 = self.baseDirectory \
                     +self.dataFolder \
                     +self.filenameSpaceS \
@@ -2507,7 +2743,7 @@ class fsi(object):
                     filename1 = self.baseDirectory \
                         +self.dataFolder \
                         +self.filenameSpaceS \
-                        +str(self.currentT) \
+                        +str(self.fromT) \
                         +self.filenameSuffix
                     if not(os.path.exists(filename1)):
                         print "The following file does not exist:\n" \
@@ -2524,26 +2760,56 @@ class fsi(object):
                     self.ugridS.GetPointData().SetVectors( \
                         organiseData.numpy2vtkDataArray(tempDisp, "displacement"))
                     self.minMagDisp, self.maxMagDisp = \
-                        self.ugridS.GetPointData().GetVectors().GetRange(-1)
+                        self.ugridS.GetPointData().GetVectors("displacement").GetRange(-1)
                     self.minDisp0, self.maxDisp0 = \
-                        self.ugridS.GetPointData().GetVectors().GetRange(0)
+                        self.ugridS.GetPointData().GetVectors("displacement").GetRange(0)
                     self.minDisp1, self.maxDisp1 = \
-                        self.ugridS.GetPointData().GetVectors().GetRange(1)
+                        self.ugridS.GetPointData().GetVectors("displacement").GetRange(1)
                     self.minDisp2, self.maxDisp2 = \
-                        self.ugridS.GetPointData().GetVectors().GetRange(2)
+                        self.ugridS.GetPointData().GetVectors("displacement").GetRange(2)
                 else:
                     self.sgridS.GetPointData().SetVectors( \
                         organiseData.numpy2vtkDataArray(tempDisp, "displacement"))
                     self.minMagDisp, self.maxMagDisp = \
-                        self.sgridS.GetPointData().GetVectors().GetRange(-1)
+                        self.sgridS.GetPointData().GetVectors("displacement").GetRange(-1)
                     self.minDisp0, self.maxDisp0 = \
-                        self.sgridS.GetPointData().GetVectors().GetRange(0)
+                        self.sgridS.GetPointData().GetVectors("displacement").GetRange(0)
                     self.minDisp1, self.maxDisp1 = \
-                        self.sgridS.GetPointData().GetVectors().GetRange(1)
+                        self.sgridS.GetPointData().GetVectors("displacement").GetRange(1)
                     self.minDisp2, self.maxDisp2 = \
-                        self.sgridS.GetPointData().GetVectors().GetRange(2)
+                        self.sgridS.GetPointData().GetVectors("displacement").GetRange(2)
                     self.boolUpdateDisp = False
+                logging.debug("solid displacement magnitude range: [%.2f, %.2f]" \
+                              % (self.minMagDisp, self.maxMagDisp))
+                logging.debug("solid displacement x-range: [%.2f, %.2f]" \
+                              % (self.minDisp0, self.maxDisp0))
+                logging.debug("solid displacement y-range: [%.2f, %.2f]" \
+                              % (self.minDisp1, self.maxDisp1))
+                logging.debug("solid displacement z-range: [%.2f, %.2f]" \
+                              % (self.minDisp2, self.maxDisp2))
+            elif self.boolVarDispSpace.get() and self.boolShowOnReferenceS.get():
+                filename1 = self.baseDirectory \
+                    +self.dataFolder \
+                    +self.filenameSpaceS \
+                    +"1" \
+                    +self.filenameSuffix
+                if not(os.path.exists(filename1)):
+                    filename1 = self.baseDirectory \
+                        +self.dataFolder \
+                        +self.filenameSpaceS \
+                        +str(self.fromT) \
+                        +self.filenameSuffix
+                    if not(os.path.exists(filename1)):
+                        print "The following file does not exist:\n" \
+                            +filename1
+                        return -1
+                tempCoordS, self.numberOfDimensions = \
+                    readCheartData.readVectors(filename1)
             else:
+                if self.boolShowOnReferenceS.get():
+                    logging.debug(str("SolidSpace-*.D" \
+                        +" is current configuration. Visualization of" \
+                        +" reference configuration is currently not supported."))
                 tempCoordS, self.numberOfDimensions = \
                     readCheartData.readVectors(self.baseDirectory \
                                                +self.dataFolder \
@@ -2563,6 +2829,12 @@ class fsi(object):
                 self.sgridCellsS.SetPoints(pointsS)
                 self.minXS, self.maxXS, self.minYS, self.maxYS, self.minZS, self.maxZS = \
                     self.sgridS.GetPoints().GetBounds()
+            logging.debug("solid space x-range: [%.2f, %.2f]" \
+                          % (self.minXS, self.maxXS))
+            logging.debug("solid space y-range: [%.2f, %.2f]" \
+                          % (self.minYS, self.maxYS))
+            logging.debug("solid space z-range: [%.2f, %.2f]" \
+                          % (self.minZS, self.maxZS))
             self.boolUpdateSpaceS = False
         logging.debug("update solid space completed")
     
@@ -3263,10 +3535,6 @@ class fsi(object):
             self.progress["value"] = 70
             self.progress.update()
             self.updateQualityF()
-        #self.readFluidPoints(self.baseDirectory \
-        #    + self.submitFolder \
-        #    + "FluidPoints-Phase-I.txt")
-        #self.exportFluidPoints()
         if not(self.visualizeSolid.get()):
             self.showS = "none"
         else:
@@ -3307,17 +3575,164 @@ class fsi(object):
             columnspan=win.gridx-3, sticky = (Tkinter.W, Tkinter.E))
         self.renderWindow.Render()
     
-    def readFluidPoints(self, filename):
-        self.fluidPoints = numpy.loadtxt(filename)
-        a = self.fluidPoints.shape[0]
-        b = self.fluidPoints.shape[1]
-        print a, b
-        for i in range(a):
-            print self.fluidPoints[i][:]
+    # settings for phase I or II probing, i.e. extracting data at given points
+    def phaseIorII(self, win, probenr=1):
+        if self.numberOfDimensions == 3 and self.boolVarDispSpace.get():
+            self.dispIStr   = Tkinter.StringVar()
+            self.solvelIStr = Tkinter.StringVar()
+            self.velIStr    = Tkinter.StringVar()
+            self.fromTIStr = Tkinter.StringVar()
+            self.toTIStr = Tkinter.StringVar()
+            self.incrementIStr     = Tkinter.StringVar()
+            self.fromTIStr.set(str(self.fromT))
+            self.toTIStr.set(str(self.toT))
+            self.incrementIStr.set(str(self.increment))
+            
+            self.probeWhichPhase = probenr
+            
+            self.popupPhaseI = Tkinter.Toplevel(win.root)
+            
+            self.popupPhaseI.configure(bg=win.linuxMintHEX)
+            for i in range(6):
+                self.popupPhaseI.rowconfigure(i, weight=0)
+            self.popupPhaseI.columnconfigure(0, weight=0)
+            self.popupPhaseI.columnconfigure(1, weight=1)
+            self.popupPhaseI.columnconfigure(2, weight=0)
+            if self.probeWhichPhase == 1:
+                self.popupPhaseI.title("Phase I data")
+            elif self.probeWhichPhase == 2:
+                self.popupPhaseI.title("Phase II data")
+            ttk.Label(self.popupPhaseI, \
+                text="Points for displacement (reference configuration):", \
+                style='My.TLabel') \
+                .grid(    column=0, row=0, padx=3, sticky=Tkinter.W)
+            ttk.Label(self.popupPhaseI, \
+                text="Points for solid velocity (current configuration):", \
+                style='My.TLabel') \
+                .grid(  column=0, row=1, padx=3, sticky=Tkinter.W)
+            ttk.Label(self.popupPhaseI, \
+                text="Points for fluid velocity (current configuration):", \
+                style='My.TLabel') \
+                .grid(    column=0, row=2, padx=3, sticky=Tkinter.W)
+            ttk.Label(self.popupPhaseI, text="First time step:", style='My.TLabel') \
+                .grid(column=0, row=3, padx=3, sticky=Tkinter.W)
+            ttk.Label(self.popupPhaseI, text="Last time step:", style='My.TLabel') \
+                .grid( column=0, row=4, padx=3, sticky=Tkinter.W)
+            ttk.Label(self.popupPhaseI, text="Increment:", style='My.TLabel') \
+                .grid(      column=0, row=5, padx=3, sticky=Tkinter.W)
+            ttk.Label(self.popupPhaseI, \
+                text="Note: Make sure first/last time step and increment fits data.", \
+                style='My.TLabel') \
+                .grid(      column=1, row=6, padx=3, sticky=Tkinter.W)
+            WIDTH = 80
+            
+            dispEntry = ttk.Entry(self.popupPhaseI, width=WIDTH, \
+                textvariable=self.dispIStr, justify=Tkinter.LEFT)
+            solvelEntry = ttk.Entry(self.popupPhaseI, width=WIDTH, \
+                textvariable=self.solvelIStr, justify=Tkinter.LEFT)
+            velEntry = ttk.Entry(self.popupPhaseI, width=WIDTH, \
+                textvariable=self.velIStr, justify=Tkinter.LEFT)
+            beginningEntry = ttk.Entry(self.popupPhaseI, width=WIDTH, \
+                textvariable=self.fromTIStr, justify=Tkinter.LEFT)
+            endEntry = ttk.Entry(self.popupPhaseI, width=WIDTH, \
+                textvariable=self.toTIStr, justify=Tkinter.LEFT)
+            incrementEntry = ttk.Entry(self.popupPhaseI, width=WIDTH, \
+                textvariable=self.incrementIStr, justify=Tkinter.LEFT)
+            dispEntry.grid(        column=1, row=0, sticky=(Tkinter.W, Tkinter.E))
+            solvelEntry.grid(column=1, row=1, sticky=(Tkinter.W, Tkinter.E))
+            velEntry.grid(  column=1, row=2, sticky=(Tkinter.W, Tkinter.E))
+            beginningEntry.grid(   column=1, row=3, sticky=(Tkinter.W, Tkinter.E))
+            endEntry.grid(         column=1, row=4, sticky=(Tkinter.W, Tkinter.E))
+            incrementEntry.grid(   column=1, row=5, sticky=(Tkinter.W, Tkinter.E))
+            
+            def setDispDirectory():
+                self.dispI = tkFileDialog.askopenfilename(parent=self.popupPhaseI, \
+                    initialdir=self.baseDirectory)
+                self.dispIStr.set(str(self.dispI))
+            def setSolVelDirectory():
+                self.solvelI = tkFileDialog.askopenfilename(parent=self.popupPhaseI, \
+                    initialdir=self.baseDirectory)
+                self.solvelIStr.set(str(self.solvelI))
+            def setVelDirectory():
+                self.velI = tkFileDialog.askopenfilename(parent=self.popupPhaseI, \
+                    initialdir=self.baseDirectory)
+                self.velIStr.set(str(self.velI))
+            
+            ttk.Button(self.popupPhaseI, image=win.useFolderIcon, \
+                command=setSolVelDirectory, style='My.TButton').grid( \
+                column = 2, row = 1, padx=3)
+            ttk.Button(self.popupPhaseI, image=win.useFolderIcon, \
+                command=setVelDirectory, style='My.TButton').grid( \
+                column = 2, row = 2, padx=3)
+            ttk.Button(self.popupPhaseI, image=win.useFolderIcon, \
+                command=setDispDirectory, style='My.TButton').grid( \
+                column = 2, row = 0, padx=3)
+            
+            toolbarDispOK = ttk.Frame(self.popupPhaseI, borderwidth=5, style='My.TFrame')
+            toolbarDispOK.grid(row=11, column=1, columnspan=2, \
+                sticky=(Tkinter.W, Tkinter.E))
+            
+            def phaseIOK():
+                self.dispI      = str(self.dispIStr.get())
+                self.solvelI    = str(self.solvelIStr.get())
+                self.velI       = str(self.velIStr.get())
+                self.fromTI     = int(self.fromTIStr.get())
+                self.toTI       = int(self.toTIStr.get())
+                self.incrementI = int(self.incrementIStr.get())
+                self.fromTStr.set(self.fromTIStr.get())
+                self.toTStr.set(self.toTIStr.get())
+                self.incrementStr.set(self.incrementIStr.get())
+                self.fromT = self.fromTI
+                self.toT   = self.toTI
+                self.increment = self.incrementI
+                self.currentT = self.fromT
+                
+                self.readPointsFromFilePhaseI()
+                
+                # time stepping for probing filter
+                self.showF.set("vel")
+                self.showS.set("vel")
+                self.updateFluid()
+                self.updateSolid()
+                self.timeSliderUpdate()
+                self.probePhaseIorIIsolvel()
+                self.probePhaseIorIIvel()
+                self.boolShowOnReferenceS.set(True)
+                self.showF.set("none")
+                self.showS.set("disp")
+                self.updateFluid()
+                self.updateSolid()
+                self.timeSliderUpdate()
+                self.probePhaseIorIIdisp()
+                self.boolShowOnReferenceS.set(False)
+                while self.currentT+self.increment <= self.toT:
+                    self.showF.set("vel")
+                    self.showS.set("vel")
+                    self.updateFluid()
+                    self.updateSolid()
+                    self.nextT()
+                    self.probePhaseIorIIsolvel()
+                    self.probePhaseIorIIvel()
+                    self.boolShowOnReferenceS.set(True)
+                    self.showF.set("none")
+                    self.showS.set("disp")
+                    self.updateFluid()
+                    self.updateSolid()
+                    self.timeSliderUpdate()
+                    self.probePhaseIorIIdisp()
+                    self.boolShowOnReferenceS.set(False)
+                
+                self.probeWhichPhase = 0
+                self.popupPhaseI.destroy()
+            
+            importOKButton = ttk.Button(toolbarDispOK, text = "Extract data", \
+                command=phaseIOK, style='My.TButton')
+            importOKButton.pack(side=Tkinter.RIGHT, fill=Tkinter.X, padx=1)
+        else:
+            logging.debug("Buttons \'Phase I\' and \'Phase II\' for 3D cases only.")
     
-    def exportFluidPoints(self):
-        
-        numpy.savetxt(self.baseDirectory \
-            + self.submitFolder \
-            + "FluidPoints-Phase-I-out.txt", self.fluidPoints)
+    def readPointsFromFilePhaseI(self):
+        self.dispPointsI   = numpy.loadtxt(self.dispI)
+        self.solvelPointsI = numpy.loadtxt(self.solvelI)
+        self.velPointsI    = numpy.loadtxt(self.velI)
     
