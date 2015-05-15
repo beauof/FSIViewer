@@ -138,9 +138,6 @@ class fsi(object):
         self.colorCompF       = -1
         self.colorCompS       = -1
         self.colorCompI       = -1
-        self.colorCompFstr    = []
-        self.colorCompSstr    = []
-        self.colorCompIstr    = []
         self.boolShowScalarBar = []
         self.boolMagnification = False
         self.magnification    = 4
@@ -274,6 +271,9 @@ class fsi(object):
         self.window2imageFilter = []
         self.pngWriter        = []
         self.backgroundDropDown        = []
+        self.componentDropDownF        = []
+        self.componentDropDownS        = []
+        self.componentDropDownI        = []
         self.customBG0        = 0.0
         self.customBG1        = 0.0
         self.customBG2        = 0.0
@@ -1833,13 +1833,11 @@ class fsi(object):
         if self.ctfNumberI >= self.numberOfCTFs:
             self.ctfNumberI = 0
         if fluidORsolid == "fluid" and self.visualizeFluid.get():
-            # decide which component we use the scalar bar for
-            self.colorCompF = int(self.colorCompFstr.get())
             # auto-range values
             if self.boolAutoRangeF.get():
                 if self.boolShowPresF:
                     self.colorCompF = -1
-                    self.colorCompFstr.set(str(self.colorCompF))
+                    self.componentDropDownF.set("magnitude")
                     self.userMinScalarBarF = self.minPressureF
                     self.userMaxScalarBarF = self.maxPressureF
                 elif self.boolShowVel:
@@ -1883,12 +1881,12 @@ class fsi(object):
                         self.userMaxScalarBarF = self.maxVort2
                 elif self.boolShowQualityF:
                     self.colorCompF = -1
-                    self.colorCompFstr.set(str(self.colorCompF))
+                    self.componentDropDownF.set("magnitude")
                     self.userMinScalarBarF = self.minQualityF
                     self.userMaxScalarBarF = self.maxQualityF
                 elif self.boolShowPhiF:
                     self.colorCompF = -1
-                    self.colorCompFstr.set(str(self.colorCompF))
+                    self.componentDropDownF.set("magnitude")
                     self.userMinScalarBarF = self.minPhiF
                     self.userMaxScalarBarF = self.maxPhiF
                 self.userMinF.set(str(self.userMinScalarBarF))
@@ -1918,13 +1916,11 @@ class fsi(object):
             self.selectColorArrayF()
             self.scalarBarF.SetLookupTable(self.currentCTFF)
         elif fluidORsolid == "solid" and self.visualizeSolid.get():
-            # decide which component we use the scalar bar for
-            self.colorCompS = int(self.colorCompSstr.get())
             # auto-range values
             if self.boolAutoRangeS.get():
                 if self.boolShowPresS:
                     self.colorCompS = -1
-                    self.colorCompSstr.set(str(self.colorCompS))
+                    self.componentDropDownS.set("magnitude")
                     self.userMinScalarBarS = self.minPressureS
                     self.userMaxScalarBarS = self.maxPressureS
                 elif self.boolShowDisp:
@@ -1955,7 +1951,7 @@ class fsi(object):
                         self.userMaxScalarBarS = self.maxSolVel2
                 elif self.boolShowQualityS:
                     self.colorCompS = -1
-                    self.colorCompSstr.set(str(self.colorCompS))
+                    self.componentDropDownS.set("magnitude")
                     self.userMinScalarBarS = self.minQualityS
                     self.userMaxScalarBarS = self.maxQualityS
                 self.userMinS.set(str(self.userMinScalarBarS))
@@ -1985,8 +1981,6 @@ class fsi(object):
             self.selectColorArrayS()
             self.scalarBarS.SetLookupTable(self.currentCTFS)
         elif fluidORsolid == "interface" and self.visualizeInterface.get():
-            # decide which component we use the scalar bar for
-            self.colorCompI = int(self.colorCompIstr.get())
             # auto-range values
             if self.boolAutoRangeI.get():
                 if self.boolShowLMult:
@@ -3282,6 +3276,21 @@ class fsi(object):
         self.pngWriter.Write()
         print("Saved %s" % (screenshotFilename))
         self.screenshotCounter += 1
+    
+    # modify color component for fluid (TODO: simplify)
+    def componentUpdateF(self, arg2):
+        self.colorCompF = self.componentDropDownF.current() - 1
+        self.updateFluid()
+    
+    # modify color component for solid (TODO: simplify)
+    def componentUpdateS(self, arg2):
+        self.colorCompS = self.componentDropDownS.current() - 1
+        self.updateSolid()
+    
+    # modify color component for solid (TODO: simplify)
+    def componentUpdateI(self, arg2):
+        self.colorCompI = self.componentDropDownI.current() - 1
+        self.updateInterface()
     
     # modify view port background colors
     def modifyBackground(self, arg2):

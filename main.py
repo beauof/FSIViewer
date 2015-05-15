@@ -243,12 +243,16 @@ def main():
         sticky=(Tkinter.W, Tkinter.S, Tkinter.E))
     ttk.Label(window.componentFrameF, width=15, text="Use component:", \
         style='My.TLabel').grid(column=0, row=0, sticky=Tkinter.S)
-    visualization.colorCompFstr = Tkinter.StringVar()
-    visualization.colorCompFstr.set(str(visualization.colorCompF))
-    ttk.Entry(window.componentFrameF, width=3, \
-        textvariable=visualization.colorCompFstr, \
-        justify=Tkinter.RIGHT).grid(column=1, row=0, \
-        sticky=(Tkinter.W, Tkinter.S, Tkinter.E))
+    
+    visualization.componentDropDownF = ttk.Combobox(window.componentFrameF)
+    visualization.componentDropDownF.grid(column=1, row = 0, \
+        sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
+    visualization.componentDropDownF.bind('<<ComboboxSelected>>', \
+        visualization.componentUpdateF)
+    visualization.componentDropDownF['values'] = \
+        ("magnitude", "x", "y", "z")
+    visualization.componentDropDownF.set("magnitude")
+    
     ttk.Checkbutton(window.componentFrameF, \
         variable=visualization.boolAutoRangeF, text='Auto-range', \
         command=lambda:visualization.enableUserRangeF(window), \
@@ -349,17 +353,20 @@ def main():
         command=visualization.scalarBarOnOffS, \
         style='My.TCheckbutton').grid(column=0, row = 7, \
         sticky=(Tkinter.W, Tkinter.E))
+    
     window.componentFrameS = ttk.Frame(window.subframeS, style='My.TFrame')
     window.componentFrameS.grid(column=0, row=8, \
         sticky=(Tkinter.W, Tkinter.S, Tkinter.E))
-    ttk.Label(window.componentFrameS, width=15, text="use component:", \
+    ttk.Label(window.componentFrameS, width=15, text="Use component:", \
         style='My.TLabel').grid(column=0, row=0, sticky=Tkinter.S)
-    visualization.colorCompSstr = Tkinter.StringVar()
-    visualization.colorCompSstr.set(str(visualization.colorCompS))
-    ttk.Entry(window.componentFrameS, width=3, \
-        textvariable=visualization.colorCompSstr, \
-        justify=Tkinter.RIGHT).grid(column=1, row=0, \
-        sticky=(Tkinter.W, Tkinter.S, Tkinter.E))
+    visualization.componentDropDownS = ttk.Combobox(window.componentFrameS)
+    visualization.componentDropDownS.grid(column=1, row = 0, \
+        sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
+    visualization.componentDropDownS.bind('<<ComboboxSelected>>', \
+        visualization.componentUpdateS)
+    visualization.componentDropDownS['values'] = \
+        ("magnitude", "x", "y", "z")
+    visualization.componentDropDownS.set("magnitude")
     
     ttk.Checkbutton(window.componentFrameS, \
         variable=visualization.boolAutoRangeS, text='Auto-range', \
@@ -432,14 +439,16 @@ def main():
     window.componentFrameI = ttk.Frame(window.subframeI, style='My.TFrame')
     window.componentFrameI.grid(column=0, row=7, \
         sticky=(Tkinter.W, Tkinter.S, Tkinter.E))
-    ttk.Label(window.componentFrameI, width=15, text="use component:", \
+    ttk.Label(window.componentFrameI, width=15, text="Use component:", \
         style='My.TLabel').grid(column=0, row=0, sticky=Tkinter.S)
-    visualization.colorCompIstr = Tkinter.StringVar()
-    visualization.colorCompIstr.set(str(visualization.colorCompI))
-    ttk.Entry(window.componentFrameI, width=3, \
-        textvariable=visualization.colorCompIstr, \
-        justify=Tkinter.RIGHT).grid(column=1, row=0, \
-        sticky=(Tkinter.W, Tkinter.S, Tkinter.E))
+    visualization.componentDropDownI = ttk.Combobox(window.componentFrameI)
+    visualization.componentDropDownI.grid(column=1, row = 0, \
+        sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
+    visualization.componentDropDownI.bind('<<ComboboxSelected>>', \
+        visualization.componentUpdateI)
+    visualization.componentDropDownI['values'] = \
+        ("magnitude", "x", "y", "z")
+    visualization.componentDropDownI.set("magnitude")
     
     ttk.Checkbutton(window.componentFrameI, \
         variable=visualization.boolAutoRangeI, text='Auto-range', \
