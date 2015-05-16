@@ -244,7 +244,8 @@ def main():
     ttk.Label(window.componentFrameF, width=15, text="Use component:", \
         style='My.TLabel').grid(column=0, row=0, sticky=Tkinter.S)
     
-    visualization.componentDropDownF = ttk.Combobox(window.componentFrameF)
+    visualization.componentDropDownF = ttk.Combobox(window.componentFrameF, \
+        justify=Tkinter.LEFT, width=10)
     visualization.componentDropDownF.grid(column=1, row = 0, \
         sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
     visualization.componentDropDownF.bind('<<ComboboxSelected>>', \
@@ -359,7 +360,8 @@ def main():
         sticky=(Tkinter.W, Tkinter.S, Tkinter.E))
     ttk.Label(window.componentFrameS, width=15, text="Use component:", \
         style='My.TLabel').grid(column=0, row=0, sticky=Tkinter.S)
-    visualization.componentDropDownS = ttk.Combobox(window.componentFrameS)
+    visualization.componentDropDownS = ttk.Combobox(window.componentFrameS, \
+        justify=Tkinter.LEFT, width=10)
     visualization.componentDropDownS.grid(column=1, row = 0, \
         sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
     visualization.componentDropDownS.bind('<<ComboboxSelected>>', \
@@ -441,7 +443,8 @@ def main():
         sticky=(Tkinter.W, Tkinter.S, Tkinter.E))
     ttk.Label(window.componentFrameI, width=15, text="Use component:", \
         style='My.TLabel').grid(column=0, row=0, sticky=Tkinter.S)
-    visualization.componentDropDownI = ttk.Combobox(window.componentFrameI)
+    visualization.componentDropDownI = ttk.Combobox(window.componentFrameI, \
+        justify=Tkinter.LEFT, width=10)
     visualization.componentDropDownI.grid(column=1, row = 0, \
         sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
     visualization.componentDropDownI.bind('<<ComboboxSelected>>', \
