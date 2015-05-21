@@ -553,6 +553,20 @@ def main():
         text="Phase II", style='My.TButton').grid(column=1, row = 0, \
         sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
     
+    
+    ttk.Button(window.subframeV, \
+        command=lambda:visualization.displayPoints(window), \
+        text="Display points", style='My.TButton').grid(column=0, row = 20, \
+        sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
+    
+    visualization.boolShowPoints = Tkinter.BooleanVar()
+    visualization.boolShowPoints.set(False)
+    visualization.showPointsCheckbutton = ttk.Checkbutton(window.subframeV, \
+        variable=visualization.boolShowPoints, text='Show points', \
+        command=visualization.pointsOnOff, \
+        style='My.TCheckbutton').grid(column=0, row = 21, \
+        sticky=(Tkinter.W, Tkinter.E))
+    
     visualization.configureCamera()
     visualization.renderer = vtk.vtkRenderer()
     visualization.configureRenderer()

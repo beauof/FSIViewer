@@ -44,6 +44,8 @@ class fsi(object):
         self.dispI            = ""
         self.solvelI          = ""
         self.velI             = ""
+        self.pointsS          = ""
+        self.pointsF          = ""
         self.dataFolder       = "data/"
         self.meshFolder       = "meshes/"
         self.submitFolder     = "submit/"
@@ -52,6 +54,8 @@ class fsi(object):
         self.dispIStr            = []
         self.solvelIStr          = []
         self.velIStr             = []
+        self.pointsSStr          = []
+        self.pointsFStr          = []
         self.dataFolderStr       = []
         self.meshFolderStr       = []
         self.filenameSpaceF   = "FluidSpace-"
@@ -263,6 +267,14 @@ class fsi(object):
         self.sphereSource     = []
         self.sphereMapper     = []
         self.sphereActor      = []
+        self.sphereSourceS    = []
+        self.sphereGlyphS     = []
+        self.sphereMapperS    = []
+        self.sphereActorS     = []
+        self.sphereSourceF    = []
+        self.sphereGlyphF     = []
+        self.sphereMapperF    = []
+        self.sphereActorF     = []
         self.showF            = []
         self.showS            = []
         self.showI            = []
@@ -360,6 +372,12 @@ class fsi(object):
         self.dispPointsI      = []
         self.solvelPointsI    = []
         self.velPointsI       = []
+        self.pointsPointsS    = []
+        self.pointsPointsF    = []
+        self.pointsNumpyS     = []
+        self.pointsNumpyF     = []
+        self.pointsPolyDataS  = []
+        self.pointsPolyDataF  = []
         self.planeSourceF     = []
         self.probeFilterF     = []
         self.probeMapperF     = []
@@ -399,6 +417,7 @@ class fsi(object):
         self.sampleFdz        = 1
         self.probeWhichPhase  = 0
         self.boolShowOnReferenceS = []
+        self.boolShowPoints   = []
         
         
     
@@ -3740,8 +3759,136 @@ class fsi(object):
         else:
             logging.debug("Buttons \'Phase I\' and \'Phase II\' for 3D cases only.")
     
+    # display a number of points, given in a file
+    def displayPoints(self, win):
+        self.pointsSStr   = Tkinter.StringVar()
+        self.pointsFStr = Tkinter.StringVar()
+        
+        self.popupPhaseI = Tkinter.Toplevel(win.root)
+        
+        self.popupPhaseI.configure(bg=win.linuxMintHEX)
+        for i in range(6):
+            self.popupPhaseI.rowconfigure(i, weight=0)
+        self.popupPhaseI.columnconfigure(0, weight=0)
+        self.popupPhaseI.columnconfigure(1, weight=1)
+        self.popupPhaseI.columnconfigure(2, weight=0)
+        self.popupPhaseI.title("Import points")
+        
+        ttk.Label(self.popupPhaseI, \
+            text="Solid points:", \
+            style='My.TLabel') \
+            .grid(    column=0, row=0, padx=3, sticky=Tkinter.W)
+        ttk.Label(self.popupPhaseI, \
+            text="Fluid points:", \
+            style='My.TLabel') \
+            .grid(  column=0, row=1, padx=3, sticky=Tkinter.W)
+        WIDTH = 80
+        
+        dispEntry = ttk.Entry(self.popupPhaseI, width=WIDTH, \
+            textvariable=self.pointsSStr, justify=Tkinter.LEFT)
+        solvelEntry = ttk.Entry(self.popupPhaseI, width=WIDTH, \
+            textvariable=self.pointsFStr, justify=Tkinter.LEFT)
+        dispEntry.grid(        column=1, row=0, sticky=(Tkinter.W, Tkinter.E))
+        solvelEntry.grid(column=1, row=1, sticky=(Tkinter.W, Tkinter.E))
+        
+        def setPointsSDirectory():
+            self.pointsS = tkFileDialog.askopenfilename(parent=self.popupPhaseI, \
+                initialdir=self.baseDirectory)
+            self.pointsSStr.set(str(self.pointsS))
+        def setPointsFDirectory():
+            self.pointsF = tkFileDialog.askopenfilename(parent=self.popupPhaseI, \
+                initialdir=self.baseDirectory)
+            self.pointsFStr.set(str(self.pointsF))
+        
+        ttk.Button(self.popupPhaseI, image=win.useFolderIcon, \
+            command=setPointsSDirectory, style='My.TButton').grid( \
+            column = 2, row = 0, padx=3)
+        ttk.Button(self.popupPhaseI, image=win.useFolderIcon, \
+            command=setPointsFDirectory, style='My.TButton').grid( \
+            column = 2, row = 1, padx=3)
+        
+        toolbarDispOK = ttk.Frame(self.popupPhaseI, borderwidth=5, style='My.TFrame')
+        toolbarDispOK.grid(row=11, column=1, columnspan=2, \
+            sticky=(Tkinter.W, Tkinter.E))
+        
+        def displayPointsOK():
+            self.pointsS    = str(self.pointsSStr.get())
+            self.pointsF    = str(self.pointsFStr.get())
+            
+            self.readPointsFromFilePoints()
+            self.pointsPointsS = vtk.vtkPoints()
+            self.pointsPointsS.SetData(numpy_to_vtk(self.pointsNumpyS, \
+                deep=1, array_type=vtk.VTK_DOUBLE))
+            
+            self.pointsPolyDataS = vtk.vtkPolyData()
+            self.pointsPolyDataS.SetPoints(self.pointsPointsS)
+            
+            self.sphereSourceS = vtk.vtkSphereSource()
+            self.sphereSourceS.SetCenter(0, 0, 0)
+            self.sphereSourceS.SetRadius(0.5)
+            
+            self.sphereGlyphS = vtk.vtkGlyph3D()
+            self.sphereGlyphS.SetInput(self.pointsPolyDataS)
+            self.sphereGlyphS.SetSource(self.sphereSourceS.GetOutput())
+            
+            self.sphereMapperS = vtk.vtkPolyDataMapper()
+            self.sphereMapperS.SetInput(self.sphereGlyphS.GetOutput())
+            
+            self.sphereActorS = vtk.vtkActor()
+            self.sphereActorS.SetMapper(self.sphereMapperS)
+            self.sphereActorS.GetProperty().SetColor(1.0, 0.0, 0.0)
+            
+            self.pointsPointsF = vtk.vtkPoints()
+            self.pointsPointsF.SetData(numpy_to_vtk(self.pointsNumpyF, \
+                deep=1, array_type=vtk.VTK_DOUBLE))
+            
+            self.pointsPolyDataF = vtk.vtkPolyData()
+            self.pointsPolyDataF.SetPoints(self.pointsPointsF)
+            
+            self.sphereSourceF = vtk.vtkSphereSource()
+            self.sphereSourceF.SetCenter(0, 0, 0)
+            self.sphereSourceF.SetRadius(0.5)
+            
+            self.sphereGlyphF = vtk.vtkGlyph3D()
+            self.sphereGlyphF.SetInput(self.pointsPolyDataF)
+            self.sphereGlyphF.SetSource(self.sphereSourceF.GetOutput())
+            
+            self.sphereMapperF = vtk.vtkPolyDataMapper()
+            self.sphereMapperF.SetInput(self.sphereGlyphF.GetOutput())
+            
+            self.sphereActorF = vtk.vtkActor()
+            self.sphereActorF.SetMapper(self.sphereMapperF)
+            self.sphereActorF.GetProperty().SetColor(0.0, 0.0, 1.0)
+            
+            self.renderer.AddActor(self.sphereActorS)
+            self.renderer.AddActor(self.sphereActorF)
+            self.renderWindow.Render()
+            self.boolShowPoints.set(True)
+            
+            self.popupPhaseI.destroy()
+        
+        importOKButton = ttk.Button(toolbarDispOK, text = "Load points", \
+            command=displayPointsOK, style='My.TButton')
+        importOKButton.pack(side=Tkinter.RIGHT, fill=Tkinter.X, padx=1)
+    
+    def pointsOnOff(self):
+        if not(self.sphereActorS == []):
+            if self.boolShowPoints.get():
+                self.renderer.AddActor(self.sphereActorS)
+                self.renderer.AddActor(self.sphereActorF)
+            else:
+                self.renderer.RemoveActor(self.sphereActorS)
+                self.renderer.RemoveActor(self.sphereActorF)
+            self.renderWindow.Render()
+        else:
+            if self.boolShowPoints.get(): self.boolShowPoints.set(False)
+    
     def readPointsFromFilePhaseI(self):
         self.dispPointsI   = numpy.loadtxt(self.dispI)
         self.solvelPointsI = numpy.loadtxt(self.solvelI)
         self.velPointsI    = numpy.loadtxt(self.velI)
+    
+    def readPointsFromFilePoints(self):
+        self.pointsNumpyS   = numpy.loadtxt(self.pointsS)
+        self.pointsNumpyF   = numpy.loadtxt(self.pointsF)
     
