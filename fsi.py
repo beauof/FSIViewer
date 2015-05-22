@@ -711,6 +711,7 @@ class fsi(object):
         phaseIPolyDataF.SetPoints(phaseIPoints)
         
         # probe data set to get scalar data
+        logging.debug("probe")
         probeFilterF = vtk.vtkProbeFilter()
         if self.ugridS == []:
             probeFilterF.SetSource(self.sgridS)
@@ -720,6 +721,7 @@ class fsi(object):
         probeFilterF.Update()
         
         # create unstructured grid from probed data set
+        logging.debug("extract data")
         ugridProbeF = vtk.vtkUnstructuredGrid()
         ugridProbeF.SetPoints(phaseIPolyDataF.GetPoints())
         ugridProbeF.GetPointData().SetVectors( \
@@ -744,6 +746,7 @@ class fsi(object):
                         +".txt"), "w")
         else:
             print "ERROR: unknown probe phase "+str(self.probeWhichPhase)
+        logging.debug("export data")
         for i in range(ugridProbeF.GetPoints().GetNumberOfPoints()):
             a = ugridProbeF.GetPoints().GetPoint(i)
             b = ugridProbeF.GetPointData().GetVectors("displacement").GetTuple(i)
@@ -772,15 +775,18 @@ class fsi(object):
         else:
             surfaceF.SetInput(self.ugridS)
         # get enclosed sample points
+        logging.debug("select enclosed points")
         enclosedSamplePointsF = vtk.vtkSelectEnclosedPoints()
         enclosedSamplePointsF.SetInput(phaseIPolyDataF)
         enclosedSamplePointsF.SetSurface(surfaceF.GetOutput())
         if self.toleranceI > 0.0:
-            enclosedSamplePointsF.SetTolerance(self.toleranceI)#10e-5
+            enclosedSamplePointsF.SetTolerance(self.toleranceI)
         else:
-            enclosedSamplePointsF.SetComputeTolerance(True)
+            enclosedSamplePointsF.SetTolerance(1.0e-5)
+        logging.debug("inside surface with tol = %f" % (enclosedSamplePointsF.GetTolerance()))
         enclosedSamplePointsF.Update()
         # threshold points inside/outside
+        logging.debug("threshold")
         pointsInsideF = vtk.vtkThresholdPoints()
         pointsInsideF.SetInput(enclosedSamplePointsF.GetOutput())
         pointsInsideF.SetInputArrayToProcess(0, 0, 0, \
@@ -791,6 +797,7 @@ class fsi(object):
         numKeptNodes = pointsInsideF.GetOutput().GetNumberOfPoints()
         
         # probe data set to get scalar data
+        logging.debug("probe")
         probeFilterF = vtk.vtkProbeFilter()
         if self.ugridS == []:
             probeFilterF.SetSource(self.sgridS)
@@ -800,6 +807,7 @@ class fsi(object):
         probeFilterF.Update()
         
         # create unstructured grid from probed data set
+        logging.debug("extract data")
         ugridProbeF = vtk.vtkUnstructuredGrid()
         ugridProbeF.SetPoints(pointsInsideF.GetOutput().GetPoints())
         ugridProbeF.GetPointData().SetVectors( \
@@ -809,7 +817,8 @@ class fsi(object):
             +str(self.currentT) \
             +".D: Found " \
             +str(ugridProbeF.GetPoints().GetNumberOfPoints()) \
-            +" nodes in solid domain.")
+            +" nodes in solid domain. Number of valid points: " \
+            +str(probeFilterF.GetValidPoints().GetNumberOfTuples()))
         if self.probeWhichPhase == 1:
             fout = open(str(self.baseDirectory \
                         +self.submitFolder \
@@ -824,6 +833,7 @@ class fsi(object):
                         +".txt"), "w")
         else:
             print "ERROR: unknown probe phase "+str(self.probeWhichPhase)
+        logging.debug("export data")
         for i in range(numKeptNodes):
             a = ugridProbeF.GetPoints().GetPoint(i)
             b = ugridProbeF.GetPointData().GetVectors("velocity").GetTuple(i)
@@ -849,15 +859,18 @@ class fsi(object):
         surfaceF = vtk.vtkDataSetSurfaceFilter()
         surfaceF.SetInput(self.ugridF)
         # get enclosed sample points
+        logging.debug("select enclosed points")
         enclosedSamplePointsF = vtk.vtkSelectEnclosedPoints()
         enclosedSamplePointsF.SetInput(phaseIPolyDataF)
         enclosedSamplePointsF.SetSurface(surfaceF.GetOutput())
         if self.toleranceI > 0.0:
-            enclosedSamplePointsF.SetTolerance(self.toleranceI)#10e-5
+            enclosedSamplePointsF.SetTolerance(self.toleranceI)
         else:
-            enclosedSamplePointsF.SetComputeTolerance(True)
+            enclosedSamplePointsF.SetTolerance(1.0e-5)
+        logging.debug("inside surface with tol = %f" % (enclosedSamplePointsF.GetTolerance()))
         enclosedSamplePointsF.Update()
         # threshold points inside/outside
+        logging.debug("threshold")
         pointsInsideF = vtk.vtkThresholdPoints()
         pointsInsideF.SetInput(enclosedSamplePointsF.GetOutput())
         pointsInsideF.SetInputArrayToProcess(0, 0, 0, \
@@ -868,12 +881,14 @@ class fsi(object):
         numKeptNodes = pointsInsideF.GetOutput().GetNumberOfPoints()
         
         # probe data set to get scalar data
+        logging.debug("probe")
         probeFilterF = vtk.vtkProbeFilter()
         probeFilterF.SetSource(self.ugridF)
         probeFilterF.SetInput(pointsInsideF.GetOutput())
         probeFilterF.Update()
         
         # create unstructured grid from probed data set
+        logging.debug("extract data")
         ugridProbeF = vtk.vtkUnstructuredGrid()
         ugridProbeF.SetPoints(pointsInsideF.GetOutput().GetPoints())
         ugridProbeF.GetPointData().SetVectors( \
@@ -882,7 +897,8 @@ class fsi(object):
         logging.debug("probe Vel-"+str(self.currentT) \
             +".D: Found " \
             +str(ugridProbeF.GetPoints().GetNumberOfPoints()) \
-            +" nodes in fluid domain.")
+            +" nodes in fluid domain. Number of valid points: " \
+            +str(probeFilterF.GetValidPoints().GetNumberOfTuples()))
         if self.probeWhichPhase == 1:
             fout = open(str(self.baseDirectory \
                         +self.submitFolder \
@@ -897,6 +913,7 @@ class fsi(object):
                         +".txt"), "a")
         else:
             print "ERROR: unknown probe phase "+str(self.probeWhichPhase)
+        logging.debug("export data")
         for i in range(numKeptNodes):
             a = ugridProbeF.GetPoints().GetPoint(i)
             b = ugridProbeF.GetPointData().GetVectors("velocity").GetTuple(i)
@@ -3686,7 +3703,7 @@ class fsi(object):
             beginningEntry.grid(   column=1, row=3, sticky=(Tkinter.W, Tkinter.E))
             endEntry.grid(         column=1, row=4, sticky=(Tkinter.W, Tkinter.E))
             incrementEntry.grid(   column=1, row=5, sticky=(Tkinter.W, Tkinter.E))
-            toleranceEntry.grid(   column=1, row=5, sticky=(Tkinter.W, Tkinter.E))
+            toleranceEntry.grid(   column=1, row=6, sticky=(Tkinter.W, Tkinter.E))
             
             def setDispDirectory():
                 self.dispI = tkFileDialog.askopenfilename(parent=self.popupPhaseI, \

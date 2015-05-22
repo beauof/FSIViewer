@@ -398,7 +398,7 @@ def main():
     ttk.Checkbutton(window.subframeS, \
         variable=visualization.boolShowOnReferenceS, text='Use reference configuration', \
         command=visualization.referenceOnOffS, \
-        style='My.TCheckbutton').grid(column=0, row = 16, \
+        style='My.TCheckbutton').grid(column=0, row = 17, \
         sticky=(Tkinter.W, Tkinter.E))
     
     # interface tab

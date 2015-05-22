@@ -1,6 +1,7 @@
 !== general
 add support to determine mesh type from mesh headers, e.g. X, T, B files // implemented, check
 add entry to track a solid nodes displacement value
+export cell data to e.g. domainF_quad_FE.vtk
 
 !== 2D
 tesselate quad-tris to enable vorticity computation
