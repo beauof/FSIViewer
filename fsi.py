@@ -88,12 +88,14 @@ class fsi(object):
         self.animateToT       = 1
         self.increment        = 1
         self.incrementI       = 1
+        self.toleranceI       = 1.0e-5
         self.fromTStr         = []
         self.toTStr           = []
         self.incrementStr     = []
         self.fromTIStr        = []
         self.toTIStr          = []
         self.incrementIStr    = []
+        self.toleranceIStr    = []
         self.animateFromStr   = []
         self.animateToStr     = []
         self.animateIncrementStr = []
@@ -773,7 +775,10 @@ class fsi(object):
         enclosedSamplePointsF = vtk.vtkSelectEnclosedPoints()
         enclosedSamplePointsF.SetInput(phaseIPolyDataF)
         enclosedSamplePointsF.SetSurface(surfaceF.GetOutput())
-        enclosedSamplePointsF.SetTolerance(0.00001)#10e-5
+        if self.toleranceI > 0.0:
+            enclosedSamplePointsF.SetTolerance(self.toleranceI)#10e-5
+        else:
+            enclosedSamplePointsF.SetComputeTolerance(True)
         enclosedSamplePointsF.Update()
         # threshold points inside/outside
         pointsInsideF = vtk.vtkThresholdPoints()
@@ -847,7 +852,10 @@ class fsi(object):
         enclosedSamplePointsF = vtk.vtkSelectEnclosedPoints()
         enclosedSamplePointsF.SetInput(phaseIPolyDataF)
         enclosedSamplePointsF.SetSurface(surfaceF.GetOutput())
-        enclosedSamplePointsF.SetTolerance(0.00001)#10e-5
+        if self.toleranceI > 0.0:
+            enclosedSamplePointsF.SetTolerance(self.toleranceI)#10e-5
+        else:
+            enclosedSamplePointsF.SetComputeTolerance(True)
         enclosedSamplePointsF.Update()
         # threshold points inside/outside
         pointsInsideF = vtk.vtkThresholdPoints()
@@ -3612,9 +3620,11 @@ class fsi(object):
             self.fromTIStr = Tkinter.StringVar()
             self.toTIStr = Tkinter.StringVar()
             self.incrementIStr     = Tkinter.StringVar()
+            self.toleranceIStr     = Tkinter.StringVar()
             self.fromTIStr.set(str(self.fromT))
             self.toTIStr.set(str(self.toT))
             self.incrementIStr.set(str(self.increment))
+            self.toleranceIStr.set(str(self.toleranceI))
             
             self.probeWhichPhase = probenr
             
@@ -3648,10 +3658,12 @@ class fsi(object):
                 .grid( column=0, row=4, padx=3, sticky=Tkinter.W)
             ttk.Label(self.popupPhaseI, text="Increment:", style='My.TLabel') \
                 .grid(      column=0, row=5, padx=3, sticky=Tkinter.W)
+            ttk.Label(self.popupPhaseI, text="Tolerance:", style='My.TLabel') \
+                .grid(      column=0, row=6, padx=3, sticky=Tkinter.W)
             ttk.Label(self.popupPhaseI, \
                 text="Note: Make sure first/last time step and increment fits data.", \
                 style='My.TLabel') \
-                .grid(      column=1, row=6, padx=3, sticky=Tkinter.W)
+                .grid(      column=1, row=7, padx=3, sticky=Tkinter.W)
             WIDTH = 80
             
             dispEntry = ttk.Entry(self.popupPhaseI, width=WIDTH, \
@@ -3666,12 +3678,15 @@ class fsi(object):
                 textvariable=self.toTIStr, justify=Tkinter.LEFT)
             incrementEntry = ttk.Entry(self.popupPhaseI, width=WIDTH, \
                 textvariable=self.incrementIStr, justify=Tkinter.LEFT)
+            toleranceEntry = ttk.Entry(self.popupPhaseI, width=WIDTH, \
+                textvariable=self.toleranceIStr, justify=Tkinter.LEFT)
             dispEntry.grid(        column=1, row=0, sticky=(Tkinter.W, Tkinter.E))
             solvelEntry.grid(column=1, row=1, sticky=(Tkinter.W, Tkinter.E))
             velEntry.grid(  column=1, row=2, sticky=(Tkinter.W, Tkinter.E))
             beginningEntry.grid(   column=1, row=3, sticky=(Tkinter.W, Tkinter.E))
             endEntry.grid(         column=1, row=4, sticky=(Tkinter.W, Tkinter.E))
             incrementEntry.grid(   column=1, row=5, sticky=(Tkinter.W, Tkinter.E))
+            toleranceEntry.grid(   column=1, row=5, sticky=(Tkinter.W, Tkinter.E))
             
             def setDispDirectory():
                 self.dispI = tkFileDialog.askopenfilename(parent=self.popupPhaseI, \
@@ -3707,6 +3722,7 @@ class fsi(object):
                 self.fromTI     = int(self.fromTIStr.get())
                 self.toTI       = int(self.toTIStr.get())
                 self.incrementI = int(self.incrementIStr.get())
+                self.toleranceI = float(self.toleranceIStr.get())
                 self.fromTStr.set(self.fromTIStr.get())
                 self.toTStr.set(self.toTIStr.get())
                 self.incrementStr.set(self.incrementIStr.get())
