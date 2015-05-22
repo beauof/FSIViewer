@@ -73,11 +73,17 @@ class fsi(object):
         self.filenameQualityS = "SolidMeshQuality-"
         self.filenameSpaceI   = "BndrySpace-"
         self.filenameLM       = "LMult-"
-        self.filenameTopoLinF = "domainF_lin_FE.T"
-        self.filenameTopoQuadF = "domainF_quad_FE.T"
-        self.filenameTopoLinS = "domainS_lin_FE.T"
-        self.filenameTopoQuadS = "domainS_quad_FE.T"
-        self.filenameTopoQuadI = "lm_quad_FE.T"
+        self.filenameTopoLinF     = "domainF_lin_FE.T"
+        self.filenameTopoQuadF    = "domainF_quad_FE.T"
+        self.filenameTopoLinFvtk  = "domainF_lin_FE.vtk"
+        self.filenameTopoQuadFvtk = "domainF_quad_FE.vtk"
+        self.filenameTopoLinFct   = "domainF_lin_FE.ct"
+        self.filenameTopoQuadFct  = "domainF_quad_FE.ct"
+        self.filenameTopoLinFcl   = "domainF_lin_FE.cl"
+        self.filenameTopoQuadFcl  = "domainF_quad_FE.cl"
+        self.filenameTopoLinS     = "domainS_lin_FE.T"
+        self.filenameTopoQuadS    = "domainS_quad_FE.T"
+        self.filenameTopoQuadI    = "lm_quad_FE.T"
         self.currentT         = 1
         self.currentIndexT    = 0
         self.fromT            = 1
@@ -2091,6 +2097,12 @@ class fsi(object):
         self.boolVarDispSpace.set(config[12] == 'True')
         self.filenameTopoLinF   = config[13] + "_lin_FE.T"
         self.filenameTopoQuadF  = config[13] + "_quad_FE.T"
+        self.filenameTopoLinFvtk  = config[13] + "_lin_FE.vtk"
+        self.filenameTopoQuadFvtk = config[13] + "_quad_FE.vtk"
+        self.filenameTopoLinFct   = config[13] + "_lin_FE.ct"
+        self.filenameTopoQuadFct  = config[13] + "_quad_FE.ct"
+        self.filenameTopoLinFcl   = config[13] + "_lin_FE.cl"
+        self.filenameTopoQuadFcl  = config[13] + "_quad_FE.cl"
         self.filenameTopoLinS   = config[14] + "_lin_FE.T"
         self.filenameTopoQuadS  = config[14] + "_quad_FE.T"
         self.DEBUG              = (config[15] == 'True')
@@ -2292,16 +2304,49 @@ class fsi(object):
                     # quadratic tetrahedral mesh
                     self.cellTypesF = vtk.vtkQuadraticTetra().GetCellType()
                     divby = 11
+                    filename = self.baseDirectory \
+                        +self.meshFolder \
+                        +self.filenameTopoQuadFvtk
                     # read tetrahedrons
                     self.tempElemF = readCheartData.readTriQuadAsLin( \
                         self.baseDirectory \
                         +self.meshFolder \
                         +self.filenameTopoQuadF, \
                         self.numberOfDimensions)
-                    # create cells for unstructured grid
-                    tempElemLinF, cellstypesF, cellslocationsF = \
-                        readCheartData.createTopology3Dquad(self.tempElemF, \
-                        self.cellTypesF)
+                    if not(os.path.exists(filename)):
+                        # create cells for unstructured grid
+                        tempElemLinF, cellstypesF, cellslocationsF = \
+                            readCheartData.createTopology3Dquad(self.tempElemF, \
+                            self.cellTypesF)
+                        logging.debug("export "+str(filename))
+                        # export cell data, such that we're faster next time
+                        readCheartData.writeScalarInts(tempElemLinF, \
+                            filename)
+                        filename = self.baseDirectory \
+                            +self.meshFolder \
+                            +self.filenameTopoQuadFct
+                        readCheartData.writeScalarInts(cellstypesF, \
+                            filename)
+                        filename = self.baseDirectory \
+                            +self.meshFolder \
+                            +self.filenameTopoQuadFcl
+                        readCheartData.writeScalarInts(cellslocationsF, \
+                            filename)
+                    else:
+                        # cell data files exist - import!
+                        logging.debug("import "+str(filename))
+                        tempElemLinF    = readCheartData.readScalarInts( \
+                            filename)
+                        filename = self.baseDirectory \
+                            +self.meshFolder \
+                            +self.filenameTopoQuadFct
+                        cellstypesF     = readCheartData.readScalarInts( \
+                            filename)
+                        filename = self.baseDirectory \
+                            +self.meshFolder \
+                            +self.filenameTopoQuadFcl
+                        cellslocationsF = readCheartData.readScalarInts( \
+                            filename)
                 elif self.meshTypeF == 10:
                     # linear tetrahedral mesh
                     self.cellTypesF = vtk.vtkTetra().GetCellType()
@@ -2332,10 +2377,43 @@ class fsi(object):
                 ## create a linear tetra mesh too for cell quality
                 ct = vtk.vtkTetra().GetCellType()
                 divby = 5
-                # create cells for unstructured grid
-                tempElemLinF, cellstypesF, cellslocationsF = \
-                    readCheartData.createTopology3Dcells(self.tempElemF, \
-                    ct)
+                filename = self.baseDirectory \
+                    +self.meshFolder \
+                    +self.filenameTopoLinFvtk
+                if not(os.path.exists(filename)):
+                    # create cells for unstructured grid
+                    tempElemLinF, cellstypesF, cellslocationsF = \
+                        readCheartData.createTopology3Dcells(self.tempElemF, \
+                        ct)
+                    logging.debug("export "+str(filename))
+                    # export cell data, such that we're faster next time
+                    readCheartData.writeScalarInts(tempElemLinF, \
+                        filename)
+                    filename = self.baseDirectory \
+                        +self.meshFolder \
+                        +self.filenameTopoLinFct
+                    readCheartData.writeScalarInts(cellstypesF, \
+                        filename)
+                    filename = self.baseDirectory \
+                        +self.meshFolder \
+                        +self.filenameTopoLinFcl
+                    readCheartData.writeScalarInts(cellslocationsF, \
+                        filename)
+                else:
+                    # cell data files exist - import!
+                    logging.debug("import "+str(filename))
+                    tempElemLinF    = readCheartData.readScalarInts( \
+                        filename)
+                    filename = self.baseDirectory \
+                        +self.meshFolder \
+                        +self.filenameTopoLinFct
+                    cellstypesF     = readCheartData.readScalarInts( \
+                        filename)
+                    filename = self.baseDirectory \
+                        +self.meshFolder \
+                        +self.filenameTopoLinFcl
+                    cellslocationsF = readCheartData.readScalarInts( \
+                        filename)
                 cellsF = vtk.vtkCellArray()
                 cellsF.SetCells(int(tempElemLinF.shape[0]/divby), \
                     numpy_to_vtk(tempElemLinF, deep=1, \

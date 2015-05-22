@@ -97,6 +97,21 @@ def writeScalars(ndarray[numpy.double_t, ndim=1] towrite, str filename):
     
     return 1
 
+# write numpy arrays to file (convenience method for mesh quality measure)
+def writeScalarInts(ndarray[numpy.int_t, ndim=1] towrite, str filename):
+    # see:
+    # http://docs.scipy.org/doc/numpy/reference/generated/numpy.savetxt.html
+    # http://docs.scipy.org/doc/numpy/reference/generated/numpy.loadtxt.html#numpy.loadtxt
+    cdef unsigned int numberOfNodes, numberOfComponents
+    cdef str myheader
+    
+    numberOfNodes      = towrite.shape[0]
+    numberOfComponents = 1
+    myheader = str(numberOfNodes) + ' ' + str(numberOfComponents)
+    numpy.savetxt(filename, towrite, fmt='%i', delimiter=' ', newline='\n', header=myheader, footer='', comments='')
+    
+    return 1
+
 
 
 def readFileList(str filename):
@@ -263,6 +278,37 @@ def readScalars(str filename):
         read = getline(&line, &l, cfile)
         if read == -1: break
         scalars[i] = float(splitLine(line)) #float(data[0])
+    fclose(cfile)
+    
+    return scalars
+
+# reads scalars
+def readScalarInts(str filename):
+    filename_byte_string = filename.encode("UTF-8")
+    cdef char* fname = filename_byte_string
+    cdef FILE* cfile
+    cdef ndarray[numpy.int_t, ndim=1] scalars
+    cdef unsigned int numberOfComponents, numberOfNodes, i
+    cdef char * line = NULL
+    cdef size_t l = 0
+    cdef ssize_t read
+    cdef double s0, s1, s2
+    
+    cfile = fopen(fname, "rb")
+    if cfile == NULL:
+        print "No such file or directory: '%s'" % filename
+    
+    # first line
+    read = getline(&line, &l, cfile)
+    s0, s1, s2 = splitLine3(line)
+    numberOfNodes = int(s0)
+    numberOfComponents = int(s1)
+    scalars = numpy.empty(numberOfNodes, dtype=int)
+    # read all subsequent lines
+    for i in range(numberOfNodes):
+        read = getline(&line, &l, cfile)
+        if read == -1: break
+        scalars[i] = int(splitLine(line)) #float(data[0])
     fclose(cfile)
     
     return scalars
