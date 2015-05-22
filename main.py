@@ -401,6 +401,54 @@ def main():
         style='My.TCheckbutton').grid(column=0, row = 17, \
         sticky=(Tkinter.W, Tkinter.E))
     
+    ttk.Separator(window.subframeS, orient=Tkinter.HORIZONTAL).grid(column=0, \
+        row = 18, sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
+    
+    window.nodeFrameS = ttk.Frame(window.subframeS, style='My.TFrame')
+    window.nodeFrameS.grid(column=0, row=19, \
+        sticky=(Tkinter.W, Tkinter.S, Tkinter.E))
+    nodeButtonS = ttk.Button(window.nodeFrameS, \
+        command=visualization.updateNodeS, \
+        text="Track node:", style='My.TButton')
+    nodeButtonS.grid(column=0, row = 0, \
+        sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
+    window.entryNodeS = ttk.Entry(window.nodeFrameS, width=6, \
+        textvariable=visualization.nodeS, \
+        justify=Tkinter.RIGHT)
+    window.entryNodeS.grid(column=1, row=0, \
+        sticky=(Tkinter.W, Tkinter.S, Tkinter.E, Tkinter.N))
+    ttk.Entry(window.nodeFrameS, width=8, \
+        textvariable=visualization.nodeSrefX, \
+        justify=Tkinter.RIGHT).grid( \
+        column=0, row=1, \
+        sticky=(Tkinter.W, Tkinter.S, Tkinter.E, Tkinter.N))
+    ttk.Entry(window.nodeFrameS, width=8, \
+        textvariable=visualization.nodeSrefY, \
+        justify=Tkinter.RIGHT).grid( \
+        column=0, row=2, \
+        sticky=(Tkinter.W, Tkinter.S, Tkinter.E, Tkinter.N))
+    ttk.Entry(window.nodeFrameS, width=8, \
+        textvariable=visualization.nodeSrefZ, \
+        justify=Tkinter.RIGHT).grid( \
+        column=0, row=3, \
+        sticky=(Tkinter.W, Tkinter.S, Tkinter.E, Tkinter.N))
+    ttk.Entry(window.nodeFrameS, width=8, \
+        textvariable=visualization.nodeSx, \
+        justify=Tkinter.RIGHT).grid( \
+        column=1, row=1, \
+        sticky=(Tkinter.W, Tkinter.S, Tkinter.E, Tkinter.N))
+    ttk.Entry(window.nodeFrameS, width=8, \
+        textvariable=visualization.nodeSy, \
+        justify=Tkinter.RIGHT).grid( \
+        column=1, row=2, \
+        sticky=(Tkinter.W, Tkinter.S, Tkinter.E, Tkinter.N))
+    ttk.Entry(window.nodeFrameS, width=8, \
+        textvariable=visualization.nodeSz, \
+        justify=Tkinter.RIGHT).grid( \
+        column=1, row=3, \
+        sticky=(Tkinter.W, Tkinter.S, Tkinter.E, Tkinter.N))
+    
+    
     # interface tab
     window.subframeI = ttk.Frame(window.notebook, style='My.TNotebook.Tab')
     window.subframeI.pack()

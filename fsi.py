@@ -10,7 +10,9 @@ from vtk.util.numpy_support import numpy_to_vtk, vtk_to_numpy
 import sys
 import logging
 import time
+import subprocess
 import os.path
+import tkMessageBox
 
 sys.dont_write_bytecode = True
 
@@ -83,6 +85,7 @@ class fsi(object):
         self.filenameTopoQuadFcl  = "domainF_quad_FE.cl"
         self.filenameTopoLinS     = "domainS_lin_FE.T"
         self.filenameTopoQuadS    = "domainS_quad_FE.T"
+        self.filenameXQuadS       = "domainS_quad_FE.X"
         self.filenameTopoQuadI    = "lm_quad_FE.T"
         self.currentT         = 1
         self.currentIndexT    = 0
@@ -426,6 +429,13 @@ class fsi(object):
         self.probeWhichPhase  = 0
         self.boolShowOnReferenceS = []
         self.boolShowPoints   = []
+        self.nodeS            = []
+        self.nodeSrefX        = []
+        self.nodeSrefY        = []
+        self.nodeSrefZ        = []
+        self.nodeSx           = []
+        self.nodeSy           = []
+        self.nodeSz           = []
         
         
     
@@ -440,6 +450,42 @@ class fsi(object):
             self.movePlaneDown()
         elif key == 'numbersign': # reset plane position
             self.resetPlane()
+    
+    def updateNodeS(self):
+        t0 = time.time()
+        logging.debug("update tracked node: "+str(self.nodeS.get()))
+        if int(self.nodeS.get()) > self.numberOfNodesS \
+            or int(self.nodeS.get()) < 1:
+            tkMessageBox.showinfo("Invalid node number", "Index range %i-%i" % (1, self.numberOfNodesS))
+            self.nodeS.set("1")
+        command = "awk 'NR==" \
+            +str(int(self.nodeS.get())+1) \
+            +"' " \
+            +self.baseDirectory \
+            +self.meshFolder \
+            +self.filenameXQuadS
+        output = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+        (x, err) = output.communicate()
+        xref = x.split()
+        self.nodeSrefX.set("% .2f" % float(xref[0]))
+        self.nodeSrefY.set("% .2f" % float(xref[1]))
+        self.nodeSrefZ.set("% .2f" % float(xref[2]))
+        command = "awk 'NR==" \
+            +str(int(self.nodeS.get())+1) \
+            +"' " \
+            +self.baseDirectory \
+            +self.dataFolder \
+            +self.filenameDisp  \
+            +str(self.currentT) \
+            +self.filenameSuffix
+        output = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+        (x, err) = output.communicate()
+        disp = x.split()
+        self.nodeSx.set("% .2f" % float(disp[0]))
+        self.nodeSy.set("% .2f" % float(disp[1]))
+        self.nodeSz.set("% .2f" % float(disp[2]))
+        t1 = time.time()
+        logging.debug("update tracked node: %i complete in %.2f seconds" % (int(self.nodeS.get()), t1-t0))
     
     # reset plane
     def resetPlane(self):
@@ -1234,6 +1280,7 @@ class fsi(object):
             self.progress["value"] = 80
             self.progress.update()
             if self.showS.get() == "disp": self.updateDisp()
+            if not(self.showS.get() == "none"): self.updateNodeS()
             self.progress["value"] = 90
             self.progress.update()
             if self.showS.get() == "vel": self.updateSolVel()
@@ -2105,6 +2152,7 @@ class fsi(object):
         self.filenameTopoQuadFcl  = config[13] + "_quad_FE.cl"
         self.filenameTopoLinS   = config[14] + "_lin_FE.T"
         self.filenameTopoQuadS  = config[14] + "_quad_FE.T"
+        self.filenameXQuadS     = config[14] + "_quad_FE.X"
         self.DEBUG              = (config[15] == 'True')
         self.densityF           = float(config[16])
         self.gravity_x          = float(config[17])
@@ -2141,6 +2189,20 @@ class fsi(object):
         self.userMinI.set(0.0)
         self.userMaxI = Tkinter.StringVar()
         self.userMaxI.set(1.0)
+        self.nodeS = Tkinter.StringVar()
+        self.nodeS.set("1")
+        self.nodeSrefX = Tkinter.StringVar()
+        self.nodeSrefY = Tkinter.StringVar()
+        self.nodeSrefZ = Tkinter.StringVar()
+        self.nodeSrefX.set("")
+        self.nodeSrefY.set("")
+        self.nodeSrefZ.set("")
+        self.nodeSx = Tkinter.StringVar()
+        self.nodeSy = Tkinter.StringVar()
+        self.nodeSz = Tkinter.StringVar()
+        self.nodeSx.set("")
+        self.nodeSy.set("")
+        self.nodeSz.set("")
     
     # auto-range colormap or use user-defined range
     def enableUserRangeF(self, win):
@@ -2239,6 +2301,7 @@ class fsi(object):
                                            +self.filenameSuffix)
             pointsI.SetData(numpy_to_vtk(tempCoord, \
                 deep=1, array_type=vtk.VTK_DOUBLE))
+            self.numberOfNodesI = tempCoord.shape[0]
             # assign points
             self.ugridI.SetPoints(pointsI)
             self.minXI, self.maxXI, self.minYI, self.maxYI, self.minZI, self.maxZI = \
@@ -2471,6 +2534,7 @@ class fsi(object):
             pointsF = vtk.vtkPoints()
             pointsF.SetData(numpy_to_vtk(tempCoord, \
                 deep=1, array_type=vtk.VTK_DOUBLE))
+            self.numberOfNodesF = tempCoord.shape[0]
             # assign points
             self.ugridF.SetPoints(pointsF)
             self.ugridCellsF.SetPoints(pointsF)
@@ -2932,6 +2996,7 @@ class fsi(object):
                                                +self.filenameSpaceS \
                                                +str(self.currentT) \
                                                +self.filenameSuffix)
+            self.numberOfNodesS = tempCoordS.shape[0]
             pointsS.SetData(numpy_to_vtk(tempCoordS, \
                 deep=1, array_type=vtk.VTK_DOUBLE))
             # assign points
@@ -3673,6 +3738,7 @@ class fsi(object):
             self.updateDisp()
             self.updateSolVel()
             self.updatePresS()
+            self.updateNodeS()
             self.progress["value"] = 80
             self.progress.update()
             self.updateQualityS()

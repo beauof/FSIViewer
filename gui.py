@@ -55,6 +55,7 @@ class gui(object):
         self.entryMaxF                 = []
         self.entryMinS                 = []
         self.entryMaxS                 = []
+        self.nodeFrameS                = []
     
     # resize handler
     def resize(self, event):
