@@ -313,6 +313,179 @@ def readScalarInts(str filename):
     
     return scalars
 
+# reads scalars
+def readScalarInts27(str filename):
+    filename_byte_string = filename.encode("UTF-8")
+    cdef char* fname = filename_byte_string
+    cdef FILE* cfile
+    cdef ndarray[numpy.int_t, ndim=2] scalars
+    cdef unsigned int numberOfComponents, numberOfNodes, i
+    cdef char * line = NULL
+    cdef size_t l = 0
+    cdef ssize_t read
+    cdef double s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15, s16, s17, s18, s19, s20, s21, s22, s23, s24, s25, s26
+    
+    cfile = fopen(fname, "rb")
+    if cfile == NULL:
+        print "No such file or directory: '%s'" % filename
+    
+    # first line
+    read = getline(&line, &l, cfile)
+    s0, s1, s2 = splitLine3(line)
+    numberOfNodes = int(s0)
+    numberOfComponents = 27
+    scalars = numpy.empty((numberOfNodes, numberOfComponents), dtype=int)
+    # read all subsequent lines
+    for i in range(numberOfNodes):
+        read = getline(&line, &l, cfile)
+        if read == -1: break
+        s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15, s16, s17, s18, s19, s20, s21, s22, s23, s24, s25, s26 = splitLine27(line)
+        scalars[i, 0] = int(s0)
+        scalars[i, 1] = int(s1)
+        scalars[i, 2] = int(s2)
+        scalars[i, 3] = int(s3)
+        scalars[i, 4] = int(s4)
+        scalars[i, 5] = int(s5)
+        scalars[i, 6] = int(s6)
+        scalars[i, 7] = int(s7)
+        scalars[i, 8] = int(s8)
+        scalars[i, 9] = int(s9)
+        scalars[i, 10] = int(s10)
+        scalars[i, 11] = int(s11)
+        scalars[i, 12] = int(s12)
+        scalars[i, 13] = int(s13)
+        scalars[i, 14] = int(s14)
+        scalars[i, 15] = int(s15)
+        scalars[i, 16] = int(s16)
+        scalars[i, 17] = int(s17)
+        scalars[i, 18] = int(s18)
+        scalars[i, 19] = int(s19)
+        scalars[i, 20] = int(s20)
+        scalars[i, 21] = int(s21)
+        scalars[i, 22] = int(s22)
+        scalars[i, 23] = int(s23)
+        scalars[i, 24] = int(s24)
+        scalars[i, 25] = int(s25)
+        scalars[i, 26] = int(s26)
+    fclose(cfile)
+    
+    return scalars
+
+# reads scalars
+def readScalarInts10(str filename):
+    filename_byte_string = filename.encode("UTF-8")
+    cdef char* fname = filename_byte_string
+    cdef FILE* cfile
+    cdef ndarray[numpy.int_t, ndim=2] scalars
+    cdef unsigned int numberOfComponents, numberOfNodes, i
+    cdef char * line = NULL
+    cdef size_t l = 0
+    cdef ssize_t read
+    cdef double s0, s1, s2, s3, s4, s5, s6, s7, s8, s9
+    
+    cfile = fopen(fname, "rb")
+    if cfile == NULL:
+        print "No such file or directory: '%s'" % filename
+    
+    # first line
+    read = getline(&line, &l, cfile)
+    s0, s1, s2 = splitLine3(line)
+    numberOfNodes = int(s0)
+    numberOfComponents = 10
+    scalars = numpy.empty((numberOfNodes, numberOfComponents), dtype=int)
+    # read all subsequent lines
+    for i in range(numberOfNodes):
+        read = getline(&line, &l, cfile)
+        if read == -1: break
+        s0, s1, s2, s3, s4, s5, s6, s7, s8, s9 = splitLine10(line)
+        scalars[i, 0] = int(s0)
+        scalars[i, 1] = int(s1)
+        scalars[i, 2] = int(s2)
+        scalars[i, 3] = int(s3)
+        scalars[i, 4] = int(s4)
+        scalars[i, 5] = int(s5)
+        scalars[i, 6] = int(s6)
+        scalars[i, 7] = int(s7)
+        scalars[i, 8] = int(s8)
+        scalars[i, 9] = int(s9)
+    fclose(cfile)
+    
+    return scalars
+
+# reads scalars
+def readScalarInts8(str filename):
+    filename_byte_string = filename.encode("UTF-8")
+    cdef char* fname = filename_byte_string
+    cdef FILE* cfile
+    cdef ndarray[numpy.int_t, ndim=2] scalars
+    cdef unsigned int numberOfComponents, numberOfNodes, i
+    cdef char * line = NULL
+    cdef size_t l = 0
+    cdef ssize_t read
+    cdef double s0, s1, s2, s3, s4, s5, s6, s7
+    
+    cfile = fopen(fname, "rb")
+    if cfile == NULL:
+        print "No such file or directory: '%s'" % filename
+    
+    # first line
+    read = getline(&line, &l, cfile)
+    s0, s1, s2 = splitLine3(line)
+    numberOfNodes = int(s0)
+    numberOfComponents = 8
+    scalars = numpy.empty((numberOfNodes, numberOfComponents), dtype=int)
+    # read all subsequent lines
+    for i in range(numberOfNodes):
+        read = getline(&line, &l, cfile)
+        if read == -1: break
+        s0, s1, s2, s3, s4, s5, s6, s7 = splitLine8(line)
+        scalars[i, 0] = int(s0)
+        scalars[i, 1] = int(s1)
+        scalars[i, 2] = int(s2)
+        scalars[i, 3] = int(s3)
+        scalars[i, 4] = int(s4)
+        scalars[i, 5] = int(s5)
+        scalars[i, 6] = int(s6)
+        scalars[i, 7] = int(s7)
+    fclose(cfile)
+    
+    return scalars
+
+# reads scalars
+def readScalarInts4(str filename):
+    filename_byte_string = filename.encode("UTF-8")
+    cdef char* fname = filename_byte_string
+    cdef FILE* cfile
+    cdef ndarray[numpy.int_t, ndim=2] scalars
+    cdef unsigned int numberOfComponents, numberOfNodes, i
+    cdef char * line = NULL
+    cdef size_t l = 0
+    cdef ssize_t read
+    cdef double s0, s1, s2, s3
+    
+    cfile = fopen(fname, "rb")
+    if cfile == NULL:
+        print "No such file or directory: '%s'" % filename
+    
+    # first line
+    read = getline(&line, &l, cfile)
+    s0, s1, s2 = splitLine3(line)
+    numberOfNodes = int(s0)
+    numberOfComponents = 4
+    scalars = numpy.empty((numberOfNodes, numberOfComponents), dtype=int)
+    # read all subsequent lines
+    for i in range(numberOfNodes):
+        read = getline(&line, &l, cfile)
+        if read == -1: break
+        s0, s1, s2, s3 = splitLine4(line)
+        scalars[i, 0] = int(s0)
+        scalars[i, 1] = int(s1)
+        scalars[i, 2] = int(s2)
+        scalars[i, 3] = int(s3)
+    fclose(cfile)
+    
+    return scalars
+
 # if the FSI method includes a change-of-variables (tranforming pressure variables such that fluid is free of gravitational effects)
 # then we have to use a reverse transformation to recover the correct pressures including hydrostatic pressure contributions
 def changeOfVariables(ndarray[numpy.double_t, ndim=2] coord, ndarray[numpy.double_t, ndim=1] pres, numpy.double_t density, numpy.double_t gx, numpy.double_t gy, numpy.double_t gz, numpy.double_t PO):
@@ -1143,7 +1316,7 @@ def interpolateLinToQuad_Hex(ndarray[numpy.int_t, ndim=2] elem, ndarray[numpy.do
                     # initial guess for global coordinate
                     ipk = getGlobalCoordinates(xik, nm)
                     iterX = 0
-                    l2norm = l2(ip, ipk)
+                    l2norm = l2diff(ip, ipk)
                     ############################################################
                     # this code crashes for very large deformations,
                     # but we keep it for a later switch between inaccurate
@@ -1160,7 +1333,7 @@ def interpolateLinToQuad_Hex(ndarray[numpy.int_t, ndim=2] elem, ndarray[numpy.do
                     #    xik = xik + mult33x31(Jkinv, ip_m_ipk)
                     #    ipk = getGlobalCoordinates(xik, nm)
                     #    iterX = iterX + 1
-                    #    l2norm = l2(ip, ipk)
+                    #    l2norm = l2diff(ip, ipk)
                     #if iterX >= 100:
                     #    print inside, iterX, l2norm
                     #    print ip, xik, ipk
@@ -1181,13 +1354,52 @@ def l1(ndarray[numpy.double_t, ndim=1] x, ndarray[numpy.double_t, ndim=1] xk):
         result += abs(xk[i] - x[i])
     return result
 
-def l2(ndarray[numpy.double_t, ndim=1] x, ndarray[numpy.double_t, ndim=1] xk):
+def l2diff(ndarray[numpy.double_t, ndim=1] x, ndarray[numpy.double_t, ndim=1] xk):
     cdef double result
     cdef unsigned int i
     result = 0.0
     for i in range(3):
         result += pow(xk[i] - x[i], 2)
     return sqrt(result)
+
+def frobenius(ndarray[numpy.double_t, ndim=2] x):
+    cdef double result
+    cdef unsigned int i, j
+    result = 0.0
+    for i in range(x.shape[0]):
+        for j in range(x.shape[1]):
+            result += pow(x[i, j], 2)
+    return sqrt(result)
+
+# computes the l2 norm column-wise and linfty norm of result
+def l2linfty(ndarray[numpy.double_t, ndim=2] x):
+    cdef unsigned int i, j
+    cdef double maxx, result
+    maxx = 0.0
+    for i in range(x.shape[0]):
+        result = 0.0
+        for j in range(x.shape[1]):
+            result += pow(x[i, j], 2)
+        if maxx < sqrt(result):
+            maxx = sqrt(result)
+    return maxx
+
+def l2(ndarray[numpy.double_t, ndim=1] x):
+    cdef double result
+    cdef unsigned int i, j
+    result = 0.0
+    for i in range(x.shape[0]):
+        result += pow(x[i], 2)
+    return sqrt(result)
+
+def linfty(ndarray[numpy.double_t, ndim=1] x):
+    cdef double result
+    cdef unsigned int i, j
+    result = 0.0
+    for i in range(x.shape[0]):
+        if result < abs(x[i]):
+            result = abs(x[i])
+    return result
 
 def mult33x31(ndarray[numpy.double_t, ndim=2] A, ndarray[numpy.double_t, ndim=1] b):
     cdef ndarray[numpy.double_t, ndim=1] result
