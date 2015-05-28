@@ -1227,9 +1227,13 @@ class fsi(object):
     # we need this function, otherwise the data sets are not updated if the
     # slider is moved
     def updateScaleValue(self, newvalue):
-        if not(self.currentT == int(newvalue)):
-            self.currentT = int(newvalue)
-            self.timeSliderUpdate()
+        print self.currentT, newvalue, int(newvalue)
+        #if not(self.currentT == int(newvalue)) \
+        #    and (int(newvalue) >= self.fromT) \
+        #    and (int(newvalue) <= self.toT):
+        #    self.currentT = int(newvalue)
+        #    self.timeSliderUpdate()
+        self.timeSliderUpdate()
     
     # current time has changed --> update time slider and data sets
     def timeSliderUpdate(self):
@@ -3770,7 +3774,9 @@ class fsi(object):
         self.timeSlider.set(self.currentT)
         self.timeSlider.grid(padx=0, pady=5, column=2, row=win.gridy-1, \
             columnspan=win.gridx-3, sticky = (Tkinter.W, Tkinter.E))
+        logging.debug("initial rendering")
         self.renderWindow.Render()
+        logging.debug("initial rendering completed")
     
     # settings for phase I or II probing, i.e. extracting data at given points
     def phaseIorII(self, win, probenr=1):
