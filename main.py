@@ -124,7 +124,7 @@ def main():
     window.subframeF.pack()
     window.notebook.add(window.subframeF, text="F", state="disabled")
     visualization.showF = Tkinter.StringVar()
-    visualization.showF.set("presF")
+    visualization.showF.set("vel")
     ttk.Radiobutton(window.subframeF, text="pressure", \
         command=visualization.updateFluid, \
         variable=visualization.showF, value="presF", \
@@ -311,7 +311,7 @@ def main():
     window.subframeS.pack()
     window.notebook.add(window.subframeS, text="S", state="disabled")
     visualization.showS = Tkinter.StringVar()
-    visualization.showS.set("presS")
+    visualization.showS.set("disp")
     ttk.Radiobutton(window.subframeS, text="pressure", \
         command=visualization.updateSolid, \
         variable=visualization.showS, value="presS", \

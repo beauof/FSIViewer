@@ -139,15 +139,15 @@ class fsi(object):
         self.gravity_x        = 0.0
         self.gravity_y        = 0.0
         self.gravity_z        = 0.0
-        self.boolShowVel      = False
+        self.boolShowVel      = True
         self.boolShowWel      = False
-        self.boolShowPresF    = True
+        self.boolShowPresF    = False
         self.boolShowVort     = False
         self.boolShowPhiF     = False
         self.boolShowQualityF = False
-        self.boolShowDisp     = False
+        self.boolShowDisp     = True
         self.boolShowSolVel   = False
-        self.boolShowPresS    = True
+        self.boolShowPresS    = False
         self.boolShowQualityS = False
         self.boolShowLMult    = True
         self.colorCompF       = -1
@@ -436,6 +436,7 @@ class fsi(object):
         self.nodeSx           = []
         self.nodeSy           = []
         self.nodeSz           = []
+        self.allProbeVel      = False
         
         
     
@@ -517,6 +518,7 @@ class fsi(object):
                 or (self.clipFnormal.get() == "k")) \
                 and (self.maxZF >= self.currentPlaneOriginZ + self.movePlaneByZ):
                 self.currentPlaneOriginZ += self.movePlaneByZ
+        logging.debug("Plane at: x = % .4f\n                     y = % .4f\n                     z = % .4f" % (self.currentPlaneOriginX, self.currentPlaneOriginY, self.currentPlaneOriginZ))
         self.updateFluid()
     
     # move cut planes for slicing/clipping 3D volume
@@ -542,6 +544,7 @@ class fsi(object):
                 or (self.clipFnormal.get() == "k")) \
                 and (self.maxZF <= self.currentPlaneOriginZ - self.movePlaneByZ):
                 self.currentPlaneOriginZ -= self.movePlaneByZ
+        logging.debug("Plane at: x = % .4f\n                     y = % .4f\n                     z = % .4f" % (self.currentPlaneOriginX, self.currentPlaneOriginY, self.currentPlaneOriginZ))
         self.updateFluid()
     
     # slice a 3D volume
@@ -936,13 +939,19 @@ class fsi(object):
         logging.debug("probe")
         probeFilterF = vtk.vtkProbeFilter()
         probeFilterF.SetSource(self.ugridF)
-        probeFilterF.SetInput(pointsInsideF.GetOutput())
+        if self.allProbeVel:
+            probeFilterF.SetInput(phaseIPolyDataF)
+        else:
+            probeFilterF.SetInput(pointsInsideF.GetOutput())
         probeFilterF.Update()
         
         # create unstructured grid from probed data set
         logging.debug("extract data")
         ugridProbeF = vtk.vtkUnstructuredGrid()
-        ugridProbeF.SetPoints(pointsInsideF.GetOutput().GetPoints())
+        if self.allProbeVel:
+            ugridProbeF.SetPoints(phaseIPolyDataF.GetPoints())
+        else:
+            ugridProbeF.SetPoints(pointsInsideF.GetOutput().GetPoints())
         ugridProbeF.GetPointData().SetVectors( \
             probeFilterF.GetOutput().GetPointData().GetVectors("velocity"))
         
@@ -966,11 +975,18 @@ class fsi(object):
         else:
             print "ERROR: unknown probe phase "+str(self.probeWhichPhase)
         logging.debug("export data")
-        for i in range(numKeptNodes):
-            a = ugridProbeF.GetPoints().GetPoint(i)
-            b = ugridProbeF.GetPointData().GetVectors("velocity").GetTuple(i)
-            fout.write("% .16f % .16f % .16f % .16f % .16f % .16f\n" \
-                % (a[0], a[1], a[2], b[0], b[1], b[2]))
+        if self.allProbeVel:
+            for i in range(ugridProbeF.GetPoints().GetNumberOfPoints()):
+                a = ugridProbeF.GetPoints().GetPoint(i)
+                b = ugridProbeF.GetPointData().GetVectors("velocity").GetTuple(i)
+                fout.write("% .16f % .16f % .16f % .16f % .16f % .16f\n" \
+                    % (a[0], a[1], a[2], b[0], b[1], b[2]))
+        else:
+            for i in range(numKeptNodes):
+                a = ugridProbeF.GetPoints().GetPoint(i)
+                b = ugridProbeF.GetPointData().GetVectors("velocity").GetTuple(i)
+                fout.write("% .16f % .16f % .16f % .16f % .16f % .16f\n" \
+                    % (a[0], a[1], a[2], b[0], b[1], b[2]))
         fout.close()
         logging.debug("probe fluid velocity completed")
     
@@ -1224,7 +1240,7 @@ class fsi(object):
             self.currentIndexT += 1
         self.timeSliderUpdate()
     
-    # we need this function, otherwise the data sets are not updated if the
+    # TODO we need this function, otherwise the data sets are not updated if the
     # slider is moved
     def updateScaleValue(self, newvalue):
         print self.currentT, newvalue, int(newvalue)
@@ -1233,7 +1249,7 @@ class fsi(object):
         #    and (int(newvalue) <= self.toT):
         #    self.currentT = int(newvalue)
         #    self.timeSliderUpdate()
-        self.timeSliderUpdate()
+        #self.timeSliderUpdate()
     
     # current time has changed --> update time slider and data sets
     def timeSliderUpdate(self):
@@ -3709,6 +3725,8 @@ class fsi(object):
                 self.meshTypeI = 14000
                 print "  I: -1 (unknown)"
         
+        self.timeLabelText.set(str(self.currentT))
+        logging.debug("current time step: %i" % self.currentT)
         self.progress.grid()
         self.progress["value"] = 2
         self.progress.update()
@@ -3781,9 +3799,54 @@ class fsi(object):
     # settings for phase I or II probing, i.e. extracting data at given points
     def phaseIorII(self, win, probenr=1):
         if self.numberOfDimensions == 3 and self.boolVarDispSpace.get():
-            self.dispIStr   = Tkinter.StringVar()
-            self.solvelIStr = Tkinter.StringVar()
-            self.velIStr    = Tkinter.StringVar()
+            if self.dispIStr == []:
+                self.dispIStr   = Tkinter.StringVar()
+                if os.path.exists(self.baseDirectory \
+                    + self.submitFolder \
+                    + "SolidPoints-Phase-I.txt") \
+                    and (probenr == 1):
+                    self.dispIStr.set(self.baseDirectory \
+                        + self.submitFolder \
+                        + "SolidPoints-Phase-I.txt")
+                elif os.path.exists(self.baseDirectory \
+                    + self.submitFolder \
+                    + "SolidPoints-Phase-II.txt") \
+                    and (probenr == 2):
+                    self.dispIStr.set(self.baseDirectory \
+                        + self.submitFolder \
+                        + "SolidPoints-Phase-II.txt")
+            if self.solvelIStr == []:
+                self.solvelIStr = Tkinter.StringVar()
+                if os.path.exists(self.baseDirectory \
+                    + self.submitFolder \
+                    + "FluidPoints-Phase-I.txt") \
+                    and (probenr == 1):
+                    self.solvelIStr.set(self.baseDirectory \
+                        + self.submitFolder \
+                        + "FluidPoints-Phase-I.txt")
+                elif os.path.exists(self.baseDirectory \
+                    + self.submitFolder \
+                    + "FluidPoints-Phase-II.txt") \
+                    and (probenr == 2):
+                    self.solvelIStr.set(self.baseDirectory \
+                        + self.submitFolder \
+                        + "FluidPoints-Phase-II.txt")
+            if self.velIStr == []:
+                self.velIStr    = Tkinter.StringVar()
+                if os.path.exists(self.baseDirectory \
+                    + self.submitFolder \
+                    + "FluidPoints-Phase-I.txt") \
+                    and (probenr == 1):
+                    self.velIStr.set(self.baseDirectory \
+                        + self.submitFolder \
+                        + "FluidPoints-Phase-I.txt")
+                elif os.path.exists(self.baseDirectory \
+                    + self.submitFolder \
+                    + "FluidPoints-Phase-II.txt") \
+                    and (probenr == 2):
+                    self.velIStr.set(self.baseDirectory \
+                        + self.submitFolder \
+                        + "FluidPoints-Phase-II.txt")
             self.fromTIStr = Tkinter.StringVar()
             self.toTIStr = Tkinter.StringVar()
             self.incrementIStr     = Tkinter.StringVar()

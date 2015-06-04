@@ -1384,6 +1384,18 @@ def l2linfty(ndarray[numpy.double_t, ndim=2] x):
             maxx = sqrt(result)
     return maxx
 
+# computes the l2 norm column-wise and mean of result
+def l2mean(ndarray[numpy.double_t, ndim=2] x):
+    cdef unsigned int i, j
+    cdef double l2, result
+    result = 0.0
+    for i in range(x.shape[0]):
+        l2 = 0.0
+        for j in range(x.shape[1]):
+            l2 += pow(x[i, j], 2)
+        result += sqrt(l2)
+    return result/x.shape[0]
+
 def l2(ndarray[numpy.double_t, ndim=1] x):
     cdef double result
     cdef unsigned int i, j
@@ -1399,6 +1411,15 @@ def linfty(ndarray[numpy.double_t, ndim=1] x):
     for i in range(x.shape[0]):
         if result < abs(x[i]):
             result = abs(x[i])
+    return result
+
+# computes l2 norm per node and returns nodal scalar field
+def l2pointwise(ndarray[numpy.double_t, ndim=2] x):
+    cdef ndarray[numpy.double_t, ndim=1] result
+    
+    result = numpy.zeros(x.shape[0]).astype(float)
+    for i in range(x.shape[0]):
+        result[i] = sqrt(x[i, 0] * x[i, 0] + x[i, 1] * x[i, 1] + x[i, 2] * x[i, 2])
     return result
 
 def mult33x31(ndarray[numpy.double_t, ndim=2] A, ndarray[numpy.double_t, ndim=1] b):
