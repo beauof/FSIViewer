@@ -1649,24 +1649,48 @@ class fsi(object):
             if not(self.clipMapperFpreserve == []):
                 self.clipMapperFpreserve.SetScalarModeToUsePointFieldData()
                 self.clipMapperFpreserve.SelectColorArray("velocity")
+            if not(self.clipMapperF == []):
+                self.clipMapperF.SetScalarModeToUsePointFieldData()
+                self.clipMapperF.SelectColorArray("velocity")
+            if not(self.cutMapperF == []):
+                self.cutMapperF.SetScalarModeToUsePointFieldData()
+                self.cutMapperF.SelectColorArray("velocity")
         elif self.boolShowWel:
             self.dataSetMapperF.SetScalarModeToUsePointFieldData()
             self.dataSetMapperF.SelectColorArray("welocity")
             if not(self.clipMapperFpreserve == []):
                 self.clipMapperFpreserve.SetScalarModeToUsePointFieldData()
                 self.clipMapperFpreserve.SelectColorArray("welocity")
+            if not(self.clipMapperF == []):
+                self.clipMapperF.SetScalarModeToUsePointFieldData()
+                self.clipMapperF.SelectColorArray("welocity")
+            if not(self.cutMapperF == []):
+                self.cutMapperF.SetScalarModeToUsePointFieldData()
+                self.cutMapperF.SelectColorArray("welocity")
         elif self.boolShowPresF:
             self.dataSetMapperF.SetScalarModeToUsePointData()
             self.dataSetMapperF.SetUseLookupTableScalarRange(True)
             if not(self.clipMapperFpreserve == []):
                 self.clipMapperFpreserve.SetScalarModeToUsePointData()
                 self.clipMapperFpreserve.SetUseLookupTableScalarRange(True)
+            if not(self.clipMapperF == []):
+                self.clipMapperF.SetScalarModeToUsePointData()
+                self.clipMapperF.SetUseLookupTableScalarRange(True)
+            if not(self.cutMapperF == []):
+                self.cutMapperF.SetScalarModeToUsePointData()
+                self.cutMapperF.SetUseLookupTableScalarRange(True)
         elif self.boolShowVort:
             self.dataSetMapperF.SetScalarModeToUsePointFieldData()
             self.dataSetMapperF.SelectColorArray("vorticity")
             if not(self.clipMapperFpreserve == []):
                 self.clipMapperFpreserve.SetScalarModeToUsePointFieldData()
                 self.clipMapperFpreserve.SelectColorArray("vorticity")
+            if not(self.clipMapperF == []):
+                self.clipMapperF.SetScalarModeToUsePointFieldData()
+                self.clipMapperF.SelectColorArray("vorticity")
+            if not(self.cutMapperF == []):
+                self.cutMapperF.SetScalarModeToUsePointFieldData()
+                self.cutMapperF.SelectColorArray("vorticity")
         elif self.boolShowQualityF:
             self.dataSetMapperF.SetScalarModeToUseCellFieldData()
             self.dataSetMapperF.SelectColorArray("Quality")
@@ -1675,6 +1699,14 @@ class fsi(object):
                 self.clipMapperFpreserve.SetScalarModeToUseCellFieldData()
                 self.clipMapperFpreserve.SelectColorArray("Quality")
                 self.clipMapperFpreserve.SetUseLookupTableScalarRange(True)
+            if not(self.clipMapperF == []):
+                self.clipMapperF.SetScalarModeToUseCellFieldData()
+                self.clipMapperF.SelectColorArray("Quality")
+                self.clipMapperF.SetUseLookupTableScalarRange(True)
+            if not(self.cutMapperF == []):
+                self.cutMapperF.SetScalarModeToUseCellFieldData()
+                self.cutMapperF.SelectColorArray("Quality")
+                self.cutMapperF.SetUseLookupTableScalarRange(True)
         elif self.boolShowPhiF:
             self.dataSetMapperF.SetScalarModeToUsePointFieldData()
             self.dataSetMapperF.SelectColorArray("phi")
@@ -1683,9 +1715,21 @@ class fsi(object):
                 self.clipMapperFpreserve.SetScalarModeToUsePointFieldData()
                 self.clipMapperFpreserve.SelectColorArray("phi")
                 self.clipMapperFpreserve.SetUseLookupTableScalarRange(True)
+            if not(self.clipMapperF == []):
+                self.clipMapperF.SetScalarModeToUsePointFieldData()
+                self.clipMapperF.SelectColorArray("phi")
+                self.clipMapperF.SetUseLookupTableScalarRange(True)
+            if not(self.cutMapperF == []):
+                self.cutMapperF.SetScalarModeToUsePointFieldData()
+                self.cutMapperF.SelectColorArray("phi")
+                self.cutMapperF.SetUseLookupTableScalarRange(True)
         self.dataSetMapperF.SetLookupTable(self.currentCTFF)
         if not(self.clipMapperFpreserve == []):
             self.clipMapperFpreserve.SetLookupTable(self.currentCTFF)
+        if not(self.clipMapperF == []):
+            self.clipMapperF.SetLookupTable(self.currentCTFF)
+        if not(self.cutMapperF == []):
+            self.cutMapperF.SetLookupTable(self.currentCTFF)
     
     # select variable for color map
     def selectColorArrayS(self):
