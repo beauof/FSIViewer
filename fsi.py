@@ -46,6 +46,8 @@ class fsi(object):
         self.dispI            = ""
         self.solvelI          = ""
         self.velI             = ""
+        self.presSI           = ""
+        self.presFI           = ""
         self.pointsS          = ""
         self.pointsF          = ""
         self.dataFolder       = "data/"
@@ -56,6 +58,8 @@ class fsi(object):
         self.dispIStr            = []
         self.solvelIStr          = []
         self.velIStr             = []
+        self.presSIStr           = []
+        self.presFIStr           = []
         self.pointsSStr          = []
         self.pointsFStr          = []
         self.dataFolderStr       = []
@@ -867,6 +871,8 @@ class fsi(object):
         ugridProbeF.SetPoints(pointsInsideF.GetOutput().GetPoints())
         ugridProbeF.GetPointData().SetVectors( \
             probeFilterF.GetOutput().GetPointData().GetVectors("velocity"))
+        ugridProbeF.GetPointData().SetScalars( \
+            probeFilterF.GetOutput().GetPointData().GetArray("pressure"))
         
         logging.debug("probe SolVel-" \
             +str(self.currentT) \
@@ -880,10 +886,20 @@ class fsi(object):
                         +"FluidPoints-Phase-I-" \
                         +str(self.currentT) \
                         +".txt"), "w")
+            foutp = open(str(self.baseDirectory \
+                        +self.submitFolder \
+                        +"Pressure-Phase-I-" \
+                        +str(self.currentT) \
+                        +".txt"), "w")
         elif self.probeWhichPhase == 2:
             fout = open(str(self.baseDirectory \
                         +self.submitFolder \
                         +"FluidPoints-Phase-II-" \
+                        +str(self.currentT) \
+                        +".txt"), "w")
+            foutp = open(str(self.baseDirectory \
+                        +self.submitFolder \
+                        +"Pressure-Phase-II-" \
                         +str(self.currentT) \
                         +".txt"), "w")
         else:
@@ -892,9 +908,13 @@ class fsi(object):
         for i in range(numKeptNodes):
             a = ugridProbeF.GetPoints().GetPoint(i)
             b = ugridProbeF.GetPointData().GetVectors("velocity").GetTuple(i)
+            c = ugridProbeF.GetPointData().GetArray("pressure").GetTuple(i)
             fout.write("% .16f % .16f % .16f % .16f % .16f % .16f\n" \
                 % (a[0], a[1], a[2], b[0], b[1], b[2]))
+            foutp.write("% .16f % .16f % .16f % .16f\n" \
+                % (a[0], a[1], a[2], c[0]))
         fout.close()
+        foutp.close()
         logging.debug("probe solid velocity completed")
     
     # probe at positions corresponding to Phase I
@@ -954,6 +974,8 @@ class fsi(object):
             ugridProbeF.SetPoints(pointsInsideF.GetOutput().GetPoints())
         ugridProbeF.GetPointData().SetVectors( \
             probeFilterF.GetOutput().GetPointData().GetVectors("velocity"))
+        ugridProbeF.GetPointData().SetScalars( \
+            probeFilterF.GetOutput().GetPointData().GetArray("pressure"))
         
         logging.debug("probe Vel-"+str(self.currentT) \
             +".D: Found " \
@@ -966,10 +988,20 @@ class fsi(object):
                         +"FluidPoints-Phase-I-" \
                         +str(self.currentT) \
                         +".txt"), "a")
+            foutp = open(str(self.baseDirectory \
+                        +self.submitFolder \
+                        +"Pressure-Phase-I-" \
+                        +str(self.currentT) \
+                        +".txt"), "a")
         elif self.probeWhichPhase == 2:
             fout = open(str(self.baseDirectory \
                         +self.submitFolder \
                         +"FluidPoints-Phase-II-" \
+                        +str(self.currentT) \
+                        +".txt"), "a")
+            foutp = open(str(self.baseDirectory \
+                        +self.submitFolder \
+                        +"Pressure-Phase-II-" \
                         +str(self.currentT) \
                         +".txt"), "a")
         else:
@@ -979,15 +1011,22 @@ class fsi(object):
             for i in range(ugridProbeF.GetPoints().GetNumberOfPoints()):
                 a = ugridProbeF.GetPoints().GetPoint(i)
                 b = ugridProbeF.GetPointData().GetVectors("velocity").GetTuple(i)
+                c = ugridProbeF.GetPointData().GetArray("pressure").GetTuple(i)
                 fout.write("% .16f % .16f % .16f % .16f % .16f % .16f\n" \
                     % (a[0], a[1], a[2], b[0], b[1], b[2]))
+                foutp.write("% .16f % .16f % .16f % .16f\n" \
+                    % (a[0], a[1], a[2], c[0]))
         else:
             for i in range(numKeptNodes):
                 a = ugridProbeF.GetPoints().GetPoint(i)
                 b = ugridProbeF.GetPointData().GetVectors("velocity").GetTuple(i)
+                c = ugridProbeF.GetPointData().GetArray("pressure").GetTuple(i)
                 fout.write("% .16f % .16f % .16f % .16f % .16f % .16f\n" \
                     % (a[0], a[1], a[2], b[0], b[1], b[2]))
+                foutp.write("% .16f % .16f % .16f % .16f\n" \
+                    % (a[0], a[1], a[2], c[0]))
         fout.close()
+        foutp.close()
         logging.debug("probe fluid velocity completed")
     
     # clip a 3D volume slicing through elements
@@ -3891,6 +3930,38 @@ class fsi(object):
                     self.velIStr.set(self.baseDirectory \
                         + self.submitFolder \
                         + "FluidPoints-Phase-II.txt")
+            if self.presSIStr == []:
+                self.presSIStr = Tkinter.StringVar()
+                if os.path.exists(self.baseDirectory \
+                    + self.submitFolder \
+                    + "Pressure-Phase-I.txt") \
+                    and (probenr == 1):
+                    self.presSIStr.set(self.baseDirectory \
+                        + self.submitFolder \
+                        + "Pressure-Phase-I.txt")
+                elif os.path.exists(self.baseDirectory \
+                    + self.submitFolder \
+                    + "presSIStr-Phase-II.txt") \
+                    and (probenr == 2):
+                    self.presSIStr.set(self.baseDirectory \
+                        + self.submitFolder \
+                        + "Pressure-Phase-II.txt")
+            if self.presFIStr == []:
+                self.presFIStr = Tkinter.StringVar()
+                if os.path.exists(self.baseDirectory \
+                    + self.submitFolder \
+                    + "Pressure-Phase-I.txt") \
+                    and (probenr == 1):
+                    self.presFIStr.set(self.baseDirectory \
+                        + self.submitFolder \
+                        + "Pressure-Phase-I.txt")
+                elif os.path.exists(self.baseDirectory \
+                    + self.submitFolder \
+                    + "presSIStr-Phase-II.txt") \
+                    and (probenr == 2):
+                    self.presFIStr.set(self.baseDirectory \
+                        + self.submitFolder \
+                        + "Pressure-Phase-II.txt")
             self.fromTIStr = Tkinter.StringVar()
             self.toTIStr = Tkinter.StringVar()
             self.incrementIStr     = Tkinter.StringVar()
@@ -3926,18 +3997,26 @@ class fsi(object):
                 text="Points for fluid velocity (current configuration):", \
                 style='My.TLabel') \
                 .grid(    column=0, row=2, padx=3, sticky=Tkinter.W)
+            ttk.Label(self.popupPhaseI, \
+                text="Points for solid pressure (current configuration):", \
+                style='My.TLabel') \
+                .grid(  column=0, row=3, padx=3, sticky=Tkinter.W)
+            ttk.Label(self.popupPhaseI, \
+                text="Points for fluid pressure (current configuration):", \
+                style='My.TLabel') \
+                .grid(    column=0, row=4, padx=3, sticky=Tkinter.W)
             ttk.Label(self.popupPhaseI, text="First time step:", style='My.TLabel') \
-                .grid(column=0, row=3, padx=3, sticky=Tkinter.W)
+                .grid(column=0, row=5, padx=3, sticky=Tkinter.W)
             ttk.Label(self.popupPhaseI, text="Last time step:", style='My.TLabel') \
-                .grid( column=0, row=4, padx=3, sticky=Tkinter.W)
+                .grid( column=0, row=6, padx=3, sticky=Tkinter.W)
             ttk.Label(self.popupPhaseI, text="Increment:", style='My.TLabel') \
-                .grid(      column=0, row=5, padx=3, sticky=Tkinter.W)
+                .grid(      column=0, row=7, padx=3, sticky=Tkinter.W)
             ttk.Label(self.popupPhaseI, text="Tolerance:", style='My.TLabel') \
-                .grid(      column=0, row=6, padx=3, sticky=Tkinter.W)
+                .grid(      column=0, row=8, padx=3, sticky=Tkinter.W)
             ttk.Label(self.popupPhaseI, \
                 text="Note: Make sure first/last time step and increment fits data.", \
                 style='My.TLabel') \
-                .grid(      column=1, row=7, padx=3, sticky=Tkinter.W)
+                .grid(      column=1, row=9, padx=3, sticky=Tkinter.W)
             WIDTH = 80
             
             dispEntry = ttk.Entry(self.popupPhaseI, width=WIDTH, \
@@ -3946,6 +4025,10 @@ class fsi(object):
                 textvariable=self.solvelIStr, justify=Tkinter.LEFT)
             velEntry = ttk.Entry(self.popupPhaseI, width=WIDTH, \
                 textvariable=self.velIStr, justify=Tkinter.LEFT)
+            presSEntry = ttk.Entry(self.popupPhaseI, width=WIDTH, \
+                textvariable=self.presSIStr, justify=Tkinter.LEFT)
+            presFEntry = ttk.Entry(self.popupPhaseI, width=WIDTH, \
+                textvariable=self.presFIStr, justify=Tkinter.LEFT)
             beginningEntry = ttk.Entry(self.popupPhaseI, width=WIDTH, \
                 textvariable=self.fromTIStr, justify=Tkinter.LEFT)
             endEntry = ttk.Entry(self.popupPhaseI, width=WIDTH, \
@@ -3957,10 +4040,12 @@ class fsi(object):
             dispEntry.grid(        column=1, row=0, sticky=(Tkinter.W, Tkinter.E))
             solvelEntry.grid(column=1, row=1, sticky=(Tkinter.W, Tkinter.E))
             velEntry.grid(  column=1, row=2, sticky=(Tkinter.W, Tkinter.E))
-            beginningEntry.grid(   column=1, row=3, sticky=(Tkinter.W, Tkinter.E))
-            endEntry.grid(         column=1, row=4, sticky=(Tkinter.W, Tkinter.E))
-            incrementEntry.grid(   column=1, row=5, sticky=(Tkinter.W, Tkinter.E))
-            toleranceEntry.grid(   column=1, row=6, sticky=(Tkinter.W, Tkinter.E))
+            presSEntry.grid(column=1, row=3, sticky=(Tkinter.W, Tkinter.E))
+            presFEntry.grid(  column=1, row=4, sticky=(Tkinter.W, Tkinter.E))
+            beginningEntry.grid(   column=1, row=5, sticky=(Tkinter.W, Tkinter.E))
+            endEntry.grid(         column=1, row=6, sticky=(Tkinter.W, Tkinter.E))
+            incrementEntry.grid(   column=1, row=7, sticky=(Tkinter.W, Tkinter.E))
+            toleranceEntry.grid(   column=1, row=8, sticky=(Tkinter.W, Tkinter.E))
             
             def setDispDirectory():
                 self.dispI = tkFileDialog.askopenfilename(parent=self.popupPhaseI, \
@@ -3974,7 +4059,18 @@ class fsi(object):
                 self.velI = tkFileDialog.askopenfilename(parent=self.popupPhaseI, \
                     initialdir=self.baseDirectory)
                 self.velIStr.set(str(self.velI))
+            def setPresSDirectory():
+                self.presSI = tkFileDialog.askopenfilename(parent=self.popupPhaseI, \
+                    initialdir=self.baseDirectory)
+                self.presSIStr.set(str(self.presSI))
+            def setPresFDirectory():
+                self.presFI = tkFileDialog.askopenfilename(parent=self.popupPhaseI, \
+                    initialdir=self.baseDirectory)
+                self.presFIStr.set(str(self.presF))
             
+            ttk.Button(self.popupPhaseI, image=win.useFolderIcon, \
+                command=setDispDirectory, style='My.TButton').grid( \
+                column = 2, row = 0, padx=3)
             ttk.Button(self.popupPhaseI, image=win.useFolderIcon, \
                 command=setSolVelDirectory, style='My.TButton').grid( \
                 column = 2, row = 1, padx=3)
@@ -3982,8 +4078,11 @@ class fsi(object):
                 command=setVelDirectory, style='My.TButton').grid( \
                 column = 2, row = 2, padx=3)
             ttk.Button(self.popupPhaseI, image=win.useFolderIcon, \
-                command=setDispDirectory, style='My.TButton').grid( \
-                column = 2, row = 0, padx=3)
+                command=setPresSDirectory, style='My.TButton').grid( \
+                column = 2, row = 3, padx=4)
+            ttk.Button(self.popupPhaseI, image=win.useFolderIcon, \
+                command=setPresFDirectory, style='My.TButton').grid( \
+                column = 2, row = 4, padx=5)
             
             toolbarDispOK = ttk.Frame(self.popupPhaseI, borderwidth=5, style='My.TFrame')
             toolbarDispOK.grid(row=11, column=1, columnspan=2, \
@@ -3993,6 +4092,8 @@ class fsi(object):
                 self.dispI      = str(self.dispIStr.get())
                 self.solvelI    = str(self.solvelIStr.get())
                 self.velI       = str(self.velIStr.get())
+                self.presSI     = str(self.presSIStr.get())
+                self.presFI     = str(self.presFIStr.get())
                 self.fromTI     = int(self.fromTIStr.get())
                 self.toTI       = int(self.toTIStr.get())
                 self.incrementI = int(self.incrementIStr.get())
@@ -4177,6 +4278,8 @@ class fsi(object):
         self.dispPointsI   = numpy.loadtxt(self.dispI)
         self.solvelPointsI = numpy.loadtxt(self.solvelI)
         self.velPointsI    = numpy.loadtxt(self.velI)
+        self.presSPointsI  = numpy.loadtxt(self.presSI)
+        self.presFPointsI  = numpy.loadtxt(self.presFI)
     
     def readPointsFromFilePoints(self):
         self.pointsNumpyS   = numpy.loadtxt(self.pointsS)
