@@ -474,7 +474,8 @@ class fsi(object):
         xref = x.split()
         self.nodeSrefX.set("% .2f" % float(xref[0]))
         self.nodeSrefY.set("% .2f" % float(xref[1]))
-        self.nodeSrefZ.set("% .2f" % float(xref[2]))
+        if len(xref) == 3:
+            self.nodeSrefZ.set("% .2f" % float(xref[2]))
         command = "awk 'NR==" \
             +str(int(self.nodeS.get())+1) \
             +"' " \
@@ -488,7 +489,8 @@ class fsi(object):
         disp = x.split()
         self.nodeSx.set("% .2f" % float(disp[0]))
         self.nodeSy.set("% .2f" % float(disp[1]))
-        self.nodeSz.set("% .2f" % float(disp[2]))
+        if len(xref) == 3:
+            self.nodeSz.set("% .2f" % float(disp[2]))
         t1 = time.time()
         logging.debug("update tracked node: %i complete in %.2f seconds" % (int(self.nodeS.get()), t1-t0))
     
