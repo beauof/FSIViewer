@@ -24,6 +24,9 @@ class gui(object):
         self.loadIcon                  = []
         self.useLoadIcon               = []
         self.loadBtn                   = []
+        self.refreshConfigIcon         = []
+        self.useRefreshConfigIcon      = []
+        self.refreshConfigBtn          = []
         self.quitIcon                  = []
         self.useQuitIcon               = []
         self.folderIcon                = []
@@ -90,12 +93,15 @@ class gui(object):
         self.toolbar.grid(row=0, column=0, \
                           columnspan=2, \
                           sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
-        self.loadIcon      = Image.open(installDir + "icons/add.png")
-        self.useLoadIcon   = ImageTk.PhotoImage(self.loadIcon)
-        self.quitIcon      = Image.open(installDir + "icons/cross.png")
-        self.useQuitIcon   = ImageTk.PhotoImage(self.quitIcon)
-        self.folderIcon    = Image.open(installDir + "icons/folder.png")
-        self.useFolderIcon = ImageTk.PhotoImage(self.folderIcon)
+        self.loadIcon             = Image.open(installDir + "icons/add.png")
+        self.useLoadIcon          = ImageTk.PhotoImage(self.loadIcon)
+        self.refreshConfigIcon    = Image.open(installDir \
+                                               + "icons/book_next.png")
+        self.useRefreshConfigIcon = ImageTk.PhotoImage(self.refreshConfigIcon)
+        self.quitIcon             = Image.open(installDir + "icons/cross.png")
+        self.useQuitIcon          = ImageTk.PhotoImage(self.quitIcon)
+        self.folderIcon           = Image.open(installDir + "icons/folder.png")
+        self.useFolderIcon        = ImageTk.PhotoImage(self.folderIcon)
     
     # notebook to customize fluid, solid, interface visualization and viewer
     def configureNotebook(self):

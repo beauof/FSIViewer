@@ -112,6 +112,11 @@ def main():
     window.loadBtn = ttk.Button(window.toolbar, image=window.useLoadIcon, \
         command=lambda:visualization.defineSequence(window), style='My.TButton')
     window.loadBtn.pack(side=Tkinter.LEFT, fill=Tkinter.X, padx=1)
+    window.refreshConfigBtn = ttk.Button(window.toolbar, \
+        image=window.useRefreshConfigIcon, \
+        command=visualization.refreshConfiguration, \
+        style='My.TButton')
+    window.refreshConfigBtn.pack(side=Tkinter.LEFT, fill=Tkinter.X, padx=1)
     window.quitBtn = ttk.Button(window.toolbar, image=window.useQuitIcon, \
         command=quit, style='My.TButton')
     window.quitBtn.pack(side=Tkinter.LEFT, fill=Tkinter.X, padx=1)

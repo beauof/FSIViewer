@@ -441,6 +441,9 @@ class fsi(object):
         self.nodeSy           = []
         self.nodeSz           = []
         self.allProbeVel      = False
+        self.scalarBarNormalizedHeight = 0.1
+        self.configFilename   = []
+        self.scalarBarFontFamily = 'Arial'
         
         
     
@@ -1849,6 +1852,49 @@ class fsi(object):
         self.timeSliderUpdate()
         self.renderWindow.Render()
     
+    # refresh scalar bar text
+    def scalarBarFont(self):
+        if not(self.scalarBarF == []):
+            self.scalarBarF.SetHeight(self.scalarBarNormalizedHeight)
+            if self.scalarBarFontFamily == 'Times':
+                self.scalarBarF.GetTitleTextProperty().SetFontFamilyToTimes()
+                self.scalarBarF.GetLabelTextProperty().SetFontFamilyToTimes()
+            elif self.scalarBarFontFamily == 'Arial':
+                self.scalarBarF.GetTitleTextProperty().SetFontFamilyToArial()
+                self.scalarBarF.GetLabelTextProperty().SetFontFamilyToArial()
+            elif self.scalarBarFontFamily == 'Courier':
+                self.scalarBarF.GetTitleTextProperty().SetFontFamilyToCourier()
+                self.scalarBarF.GetLabelTextProperty().SetFontFamilyToCourier()
+        else:
+            logging.debug("self.scalarBarF == []")
+        if not(self.scalarBarS == []):
+            self.scalarBarS.SetHeight(self.scalarBarNormalizedHeight)
+            if self.scalarBarFontFamily == 'Times':
+                self.scalarBarS.GetTitleTextProperty().SetFontFamilyToTimes()
+                self.scalarBarS.GetLabelTextProperty().SetFontFamilyToTimes()
+            elif self.scalarBarFontFamily == 'Arial':
+                self.scalarBarS.GetTitleTextProperty().SetFontFamilyToArial()
+                self.scalarBarS.GetLabelTextProperty().SetFontFamilyToArial()
+            elif self.scalarBarFontFamily == 'Courier':
+                self.scalarBarS.GetTitleTextProperty().SetFontFamilyToCourier()
+                self.scalarBarS.GetLabelTextProperty().SetFontFamilyToCourier()
+        else:
+            logging.debug("self.scalarBarS == []")
+        if not(self.scalarBarI == []):
+            self.scalarBarI.SetHeight(self.scalarBarNormalizedHeight)
+            if self.scalarBarFontFamily == 'Times':
+                self.scalarBarI.GetTitleTextProperty().SetFontFamilyToTimes()
+                self.scalarBarI.GetLabelTextProperty().SetFontFamilyToTimes()
+            elif self.scalarBarFontFamily == 'Arial':
+                self.scalarBarI.GetTitleTextProperty().SetFontFamilyToArial()
+                self.scalarBarI.GetLabelTextProperty().SetFontFamilyToArial()
+            elif self.scalarBarFontFamily == 'Courier':
+                self.scalarBarI.GetTitleTextProperty().SetFontFamilyToCourier()
+                self.scalarBarI.GetLabelTextProperty().SetFontFamilyToCourier()
+        else:
+            logging.debug("self.scalarBarI == []")
+        self.renderWindow.Render()
+    
     # show/hide scalar bar for fluid data set
     def scalarBarOnOffF(self):
         if self.boolShowScalarBarF == []:
@@ -1867,7 +1913,7 @@ class fsi(object):
             self.coordScalarBarF.SetCoordinateSystemToNormalizedViewport()
             self.coordScalarBarF.SetValue(0.1, 0.025)
             self.scalarBarF.SetWidth(0.8)
-            self.scalarBarF.SetHeight(0.1)
+            self.scalarBarF.SetHeight(self.scalarBarNormalizedHeight)
         self.nextCTF("fluid")
         if self.boolShowScalarBarF.get():
             if self.boolShowVel:
@@ -1905,7 +1951,7 @@ class fsi(object):
             self.coordScalarBarS.SetCoordinateSystemToNormalizedViewport()
             self.coordScalarBarS.SetValue(0.1, 0.025)
             self.scalarBarS.SetWidth(0.8)
-            self.scalarBarS.SetHeight(0.1)
+            self.scalarBarS.SetHeight(self.scalarBarNormalizedHeight)
         self.nextCTF("solid")
         if self.boolShowScalarBarS.get():
             if self.boolShowDisp:
@@ -1939,7 +1985,7 @@ class fsi(object):
             self.coordScalarBarI.SetCoordinateSystemToNormalizedViewport()
             self.coordScalarBarI.SetValue(0.1, 0.025)
             self.scalarBarI.SetWidth(0.8)
-            self.scalarBarI.SetHeight(0.1)
+            self.scalarBarI.SetHeight(self.scalarBarNormalizedHeight)
         self.nextCTF("interface")
         if self.boolShowScalarBarI.get():
             if self.boolShowLMult:
@@ -2229,7 +2275,8 @@ class fsi(object):
     
     # read configuration file to set user default values
     def readConfiguration(self, filename):
-        with open (filename, "r") as myfile:
+        self.configFilename = filename
+        with open (self.configFilename, "r") as myfile:
             config = myfile.read().splitlines()
         # use user configuration
         self.installDirectory   = config[0]
@@ -2275,6 +2322,8 @@ class fsi(object):
         self.filenameSpaceI     = config[26]
         self.filenameLMult      = config[27]
         self.filenameSolVel     = config[28]
+        self.scalarBarNormalizedHeight = float(config[29])
+        self.scalarBarFontFamily = str(config[30])
         # other hard-coded defaults
         self.boolAutoRangeF     = Tkinter.BooleanVar()
         self.boolAutoRangeF.set(True)
@@ -2308,6 +2357,30 @@ class fsi(object):
         self.nodeSx.set("")
         self.nodeSy.set("")
         self.nodeSz.set("")
+    
+    # read configuration file to set user default values
+    # allows to runtime changes of g, rho_f, debug flag, pO, scalar bar font
+    def refreshConfiguration(self):
+        if not(self.configFilename == []):
+            with open (self.configFilename, "r") as myfile:
+                config = myfile.read().splitlines()
+            # use user configuration
+            self.boolEffectiveG     = Tkinter.BooleanVar()
+            self.boolEffectiveG.set(config[8] == 'True')
+            self.boolVarDispSpace   = Tkinter.BooleanVar()
+            self.boolVarDispSpace.set(config[12] == 'True')
+            self.DEBUG              = (config[15] == 'True')
+            self.densityF           = float(config[16])
+            self.gravity_x          = float(config[17])
+            self.gravity_y          = float(config[18])
+            self.gravity_z          = float(config[19])
+            self.PO                 = float(config[23])
+            self.scalarBarNormalizedHeight = float(config[29])
+            self.scalarBarFontFamily = str(config[30])
+            self.scalarBarFont()
+        else:
+            logging.debug("can only refresh configuration " \
+                + "if initial configuration was set")
     
     # auto-range colormap or use user-defined range
     def enableUserRangeF(self, win):
