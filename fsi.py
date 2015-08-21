@@ -364,6 +364,7 @@ class fsi(object):
         self.maxQualityI      = 1.0
         self.clippingPlaneF   = []
         self.linearSubdivisionClipF = []
+        self.linearSubdivisionSliceF = []
         self.extractGridClipF = []
         self.clipF            = []
         self.extractClipF     = []
@@ -376,6 +377,7 @@ class fsi(object):
         self.clipActorFpreserve       = []
         self.boolVarDispSpace = []
         self.clipFnumberOfSubdivisions = 2
+        self.sliceFnumberOfSubdivisions = 2
         self.currentPlaneOriginX = self.minXF+0.5*(self.maxXF-self.minXF)
         self.currentPlaneOriginY = self.minYF+0.5*(self.maxYF-self.minYF)
         self.currentPlaneOriginZ = self.minZF+0.5*(self.maxZF-self.minZF)
@@ -420,6 +422,7 @@ class fsi(object):
         self.pointsInsideF    = []
         self.polyDataForDelaunayF  = []
         self.delnyF           = []
+        self.ugridProbeF      = []
         self.probeFilterF     = []
         self.probeFilterFPhaseI = []
         self.ugridProbeFPhaseI  = []
@@ -574,9 +577,15 @@ class fsi(object):
         self.planeCutF.SetInput(self.ugridF)
         self.planeCutF.SetCutFunction(self.slicePlaneF)
         self.planeCutF.Update()
+        if self.linearSubdivisionSliceF == []:
+            self.linearSubdivisionSliceF = vtk.vtkLinearSubdivisionFilter()
+            self.linearSubdivisionSliceF.SetInput(self.planeCutF.GetOutput())
+        self.linearSubdivisionSliceF.SetNumberOfSubdivisions( \
+            self.sliceFnumberOfSubdivisions)
         if self.cutMapperF == []:
             self.cutMapperF = vtk.vtkPolyDataMapper()
-        self.cutMapperF.SetInputConnection(self.planeCutF.GetOutputPort())
+#        self.cutMapperF.SetInputConnection(self.planeCutF.GetOutputPort())
+        self.cutMapperF.SetInputConnection(self.linearSubdivisionSliceF.GetOutputPort())
         self.cutMapperF.SetLookupTable(self.currentCTFF)
         self.scalarBarOnOffF()
         if self.boolShowPresF:
@@ -1052,18 +1061,24 @@ class fsi(object):
         
         if self.clipFnormal.get() == "x":
             self.extractGridClipF.SetBoxClip( \
-#                self.minXF, self.currentPlaneOriginX, \
-                self.currentPlaneOriginX, self.maxXF, \
+                self.minXF, self.currentPlaneOriginX, \
+#                self.currentPlaneOriginX, self.maxXF, \
                 self.minYF, self.maxYF, \
                 self.minZF, self.maxZF)
         elif self.clipFnormal.get() == "y":
             self.extractGridClipF.SetBoxClip( self.minXF, self.maxXF, \
-                self.minYF, self.currentPlaneOriginY, \
+                self.currentPlaneOriginY, self.maxYF, \
                 self.minZF, self.maxZF)
+#            self.extractGridClipF.SetBoxClip( self.minXF, self.maxXF, \
+#                self.minYF, self.currentPlaneOriginY, \
+#                self.minZF, self.maxZF)
         elif self.clipFnormal.get() == "z":
             self.extractGridClipF.SetBoxClip( self.minXF, self.maxXF, \
                 self.minYF, self.maxYF, \
-                self.minZF, self.currentPlaneOriginZ)
+                self.currentPlaneOriginZ, self.maxZF)
+#            self.extractGridClipF.SetBoxClip( self.minXF, self.maxXF, \
+#                self.minYF, self.maxYF, \
+#                self.minZF, self.currentPlaneOriginZ)
         if self.extractClipF == []:
             self.extractClipF = vtk.vtkGeometryFilter()
             self.extractClipF.SetInput(self.extractGridClipF.GetOutput())
@@ -1071,8 +1086,8 @@ class fsi(object):
         if self.linearSubdivisionClipF == []:
             self.linearSubdivisionClipF = vtk.vtkLinearSubdivisionFilter()
             self.linearSubdivisionClipF.SetInput(self.extractClipF.GetOutput())
-            self.linearSubdivisionClipF.SetNumberOfSubdivisions( \
-                self.clipFnumberOfSubdivisions)
+        self.linearSubdivisionClipF.SetNumberOfSubdivisions( \
+            self.clipFnumberOfSubdivisions)
         if self.clipMapperF == []:
             self.clipMapperF = vtk.vtkDataSetMapper()
             self.clipMapperF.SetInput(self.linearSubdivisionClipF.GetOutput())
@@ -1101,6 +1116,7 @@ class fsi(object):
         if self.clipActorF == []:
             self.clipActorF = vtk.vtkActor()
             self.clipActorF.SetMapper(self.clipMapperF)
+        self.clipActorF.GetProperty().SetEdgeVisibility(self.boolEdgesF.get())
     
     # clip a 3D volume such that elements are preserved
     def clipFxyzPreserveElements(self):
@@ -1126,8 +1142,8 @@ class fsi(object):
         if self.linearSubdivisionClipFpreserve == []:
             self.linearSubdivisionClipFpreserve = vtk.vtkLinearSubdivisionFilter()
             self.linearSubdivisionClipFpreserve.SetInput(self.extractClipFpreserve.GetOutput())
-            self.linearSubdivisionClipFpreserve.SetNumberOfSubdivisions( \
-                self.dsmFnumberOfSubdivisions)
+        self.linearSubdivisionClipFpreserve.SetNumberOfSubdivisions( \
+            self.dsmFnumberOfSubdivisions)
         if self.clipMapperFpreserve == []:
             self.clipMapperFpreserve = vtk.vtkDataSetMapper()
             self.clipMapperFpreserve.SetInput(self.linearSubdivisionClipFpreserve.GetOutput())
@@ -1156,6 +1172,8 @@ class fsi(object):
         if self.clipActorFpreserve == []:
             self.clipActorFpreserve = vtk.vtkActor()
             self.clipActorFpreserve.SetMapper(self.clipMapperFpreserve)
+        self.clipActorFpreserve.GetProperty().SetEdgeVisibility( \
+            self.boolEdgesF.get())
     
     # compute mesh quality per cell
     # http://www.vtk.org/Wiki/images/6/6b/VerdictManual-revA.pdf
@@ -1394,20 +1412,29 @@ class fsi(object):
     
     # show/hide element edges
     def edgesOnOffF(self):
-        self.boolEdgesF = self.dataSetActorF.GetProperty().GetEdgeVisibility()==0
-        self.dataSetActorF.GetProperty().SetEdgeVisibility(self.boolEdgesF)
+        if not(self.dataSetActorF == []):
+            self.dataSetActorF.GetProperty().SetEdgeVisibility( \
+                self.boolEdgesF.get())
+        if not(self.clipActorF == []):
+            self.clipActorF.GetProperty().SetEdgeVisibility( \
+                self.boolEdgesF.get())
+        if not(self.clipActorFpreserve == []):
+            self.clipActorFpreserve.GetProperty().SetEdgeVisibility( \
+                self.boolEdgesF.get())
         self.renderWindow.Render()
     
     # show/hide element edges
     def edgesOnOffS(self):
-        self.boolEdgesS = self.dataSetActorS.GetProperty().GetEdgeVisibility()==0
-        self.dataSetActorS.GetProperty().SetEdgeVisibility(self.boolEdgesS)
+        if not(self.dataSetActorS == []):
+            self.dataSetActorS.GetProperty().SetEdgeVisibility( \
+                self.boolEdgesS.get())
         self.renderWindow.Render()
     
     # show/hide element edges
     def edgesOnOffI(self):
-        self.boolEdgesI = self.dataSetActorI.GetProperty().GetEdgeVisibility()==0
-        self.dataSetActorI.GetProperty().SetEdgeVisibility(self.boolEdgesI)
+        if not(self.dataSetActorI == []):
+            self.dataSetActorI.GetProperty().SetEdgeVisibility( \
+                self.boolEdgesI.get())
         self.renderWindow.Render()
     
     # update fluid data set mapper
@@ -1626,7 +1653,8 @@ class fsi(object):
         if self.dataSetActorF == []:
             self.dataSetActorF = vtk.vtkActor()
         self.dataSetActorF.SetMapper(self.dataSetMapperF)
-        self.dataSetActorF.GetProperty().SetEdgeVisibility(self.boolEdgesF.get())
+        self.dataSetActorF.GetProperty().SetEdgeVisibility( \
+            self.boolEdgesF.get())
         self.dataSetActorF.GetProperty().SetInterpolationToGouraud()
         self.selectColorArrayF()
         self.renderer.AddActor(self.dataSetActorF)
@@ -1654,7 +1682,8 @@ class fsi(object):
         if self.dataSetActorS == []:
             self.dataSetActorS = vtk.vtkActor()
         self.dataSetActorS.SetMapper(self.dataSetMapperS)
-        self.dataSetActorS.GetProperty().SetEdgeVisibility(self.boolEdgesS.get())
+        self.dataSetActorS.GetProperty().SetEdgeVisibility( \
+            self.boolEdgesS.get())
         self.dataSetActorS.GetProperty().SetInterpolationToGouraud()
         self.selectColorArrayS()
         self.renderer.AddActor(self.dataSetActorS)
@@ -1679,7 +1708,8 @@ class fsi(object):
         if self.dataSetActorI == []:
             self.dataSetActorI = vtk.vtkActor()
         self.dataSetActorI.SetMapper(self.dataSetMapperI)
-        self.dataSetActorI.GetProperty().SetEdgeVisibility(self.boolEdgesI.get())
+        self.dataSetActorI.GetProperty().SetEdgeVisibility( \
+            self.boolEdgesI.get())
         self.dataSetActorI.GetProperty().SetInterpolationToGouraud()
         self.selectColorArrayI()
         self.renderer.AddActor(self.dataSetActorI)
@@ -1893,7 +1923,6 @@ class fsi(object):
                 self.scalarBarI.GetLabelTextProperty().SetFontFamilyToCourier()
         else:
             logging.debug("self.scalarBarI == []")
-        self.renderWindow.Render()
     
     # show/hide scalar bar for fluid data set
     def scalarBarOnOffF(self):
@@ -2324,6 +2353,11 @@ class fsi(object):
         self.filenameSolVel     = config[28]
         self.scalarBarNormalizedHeight = float(config[29])
         self.scalarBarFontFamily = str(config[30])
+        self.dsmFnumberOfSubdivisions = int(config[31])
+        self.dsmSnumberOfSubdivisions = int(config[32])
+        self.dsmInumberOfSubdivisions = int(config[33])
+        self.clipFnumberOfSubdivisions = int(config[34])
+        self.sliceFnumberOfSubdivisions = int(config[35])
         # other hard-coded defaults
         self.boolAutoRangeF     = Tkinter.BooleanVar()
         self.boolAutoRangeF.set(True)
@@ -2378,6 +2412,27 @@ class fsi(object):
             self.scalarBarNormalizedHeight = float(config[29])
             self.scalarBarFontFamily = str(config[30])
             self.scalarBarFont()
+            self.dsmFnumberOfSubdivisions = int(config[31])
+            self.dsmSnumberOfSubdivisions = int(config[32])
+            self.dsmInumberOfSubdivisions = int(config[33])
+            self.clipFnumberOfSubdivisions = int(config[34])
+            self.sliceFnumberOfSubdivisions = int(config[35])
+            if not(self.linearSubdivisionF == []):
+                self.linearSubdivisionF.SetNumberOfSubdivisions( \
+                    self.dsmFnumberOfSubdivisions)
+            if not(self.linearSubdivisionS == []):
+                self.linearSubdivisionS.SetNumberOfSubdivisions( \
+                    self.dsmSnumberOfSubdivisions)
+            if not(self.linearSubdivisionI == []):
+                self.linearSubdivisionI.SetNumberOfSubdivisions( \
+                    self.dsmInumberOfSubdivisions)
+            if not(self.linearSubdivisionClipF == []):
+                self.linearSubdivisionClipF.SetNumberOfSubdivisions( \
+                    self.clipFnumberOfSubdivisions)
+            if not(self.linearSubdivisionSliceF == []):
+                self.linearSubdivisionSliceF.SetNumberOfSubdivisions( \
+                    self.sliceFnumberOfSubdivisions)
+            self.renderWindow.Render()
         else:
             logging.debug("can only refresh configuration " \
                 + "if initial configuration was set")
