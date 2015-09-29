@@ -443,7 +443,7 @@ class fsi(object):
         self.nodeSx           = []
         self.nodeSy           = []
         self.nodeSz           = []
-        self.allProbeVel      = False
+        self.allProbeVel      = True
         self.scalarBarNormalizedHeight = 0.1
         self.configFilename   = []
         self.scalarBarFontFamily = 'Arial'
@@ -1022,10 +1022,11 @@ class fsi(object):
             print "ERROR: unknown probe phase "+str(self.probeWhichPhase)
         logging.debug("export data")
         if self.allProbeVel:
-            for i in range(ugridProbeF.GetPoints().GetNumberOfPoints()):
-                a = ugridProbeF.GetPoints().GetPoint(i)
-                b = ugridProbeF.GetPointData().GetVectors("velocity").GetTuple(i)
-                c = ugridProbeF.GetPointData().GetArray("pressure").GetTuple(i)
+            for i in range(probeFilterF.GetValidPoints().GetNumberOfTuples()):
+                validID = int(probeFilterF.GetValidPoints().GetTuple1(i))
+                a = ugridProbeF.GetPoints().GetPoint(validID)
+                b = ugridProbeF.GetPointData().GetVectors("velocity").GetTuple(validID)
+                c = ugridProbeF.GetPointData().GetArray("pressure").GetTuple(validID)
                 fout.write("% .16f % .16f % .16f % .16f % .16f % .16f\n" \
                     % (a[0], a[1], a[2], b[0], b[1], b[2]))
                 foutp.write("% .16f % .16f % .16f % .16f\n" \
@@ -1061,8 +1062,8 @@ class fsi(object):
         
         if self.clipFnormal.get() == "x":
             self.extractGridClipF.SetBoxClip( \
-                self.minXF, self.currentPlaneOriginX, \
-#                self.currentPlaneOriginX, self.maxXF, \
+#                self.minXF, self.currentPlaneOriginX, \
+                self.currentPlaneOriginX, self.maxXF, \
                 self.minYF, self.maxYF, \
                 self.minZF, self.maxZF)
         elif self.clipFnormal.get() == "y":
