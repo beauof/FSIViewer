@@ -443,7 +443,7 @@ class fsi(object):
         self.nodeSx           = []
         self.nodeSy           = []
         self.nodeSz           = []
-        self.allProbeVel      = True
+        self.allProbeVel      = False
         self.scalarBarNormalizedHeight = 0.1
         self.configFilename   = []
         self.scalarBarFontFamily = 'Arial'
@@ -936,6 +936,10 @@ class fsi(object):
     def probePhaseIorIIvel(self):
         
         logging.debug("probe fluid velocity")
+        if self.probeWhichPhase == 1:
+            self.allProbeVel = True
+        elif self.probeWhichPhase == 2:
+            self.allProbeVel = False
         # sample points
         phaseIPoints = vtk.vtkPoints()
         phaseIPoints.SetData(numpy_to_vtk(self.solvelPointsI, \
@@ -4072,7 +4076,7 @@ class fsi(object):
                         + "Pressure-Phase-I.txt")
                 elif os.path.exists(self.baseDirectory \
                     + self.submitFolder \
-                    + "presSIStr-Phase-II.txt") \
+                    + "Pressure-Phase-II.txt") \
                     and (probenr == 2):
                     self.presSIStr.set(self.baseDirectory \
                         + self.submitFolder \
@@ -4088,7 +4092,7 @@ class fsi(object):
                         + "Pressure-Phase-I.txt")
                 elif os.path.exists(self.baseDirectory \
                     + self.submitFolder \
-                    + "presSIStr-Phase-II.txt") \
+                    + "Pressure-Phase-II.txt") \
                     and (probenr == 2):
                     self.presFIStr.set(self.baseDirectory \
                         + self.submitFolder \
@@ -4197,7 +4201,7 @@ class fsi(object):
             def setPresFDirectory():
                 self.presFI = tkFileDialog.askopenfilename(parent=self.popupPhaseI, \
                     initialdir=self.baseDirectory)
-                self.presFIStr.set(str(self.presF))
+                self.presFIStr.set(str(self.presFI))
             
             ttk.Button(self.popupPhaseI, image=win.useFolderIcon, \
                 command=setDispDirectory, style='My.TButton').grid( \
