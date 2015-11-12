@@ -1461,7 +1461,7 @@ class fsi(object):
                 self.renderer.RemoveActor(self.cutActorF)
             if not(self.probeActorF == []):
                 self.renderer.RemoveActor(self.probeActorF)
-            if not(self.vortexSphereActor):
+            if not(self.vortexSphereActor == []):
                 self.renderer.RemoveActor(self.vortexSphereActor)
             self.boolShowVel   = False
             self.boolShowWel   = False
@@ -1529,7 +1529,7 @@ class fsi(object):
                     self.renderer.RemoveActor(self.cutActorF)
                 if not(self.probeActorF == []):
                     self.renderer.RemoveActor(self.probeActorF)
-                if not(self.vortexSphereActor):
+                if not(self.vortexSphereActor == []):
                     self.renderer.RemoveActor(self.vortexSphereActor)
                 self.renderer.AddActor(self.dataSetActorF)
             elif (self.clipFnormal.get() == "xe") \
@@ -1544,7 +1544,7 @@ class fsi(object):
                     self.renderer.RemoveActor(self.cutActorF)
                 if not(self.probeActorF == []):
                     self.renderer.RemoveActor(self.probeActorF)
-                if not(self.vortexSphereActor):
+                if not(self.vortexSphereActor == []):
                     self.renderer.RemoveActor(self.vortexSphereActor)
                 self.renderer.AddActor(self.clipActorFpreserve)
             elif (self.clipFnormal.get() == "x") \
@@ -1559,7 +1559,7 @@ class fsi(object):
                     self.renderer.RemoveActor(self.cutActorF)
                 if not(self.probeActorF == []):
                     self.renderer.RemoveActor(self.probeActorF)
-                if not(self.vortexSphereActor):
+                if not(self.vortexSphereActor == []):
                     self.renderer.RemoveActor(self.vortexSphereActor)
                 self.renderer.AddActor(self.clipActorF)
             elif (self.clipFnormal.get() == "a") \
@@ -1574,7 +1574,7 @@ class fsi(object):
                     self.renderer.RemoveActor(self.clipActorF)
                 if not(self.probeActorF == []):
                     self.renderer.RemoveActor(self.probeActorF)
-                if not(self.vortexSphereActor):
+                if not(self.vortexSphereActor == []):
                     self.renderer.RemoveActor(self.vortexSphereActor)
                 self.renderer.AddActor(self.cutActorF)
             elif (self.clipFnormal.get() == "i") \
@@ -1589,7 +1589,7 @@ class fsi(object):
                     self.renderer.RemoveActor(self.clipActorF)
                 if not(self.cutActorF == []):
                     self.renderer.RemoveActor(self.cutActorF)
-                if not(self.vortexSphereActor):
+                if not(self.vortexSphereActor == []):
                     self.renderer.RemoveActor(self.vortexSphereActor)
                 self.renderer.AddActor(self.probeActorF)
             elif self.clipFnormal.get() == "vortex-structure":
@@ -1626,24 +1626,21 @@ class fsi(object):
                 vortexSphereGlyph.SetInput(self.pointsVortexStructure)
                 vortexSphereGlyph.SetSource(vortexSphereSource.GetOutput())
                 
-                vortexSphereMapper = vtk.vtkPolyDataMapper()
-                vortexSphereMapper.SetInput(vortexSphereGlyph.GetOutput())
+                vortexSurface = vtk.vtkSurfaceReconstructionFilter()
+                vortexSurface.SetInput(self.pointsVortexStructure)
                 
-#                vortexSurface = vtk.vtkSurfaceReconstructionFilter()
-#                vortexSurface.SetInput(self.pointsVortexStructure)
-#                
-#                vortexContourFilter = vtk.vtkContourFilter()
-#                vortexContourFilter.SetInput(vortexSurface.GetOutput())
-#                vortexContourFilter.SetValue(0, 0.0)
-#                
-#                vortexReverseSense = vtk.vtkReverseSense()
-#                vortexReverseSense.SetInput(vortexContourFilter.GetOutput())
-#                vortexReverseSense.ReverseCellsOn()
-#                vortexReverseSense.ReverseNormalsOn()
+                vortexContourFilter = vtk.vtkContourFilter()
+                vortexContourFilter.SetInput(vortexSurface.GetOutput())
+                vortexContourFilter.SetValue(0, 1)
+                
+                vortexReverseSense = vtk.vtkReverseSense()
+                vortexReverseSense.SetInput(vortexContourFilter.GetOutput())
+                vortexReverseSense.ReverseCellsOn()
+                vortexReverseSense.ReverseNormalsOn()
                 
                 vortexMapper = vtk.vtkPolyDataMapper()
-                vortexMapper.SetInput(vortexSphereGlyph.GetOutput())
-#                vortexMapper.SetInput(vortexReverseSense.GetOutput())
+#                vortexMapper.SetInput(vortexSphereGlyph.GetOutput())
+                vortexMapper.SetInput(vortexReverseSense.GetOutput())
                 #vortexMapper.ScalarVisibilityOff()
                 
                 self.vortexSphereActor = vtk.vtkActor()
