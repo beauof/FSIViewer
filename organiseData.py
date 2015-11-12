@@ -168,6 +168,17 @@ def numpy2vtkDataArray1(npa, mystr):
     
     return data
 
+def numpy2vtkDataArray9(npa, mystr):
+#    print npa[1][0]
+    size0, size1 = npa.shape
+    data = vtk.vtkDoubleArray()
+    data.SetNumberOfComponents(9)
+    data.SetName(mystr)
+    for i in range(size0):
+        data.InsertNextTuple9(npa[i, 0], npa[i, 1], npa[i, 2], npa[i, 3], npa[i, 4], npa[i, 5], npa[i, 6], npa[i, 7], npa[i, 8])
+    
+    return data
+
 
 def numpy2vtkDataArrayInt(npa):
 #    print npa[1][0]

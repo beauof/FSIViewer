@@ -31,6 +31,7 @@ class fsi(object):
         self.boolUpdatePresF  = True
         self.boolUpdateSpaceF = True
         self.boolUpdateVort   = True
+        self.boolUpdateVortex = True
         self.boolUpdatePhiF   = True
         self.boolUpdateDisp   = True
         self.boolUpdateSolVel = True
@@ -67,7 +68,8 @@ class fsi(object):
         self.filenameSpaceF   = "FluidSpace-"
         self.filenameVel      = "Vel-"
         self.filenameWel      = "Wel-"
-        self.filenameVort      = "Vort-"
+        self.filenameVort     = "Vort-"
+        self.filenameVortex   = "Vortex-"
         self.filenamePresF    = "FluidPres-"
         self.filenameQualityF = "FluidMeshQuality-"
         self.filenamePhiF     = "phi-"
@@ -290,6 +292,8 @@ class fsi(object):
         self.sphereGlyphF     = []
         self.sphereMapperF    = []
         self.sphereActorF     = []
+        self.pointsVortexStructure = []
+        self.vortexSphereActor = []
         self.showF            = []
         self.showS            = []
         self.showI            = []
@@ -940,6 +944,7 @@ class fsi(object):
             self.allProbeVel = True
         elif self.probeWhichPhase == 2:
             self.allProbeVel = False
+        self.allProbeVel = False
         # sample points
         phaseIPoints = vtk.vtkPoints()
         phaseIPoints.SetData(numpy_to_vtk(self.solvelPointsI, \
@@ -1331,6 +1336,7 @@ class fsi(object):
             self.boolUpdatePresF  = True
             self.boolUpdateSpaceF = True
             self.boolUpdateVort   = True
+            self.boolUpdateVortex = True
             self.boolUpdateQualityF = True
             self.boolUpdatePhiF   = True
         if self.visualizeSolid.get():
@@ -1455,6 +1461,8 @@ class fsi(object):
                 self.renderer.RemoveActor(self.cutActorF)
             if not(self.probeActorF == []):
                 self.renderer.RemoveActor(self.probeActorF)
+            if not(self.vortexSphereActor):
+                self.renderer.RemoveActor(self.vortexSphereActor)
             self.boolShowVel   = False
             self.boolShowWel   = False
             self.boolShowPresF = False
@@ -1521,6 +1529,8 @@ class fsi(object):
                     self.renderer.RemoveActor(self.cutActorF)
                 if not(self.probeActorF == []):
                     self.renderer.RemoveActor(self.probeActorF)
+                if not(self.vortexSphereActor):
+                    self.renderer.RemoveActor(self.vortexSphereActor)
                 self.renderer.AddActor(self.dataSetActorF)
             elif (self.clipFnormal.get() == "xe") \
                  or (self.clipFnormal.get() == "ye") \
@@ -1534,6 +1544,8 @@ class fsi(object):
                     self.renderer.RemoveActor(self.cutActorF)
                 if not(self.probeActorF == []):
                     self.renderer.RemoveActor(self.probeActorF)
+                if not(self.vortexSphereActor):
+                    self.renderer.RemoveActor(self.vortexSphereActor)
                 self.renderer.AddActor(self.clipActorFpreserve)
             elif (self.clipFnormal.get() == "x") \
                  or (self.clipFnormal.get() == "y") \
@@ -1547,6 +1559,8 @@ class fsi(object):
                     self.renderer.RemoveActor(self.cutActorF)
                 if not(self.probeActorF == []):
                     self.renderer.RemoveActor(self.probeActorF)
+                if not(self.vortexSphereActor):
+                    self.renderer.RemoveActor(self.vortexSphereActor)
                 self.renderer.AddActor(self.clipActorF)
             elif (self.clipFnormal.get() == "a") \
                  or (self.clipFnormal.get() == "b") \
@@ -1560,6 +1574,8 @@ class fsi(object):
                     self.renderer.RemoveActor(self.clipActorF)
                 if not(self.probeActorF == []):
                     self.renderer.RemoveActor(self.probeActorF)
+                if not(self.vortexSphereActor):
+                    self.renderer.RemoveActor(self.vortexSphereActor)
                 self.renderer.AddActor(self.cutActorF)
             elif (self.clipFnormal.get() == "i") \
                  or (self.clipFnormal.get() == "j") \
@@ -1573,7 +1589,71 @@ class fsi(object):
                     self.renderer.RemoveActor(self.clipActorF)
                 if not(self.cutActorF == []):
                     self.renderer.RemoveActor(self.cutActorF)
+                if not(self.vortexSphereActor):
+                    self.renderer.RemoveActor(self.vortexSphereActor)
                 self.renderer.AddActor(self.probeActorF)
+            elif self.clipFnormal.get() == "vortex-structure":
+                if not(self.clipActorFpreserve == []):
+                    self.renderer.RemoveActor(self.clipActorFpreserve)
+                if not(self.clipActorF == []):
+                    self.renderer.RemoveActor(self.clipActorF)
+                if not(self.cutActorF == []):
+                    self.renderer.RemoveActor(self.cutActorF)
+                if not(self.probeActorF == []):
+                    self.renderer.RemoveActor(self.probeActorF)
+                if not(self.dataSetActorF == []):
+                    self.renderer.RemoveActor(self.dataSetActorF)
+                self.updateVortex()
+                
+                vortexPoints = vtk.vtkPoints()
+                vortexPoints.SetData(self.ugridF.GetPoints().GetData())
+                
+                vortexThreshold = vtk.vtkThresholdPoints()
+                vortexThreshold.SetInput(self.ugridF)
+                vortexThreshold.SetInputArrayToProcess(0, 0, 0, \
+                    vtk.vtkDataObject.FIELD_ASSOCIATION_POINTS, "vortex_structure")
+                vortexThreshold.ThresholdByUpper(1)
+                vortexThreshold.Update()
+                
+                self.pointsVortexStructure = vtk.vtkPolyData()
+                self.pointsVortexStructure.SetPoints(vortexThreshold.GetOutput().GetPoints())
+                
+                vortexSphereSource = vtk.vtkSphereSource()
+                vortexSphereSource.SetCenter(0, 0, 0)
+                vortexSphereSource.SetRadius(0.5)
+                
+                vortexSphereGlyph = vtk.vtkGlyph3D()
+                vortexSphereGlyph.SetInput(self.pointsVortexStructure)
+                vortexSphereGlyph.SetSource(vortexSphereSource.GetOutput())
+                
+                vortexSphereMapper = vtk.vtkPolyDataMapper()
+                vortexSphereMapper.SetInput(vortexSphereGlyph.GetOutput())
+                
+#                vortexSurface = vtk.vtkSurfaceReconstructionFilter()
+#                vortexSurface.SetInput(self.pointsVortexStructure)
+#                
+#                vortexContourFilter = vtk.vtkContourFilter()
+#                vortexContourFilter.SetInput(vortexSurface.GetOutput())
+#                vortexContourFilter.SetValue(0, 0.0)
+#                
+#                vortexReverseSense = vtk.vtkReverseSense()
+#                vortexReverseSense.SetInput(vortexContourFilter.GetOutput())
+#                vortexReverseSense.ReverseCellsOn()
+#                vortexReverseSense.ReverseNormalsOn()
+                
+                vortexMapper = vtk.vtkPolyDataMapper()
+                vortexMapper.SetInput(vortexSphereGlyph.GetOutput())
+#                vortexMapper.SetInput(vortexReverseSense.GetOutput())
+                #vortexMapper.ScalarVisibilityOff()
+                
+                self.vortexSphereActor = vtk.vtkActor()
+                self.vortexSphereActor.SetMapper(vortexMapper)
+                
+                self.vortexSphereActor.GetProperty().SetColor(1.0, 0.0, 0.0)
+                
+                self.renderer.AddActor(self.vortexSphereActor)
+                self.renderWindow.Render()
+        
         self.scalarBarOnOffF()
         self.renderWindow.Render()
     
@@ -2197,6 +2277,7 @@ class fsi(object):
             # connect to data set mapper
             self.selectColorArrayF()
             self.scalarBarF.SetLookupTable(self.currentCTFF)
+#            self.scalarBarF.SetLabelFormat("%.f")
         elif fluidORsolid == "solid" and self.visualizeSolid.get():
             # auto-range values
             if self.boolAutoRangeS.get():
@@ -2995,6 +3076,29 @@ class fsi(object):
                           % (self.minPressureF, self.maxPressureF))
             self.boolUpdatePresF = False
         logging.debug("update fluid pressure completed")
+    
+    # update fluid pressure
+    def updateVortex(self):
+        logging.debug("update fluid vortex structures")
+        if self.boolUpdateSpaceF:
+            logging.debug("unstructured grid for fluid will be updated first")
+            self.updateSpaceF()
+        if self.boolUpdateVortex \
+            and (os.path.exists(self.baseDirectory \
+                 +self.dataFolder \
+                 +self.filenameVortex \
+                 +str(self.currentT) \
+                 +self.filenameSuffix)):
+            tempVortex = readCheartData.readScalarInts( \
+                self.baseDirectory \
+                +self.dataFolder \
+                +self.filenameVortex \
+                +str(self.currentT) \
+                +self.filenameSuffix)
+            self.ugridF.GetPointData().AddArray( \
+                organiseData.numpy2vtkDataArray1(tempVortex, "vortex_structure"))
+            self.boolUpdateVortex = False
+        logging.debug("update fluid vortex structures completed")
     
     # update fluid pressure
     def updatePhiF(self):

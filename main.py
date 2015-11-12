@@ -222,8 +222,13 @@ def main():
         style='My.TRadiobutton').grid(column=0, row = 22, \
         sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
     
-    ttk.Separator(window.subframeF, orient=Tkinter.HORIZONTAL).grid(column=0, \
-        row = 23, sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
+    ttk.Radiobutton(window.subframeF, text='vortex structure', \
+        command=visualization.updateFluid, \
+        variable=visualization.clipFnormal, value='vortex-structure', \
+        style='My.TRadiobutton').grid(column=0, row = 23, \
+        sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
+#    ttk.Separator(window.subframeF, orient=Tkinter.HORIZONTAL).grid(column=0, \
+#        row = 23, sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
     
     visualization.boolEdgesF = Tkinter.BooleanVar()
     visualization.boolEdgesF.set(False)
