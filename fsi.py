@@ -36,6 +36,7 @@ class fsi(object):
         self.boolUpdateDisp   = True
         self.boolUpdateSolVel = True
         self.boolUpdatePresS  = True
+        self.boolUpdateCauchyStress = True
         self.boolUpdateSpaceS = True
         self.boolUpdateQualityF = True
         self.boolUpdateQualityS = True
@@ -78,6 +79,7 @@ class fsi(object):
         self.filenameDisp     = "Disp-"
         self.filenameSolVel   = "SolVel-"
         self.filenamePresS    = "SolidPres-"
+        self.filenameCauchyStress = "CauchyStress-"
         self.filenameQualityS = "SolidMeshQuality-"
         self.filenameSpaceI   = "BndrySpace-"
         self.filenameLM       = "LMult-"
@@ -153,6 +155,7 @@ class fsi(object):
         self.boolShowQualityF = False
         self.boolShowDisp     = True
         self.boolShowSolVel   = False
+        self.boolShowCauchyStress = False
         self.boolShowPresS    = False
         self.boolShowQualityS = False
         self.boolShowLMult    = True
@@ -225,6 +228,14 @@ class fsi(object):
         self.maxSolVel1       = 1.0
         self.minSolVel2       = 0.0
         self.maxSolVel2       = 1.0
+        self.minMagCauchyStress     = 0.0
+        self.maxMagCauchyStress     = 1.0
+        self.minCauchyStress0       = 0.0
+        self.maxCauchyStress0       = 1.0
+        self.minCauchyStress1       = 0.0
+        self.maxCauchyStress1       = 1.0
+        self.minCauchyStress2       = 0.0
+        self.maxCauchyStress2       = 1.0
         self.userMinS         = 0.0
         self.userMaxS         = 1.0
         self.minMagLMult      = 0.0
@@ -1343,6 +1354,7 @@ class fsi(object):
             self.boolUpdateDisp   = True
             self.boolUpdateSolVel = True
             self.boolUpdatePresS  = True
+            self.boolUpdateCauchyStress = True
             self.boolUpdateSpaceS = True
             self.boolUpdateQualityS = True
         if self.visualizeInterface.get():
@@ -1377,6 +1389,7 @@ class fsi(object):
             self.progress["value"] = 90
             self.progress.update()
             if self.showS.get() == "vel": self.updateSolVel()
+            if self.showS.get() == "cauchy": self.updateCauchyStress()
             if self.showS.get() == "presS": self.updatePresS()
             if self.showS.get() == "quality": self.updateQualityS()
             self.scalarBarOnOffS()
@@ -1639,8 +1652,8 @@ class fsi(object):
                 vortexReverseSense.ReverseNormalsOn()
                 
                 vortexMapper = vtk.vtkPolyDataMapper()
-#                vortexMapper.SetInput(vortexSphereGlyph.GetOutput())
-                vortexMapper.SetInput(vortexReverseSense.GetOutput())
+                vortexMapper.SetInput(vortexSphereGlyph.GetOutput())
+#                vortexMapper.SetInput(vortexReverseSense.GetOutput())
                 #vortexMapper.ScalarVisibilityOff()
                 
                 self.vortexSphereActor = vtk.vtkActor()
@@ -1661,6 +1674,7 @@ class fsi(object):
                 self.renderer.RemoveActor(self.dataSetActorS)
             self.boolShowDisp  = False
             self.boolShowSolVel = False
+            self.boolShowCauchyStress = False
             self.boolShowPresF = False
             self.boolShowQualityS = False
             self.boolShowScalarBarS.set(False)
@@ -1668,24 +1682,35 @@ class fsi(object):
             if self.showS.get() == "disp":
                 self.boolShowDisp  = True
                 self.boolShowSolVel = False
+                self.boolShowCauchyStress = False
                 self.boolShowPresS = False
                 self.boolShowQualityS = False
                 self.updateDisp()
             elif self.showS.get() == "vel":
                 self.boolShowDisp   = False
                 self.boolShowSolVel = True
+                self.boolShowCauchyStress = False
+                self.boolShowPresS  = False
+                self.boolShowQualityS = False
+                self.updateSolVel()
+            elif self.showS.get() == "cauchy":
+                self.boolShowDisp   = False
+                self.boolShowSolVel = False
+                self.boolShowCauchyStress = True
                 self.boolShowPresS  = False
                 self.boolShowQualityS = False
                 self.updateSolVel()
             elif self.showS.get() == "presS":
                 self.boolShowDisp  = False
                 self.boolShowSolVel = False
+                self.boolShowCauchyStress = False
                 self.boolShowPresS = True
                 self.boolShowQualityS = False
                 self.updatePresS()
             elif self.showS.get() == "quality":
                 self.boolShowDisp  = False
                 self.boolShowSolVel = False
+                self.boolShowCauchyStress = False
                 self.boolShowPresS = False
                 self.boolShowQualityS = True
                 self.updateQualityS()
@@ -1895,6 +1920,9 @@ class fsi(object):
         elif self.boolShowSolVel:
             self.dataSetMapperS.SetScalarModeToUsePointFieldData()
             self.dataSetMapperS.SelectColorArray("velocity")
+        elif self.boolShowCauchyStress:
+            self.dataSetMapperS.SetScalarModeToUsePointFieldData()
+            self.dataSetMapperS.SelectColorArray("cauchy")
         elif self.boolShowPresS:
             self.dataSetMapperS.SetScalarModeToUsePointData()
             self.dataSetMapperS.SetUseLookupTableScalarRange(True)
@@ -2069,6 +2097,8 @@ class fsi(object):
                 self.scalarBarS.SetTitle("Solid displacement")
             elif self.boolShowSolVel:
                 self.scalarBarS.SetTitle("Solid velocity")
+            elif self.boolShowCauchyStress:
+                self.scalarBarS.SetTitle("Cauchy stress")
             elif self.boolShowPresS:
                 self.scalarBarS.SetTitle("Solid pressure")
             elif self.boolShowQualityS:
@@ -2309,6 +2339,19 @@ class fsi(object):
                     elif self.colorCompS == 2:
                         self.userMinScalarBarS = self.minSolVel2
                         self.userMaxScalarBarS = self.maxSolVel2
+                elif self.boolShowCauchyStress:
+                    if self.colorCompS == -1:
+                        self.userMinScalarBarS = self.minMagCauchyStress
+                        self.userMaxScalarBarS = self.maxMagCauchyStress
+                    elif self.colorCompS == 0:
+                        self.userMinScalarBarS = self.minCauchyStress0
+                        self.userMaxScalarBarS = self.maxCauchyStress0
+                    elif self.colorCompS == 1:
+                        self.userMinScalarBarS = self.minCauchyStress1
+                        self.userMaxScalarBarS = self.maxCauchyStress1
+                    elif self.colorCompS == 2:
+                        self.userMinScalarBarS = self.minCauchyStress2
+                        self.userMaxScalarBarS = self.maxCauchyStress2
                 elif self.boolShowQualityS:
                     self.colorCompS = -1
                     self.componentDropDownS.set("magnitude")
@@ -2441,6 +2484,7 @@ class fsi(object):
         self.dsmInumberOfSubdivisions = int(config[33])
         self.clipFnumberOfSubdivisions = int(config[34])
         self.sliceFnumberOfSubdivisions = int(config[35])
+        self.filenameCauchyStress = config[36]
         # other hard-coded defaults
         self.boolAutoRangeF     = Tkinter.BooleanVar()
         self.boolAutoRangeF.set(True)
@@ -2641,9 +2685,9 @@ class fsi(object):
             self.ugridI.GetPointData().SetVectors( \
                 organiseData.numpy2vtkDataArray(tempLMult, "LM"))
             if self.numberOfDimensions != numberOfDimensions:
-                logging.debug("ERROR: number of dimensions of interface space is " \
+                logging.debug("ERROR: number of dimensions of interface space is %i" \
                               % self.numberOfDimensions)
-                logging.debug("ERROR: number of Lagrange multiplier components is " \
+                logging.debug("ERROR: number of Lagrange multiplier components is %i" \
                               % numberOfDimensions)
             self.minMagLMult, self.maxMagLMult = \
                 self.ugridI.GetPointData().GetVectors().GetRange(-1)
@@ -2896,9 +2940,9 @@ class fsi(object):
             self.ugridF.GetPointData().SetVectors( \
                 organiseData.numpy2vtkDataArray(tempVel, "velocity"))
             if self.numberOfDimensions != numberOfDimensions:
-                logging.debug("ERROR: number of dimensions of fluid space is " \
+                logging.debug("ERROR: number of dimensions of fluid space is %i" \
                               % self.numberOfDimensions)
-                logging.debug("ERROR: number of fluid velocity components is " \
+                logging.debug("ERROR: number of fluid velocity components is %i" \
                               % numberOfDimensions)
             self.minMagVel, self.maxMagVel = \
                 self.ugridF.GetPointData().GetVectors("velocity").GetRange(-1)
@@ -2940,9 +2984,9 @@ class fsi(object):
             self.ugridF.GetPointData().AddArray( \
                 organiseData.numpy2vtkDataArray(tempWel, "welocity"))
             if self.numberOfDimensions != numberOfDimensions:
-                logging.debug("ERROR: number of dimensions of fluid space is " \
+                logging.debug("ERROR: number of dimensions of fluid space is %i" \
                               % self.numberOfDimensions)
-                logging.debug("ERROR: number of fluid domain velocity components is " \
+                logging.debug("ERROR: number of fluid domain velocity components is %i" \
                               % numberOfDimensions)
             self.minMagWel, self.maxMagWel = \
                 self.ugridF.GetPointData().GetVectors("welocity").GetRange(-1)
@@ -3375,9 +3419,9 @@ class fsi(object):
                 self.ugridS.GetPointData().SetVectors( \
                     organiseData.numpy2vtkDataArray(tempDisp, "displacement"))
                 if self.numberOfDimensions != numberOfDimensions:
-                    logging.debug("ERROR: number of dimensions of solid space is " \
+                    logging.debug("ERROR: number of dimensions of solid space is %i" \
                                   % self.numberOfDimensions)
-                    logging.debug("ERROR: number of solid displacement components is " \
+                    logging.debug("ERROR: number of solid displacement components is %i" \
                                   % numberOfDimensions)
                 self.minMagDisp, self.maxMagDisp = \
                     self.ugridS.GetPointData().GetVectors("displacement").GetRange(-1)
@@ -3391,9 +3435,9 @@ class fsi(object):
                 self.sgridS.GetPointData().SetVectors( \
                     organiseData.numpy2vtkDataArray(tempDisp, "displacement"))
                 if self.numberOfDimensions != numberOfDimensions:
-                    logging.debug("ERROR: number of dimensions of solid space is " \
+                    logging.debug("ERROR: number of dimensions of solid space is %i" \
                                   % self.numberOfDimensions)
-                    logging.debug("ERROR: number of solid displacement components is " \
+                    logging.debug("ERROR: number of solid displacement components is %i" \
                                   % numberOfDimensions)
                 self.minMagDisp, self.maxMagDisp = \
                     self.sgridS.GetPointData().GetVectors("displacement").GetRange(-1)
@@ -3436,9 +3480,9 @@ class fsi(object):
                 self.ugridS.GetPointData().AddArray( \
                     organiseData.numpy2vtkDataArray(tempSolVel, "velocity"))
                 if self.numberOfDimensions != numberOfDimensions:
-                    logging.debug("ERROR: number of dimensions of solid space is " \
+                    logging.debug("ERROR: number of dimensions of solid space is %i" \
                                   % self.numberOfDimensions)
-                    logging.debug("ERROR: number of solid velocity components is " \
+                    logging.debug("ERROR: number of solid velocity components is %i" \
                                   % numberOfDimensions)
                 self.minMagSolVel, self.maxMagSolVel = \
                     self.ugridS.GetPointData().GetVectors("velocity").GetRange(-1)
@@ -3452,9 +3496,9 @@ class fsi(object):
                 self.sgridS.GetPointData().AddArray( \
                     organiseData.numpy2vtkDataArray(tempSolVel, "velocity"))
                 if self.numberOfDimensions != numberOfDimensions:
-                    logging.debug("ERROR: number of dimensions of solid space is " \
+                    logging.debug("ERROR: number of dimensions of solid space is %i" \
                                   % self.numberOfDimensions)
-                    logging.debug("ERROR: number of solid velocity components is " \
+                    logging.debug("ERROR: number of solid velocity components is %i" \
                                   % numberOfDimensions)
                 self.minMagSolVel, self.maxMagSolVel = \
                     self.sgridS.GetPointData().GetVectors("velocity").GetRange(-1)
@@ -3556,6 +3600,69 @@ class fsi(object):
                               % (self.minPressureS, self.maxPressureS))
                 self.boolUpdatePresS = False
         logging.debug("update solid pressure completed")
+    
+    # update solid Cauchy stress
+    def updateCauchyStress(self):
+        logging.debug("update solid Cauchy stress")
+        if ((self.ugridS == []) or (self.sgridS == [])) or self.boolUpdateSpaceS:
+            logging.debug("unstructured grid for solid will be updated first")
+            self.updateSpaceS()
+        if self.boolUpdateCauchyStress \
+            and (os.path.exists(self.baseDirectory \
+                 +self.dataFolder \
+                 +self.filenameCauchyStress \
+                 +str(self.currentT) \
+                 +self.filenameSuffix)):
+            tempCauchyStress, numberOfDimensions = \
+                readCheartData.readVectors(self.baseDirectory \
+                                           +self.dataFolder \
+                                           +self.filenameCauchyStress \
+                                           +str(self.currentT) \
+                                           +self.filenameSuffix)
+            if not(self.ugridS == []):
+                self.ugridS.GetPointData().AddArray( \
+                    organiseData.numpy2vtkDataArray(tempCauchyStress, "cauchy"))
+                if self.numberOfDimensions != numberOfDimensions:
+                    logging.debug("ERROR: number of dimensions of solid space is %i" \
+                                  % self.numberOfDimensions)
+                    logging.debug("ERROR: number of solid Cauchy stress components is %i" \
+                                  % numberOfDimensions)
+                    logging.debug("ERROR: we only read the first three components for now")
+                self.minMagCauchyStress, self.maxMagCauchyStress = \
+                    self.ugridS.GetPointData().GetVectors("cauchy").GetRange(-1)
+                self.minCauchyStress0, self.maxCauchyStress0 = \
+                    self.ugridS.GetPointData().GetVectors("cauchy").GetRange(0)
+                self.minCauchyStress1, self.maxCauchyStress1 = \
+                    self.ugridS.GetPointData().GetVectors("cauchy").GetRange(1)
+                self.minCauchyStress2, self.maxCauchyStress2 = \
+                    self.ugridS.GetPointData().GetVectors("cauchy").GetRange(2)
+            else:
+                self.sgridS.GetPointData().AddArray( \
+                    organiseData.numpy2vtkDataArray(tempCauchyStress, "cauchy"))
+                if self.numberOfDimensions != numberOfDimensions:
+                    logging.debug("ERROR: number of dimensions of solid space is %i" \
+                                  % self.numberOfDimensions)
+                    logging.debug("ERROR: number of solid Cauchy stress components is %i" \
+                                  % numberOfDimensions)
+                    logging.debug("ERROR: we only read the first three components for now")
+                self.minMagCauchyStress, self.maxMagCauchyStress = \
+                    self.sgridS.GetPointData().GetVectors("cauchy").GetRange(-1)
+                self.minCauchyStress0, self.maxCauchyStress0 = \
+                    self.sgridS.GetPointData().GetVectors("cauchy").GetRange(0)
+                self.minCauchyStress1, self.maxCauchyStress1 = \
+                    self.sgridS.GetPointData().GetVectors("cauchy").GetRange(1)
+                self.minCauchyStress2, self.maxCauchyStress2 = \
+                    self.sgridS.GetPointData().GetVectors("cauchy").GetRange(2)
+            logging.debug("solid Cauchy stress magnitude range (xx, yy, zz): [%.2f, %.2f]" \
+                          % (self.minMagCauchyStress, self.maxMagCauchyStress))
+            logging.debug("solid Cauchy stress xx-range: [%.2f, %.2f]" \
+                          % (self.minCauchyStress0, self.maxCauchyStress0))
+            logging.debug("solid Cauchy stress yy-range: [%.2f, %.2f]" \
+                          % (self.minCauchyStress1, self.maxCauchyStress1))
+            logging.debug("solid Cauchy stress zz-range: [%.2f, %.2f]" \
+                          % (self.minCauchyStress2, self.maxCauchyStress2))
+            self.boolUpdateCauchyStress = False
+        logging.debug("update solid Cauchy stress completed")
     
     # define time sequence
     def defineSequence(self, win):
@@ -4078,6 +4185,7 @@ class fsi(object):
             self.updateSpaceS()
             self.updateDisp()
             self.updateSolVel()
+            self.updateCauchyStress()
             self.updatePresS()
             self.updateNodeS()
             self.progress["value"] = 80
