@@ -50,6 +50,11 @@ def splitLine6(char* l):
     j = &l
     return strtod(l,j), strtod(j[0]+1,j), strtod(j[0]+1,j), strtod(j[0]+1,j), strtod(j[0]+1,j), strtod(j[0]+1,j)
 
+def splitLine9(char* l):
+    cdef char** j
+    j = &l
+    return strtod(l,j), strtod(j[0]+1,j), strtod(j[0]+1,j), strtod(j[0]+1,j), strtod(j[0]+1,j), strtod(j[0]+1,j), strtod(j[0]+1,j), strtod(j[0]+1,j), strtod(j[0]+1,j)
+
 def splitLine10(char* l):
     cdef char** j
     j = &l
@@ -232,20 +237,36 @@ def readCoordDisp(str filename, str filename2):
     # defaults to three dimensional coordinate data (vtk depends on 3D)
     coordinates = numpy.empty((numberOfNodes, 3))
     displacement = numpy.empty((numberOfNodes, 3))
-    # read all subsequent lines
-    for i in range(numberOfNodes):
-        read = getline(&line, &l, cfile)
-        read2 = getline(&line2, &l2, cfile2)
-        if read == -1: break
-        s0, s1, s2 = splitLine3(line)
-        d0, d1, d2 = splitLine3(line2)
-#        data = string.split(line) # is slower but safer..
-        coordinates[i, 0] = float(s0+d0) #float(data[0])
-        coordinates[i, 1] = float(s1+d1) #float(data[1])
-        coordinates[i, 2] = float(s2+d2)
-        displacement[i, 0] = float(d0) #float(data[0])
-        displacement[i, 1] = float(d1) #float(data[1])
-        displacement[i, 2] = float(d2)
+    if numberOfComponents == 2:
+        # read all subsequent lines
+        for i in range(numberOfNodes):
+            read = getline(&line, &l, cfile)
+            read2 = getline(&line2, &l2, cfile2)
+            if read == -1: break
+            s0, s1 = splitLine2(line)
+            d0, d1 = splitLine2(line2)
+#            data = string.split(line) # is slower but safer..
+            coordinates[i, 0] = float(s0+d0) #float(data[0])
+            coordinates[i, 1] = float(s1+d1) #float(data[1])
+            coordinates[i, 2] = 0.0
+            displacement[i, 0] = float(d0) #float(data[0])
+            displacement[i, 1] = float(d1) #float(data[1])
+            displacement[i, 2] = 0.0
+    else:
+        # read all subsequent lines
+        for i in range(numberOfNodes):
+            read = getline(&line, &l, cfile)
+            read2 = getline(&line2, &l2, cfile2)
+            if read == -1: break
+            s0, s1, s2 = splitLine3(line)
+            d0, d1, d2 = splitLine3(line2)
+#            data = string.split(line) # is slower but safer..
+            coordinates[i, 0] = float(s0+d0) #float(data[0])
+            coordinates[i, 1] = float(s1+d1) #float(data[1])
+            coordinates[i, 2] = float(s2+d2)
+            displacement[i, 0] = float(d0) #float(data[0])
+            displacement[i, 1] = float(d1) #float(data[1])
+            displacement[i, 2] = float(d2)
     fclose(cfile)
     fclose(cfile2)
     
@@ -691,21 +712,27 @@ def readQuadHex(str filename, int numDim=2):
     numberOfElements = int(s0)
     numberOfNodes = int(s1)
     if numDim == 2:
-        elements = numpy.empty((numberOfElements, 8)).astype(int)
+        elements = numpy.empty((numberOfElements, 9)).astype(int)
         # read all subsequent lines
         for i in range(numberOfElements):
             read = getline(&line, &l, cfile)
             if read == -1: break
-            s0, s1, s2, s3, s4, s5, s6, s7 = splitLine6(line)
+            s0, s1, s2, s3, s4, s5, s6, s7, s8 = splitLine9(line)
+            # VTK node numbers          Cheart node numbers
+            # 3--6--2                   2--8--3
+            # |  |  |                   |  |  |
+            # 7--8--5                   5--6--7
+            # |  |  |                   |  |  |
+            # 0--4--1                   0--4--1
             elements[i, 0] = int(s0-1)
             elements[i, 1] = int(s1-1)
-            elements[i, 2] = int(s2-1)
-            elements[i, 3] = int(s3-1)
+            elements[i, 2] = int(s3-1)
+            elements[i, 3] = int(s2-1)
             elements[i, 4] = int(s4-1)
-            elements[i, 5] = int(s5-1)
-            elements[i, 6] = int(s6-1)
-            elements[i, 7] = int(s7-1)
-            # TODO not checked TODO
+            elements[i, 5] = int(s7-1)
+            elements[i, 6] = int(s8-1)
+            elements[i, 7] = int(s5-1)
+            elements[i, 8] = int(s6-1)
     else:
         elements = numpy.empty((numberOfElements, 27)).astype(int)
         # read all subsequent lines
@@ -1083,6 +1110,78 @@ def interpolateLinToQuad(ndarray[numpy.int_t, ndim=2] elem, ndarray[numpy.double
                     presQuad[elem[i, j]] = N0 * val0 + N1 * val1 + N2 * val2 + N3 * val3
     
     return presQuad
+
+# interpolate scalar field onto quad-quadrilaterals
+def interpolateLinToQuad_Quad(ndarray[numpy.int_t, ndim=2] elem, ndarray[numpy.double_t, ndim=2] coord, ndarray[numpy.double_t, ndim=1] presLin, ndarray[numpy.int_t, ndim=1] mapping, int numDim=2):
+    
+    cdef unsigned int numberOfQuadraticElements, numScalarsLin, numberOfNodes, element, i
+    cdef unsigned int nodenumber, nodenumber0, nodenumber1, nodenumber2, nodenumber3
+    cdef double val, val0, val1, val2, val3, val4
+    cdef double initVal
+    cdef ndarray[numpy.double_t, ndim=1] presQuad
+    
+    numberOfQuadraticElements = elem.shape[0]
+    numScalarsLin = presLin.shape[0]
+    numberOfNodes = coord.shape[0]
+    
+    initVal  = -1351353513.55
+    presQuad = numpy.zeros(numberOfNodes).astype(float)
+    
+    for i in range(numberOfNodes):
+        print i, mapping[i]
+        presQuad[i] = initVal;
+    
+    for i in range(numScalarsLin):
+        presQuad[mapping[i]] = presLin[i]
+    
+    # we assume to interpolate on the reference configuration (is this wrong as long as we don't deform arbitrarily?)
+    for element in range(0, numberOfQuadraticElements, 1):
+        nodenumber  = elem[element][4]
+        nodenumber0 = elem[element][0]
+        nodenumber1 = elem[element][1]
+        val0 = presQuad[nodenumber0]
+        val1 = presQuad[nodenumber1]
+        val  = 0.5 * (val0 + val1)
+        presQuad[nodenumber] = val
+        
+        nodenumber  = elem[element][7]
+        nodenumber0 = elem[element][0]
+        nodenumber1 = elem[element][3]
+        val0 = presQuad[nodenumber0]
+        val1 = presQuad[nodenumber1]
+        val  = 0.5 * (val0 + val1)
+        presQuad[nodenumber] = val
+        
+        nodenumber  = elem[element][5]
+        nodenumber0 = elem[element][1]
+        nodenumber1 = elem[element][2]
+        val0 = presQuad[nodenumber0]
+        val1 = presQuad[nodenumber1]
+        val  = 0.5 * (val0 + val1)
+        presQuad[nodenumber] = val
+        
+        nodenumber  = elem[element][6]
+        nodenumber0 = elem[element][2]
+        nodenumber1 = elem[element][3]
+        val0 = presQuad[nodenumber0]
+        val1 = presQuad[nodenumber1]
+        val  = 0.5 * (val0 + val1)
+        presQuad[nodenumber] = val
+        
+        nodenumber  = elem[element][8]
+        nodenumber0 = elem[element][0]
+        nodenumber1 = elem[element][1]
+        nodenumber2 = elem[element][2]
+        nodenumber3 = elem[element][3]
+        val0 = presQuad[nodenumber0]
+        val1 = presQuad[nodenumber1]
+        val2 = presQuad[nodenumber2]
+        val3 = presQuad[nodenumber3]
+        val  = 0.25 * (val0 + val1 + val2 + val3)
+        presQuad[nodenumber] = val
+    
+    return presQuad
+    
 
 # interpolate scalar field onto quad-hexes
 def interpolateLinToQuad_Hex(ndarray[numpy.int_t, ndim=2] elem, ndarray[numpy.double_t, ndim=2] coord, ndarray[numpy.double_t, ndim=1] presLin, ndarray[numpy.int_t, ndim=1] mapping, int numDim=2):
@@ -1916,26 +2015,50 @@ def createTopology2Dquad(ndarray[numpy.int_t, ndim=2] elements, int ct):
     # number of nodes per element
     numCols = elements.shape[1]
     
-    # allocate memory
-    elementsLinearIndex = numpy.empty(numRows*7).astype(int)
-    cellslocations = numpy.empty(numRows).astype(int)
-    cellstypes = numpy.empty(numRows).astype(int)
-    
-    # for all elements
-    for i in range(numRows):
-        # set cell locations in linearly indexed array
-        k = (numCols + 1) * i
-        cellslocations[i]   = k
-        # set cell type
-        cellstypes[i]   = ct
-        # set elements
-        elementsLinearIndex[k]    = numCols
-        elementsLinearIndex[k+1]  = elements[i, 0]
-        elementsLinearIndex[k+2]  = elements[i, 1]
-        elementsLinearIndex[k+3]  = elements[i, 2]
-        elementsLinearIndex[k+4]  = elements[i, 3]
-        elementsLinearIndex[k+5]  = elements[i, 5]
-        elementsLinearIndex[k+6]  = elements[i, 4]
+    # biquadratic quad
+    if ct == 28:
+      # allocate memory
+      elementsLinearIndex = numpy.empty(numRows*10).astype(int)
+      cellslocations = numpy.empty(numRows).astype(int)
+      cellstypes = numpy.empty(numRows).astype(int)
+      # for all elements
+      for i in range(numRows):
+          # set cell locations in linearly indexed array
+          k = (numCols + 1) * i
+          cellslocations[i]   = k
+          # set cell type
+          cellstypes[i]   = ct
+          # set elements
+          elementsLinearIndex[k]    = numCols
+          elementsLinearIndex[k+1]  = elements[i, 0]
+          elementsLinearIndex[k+2]  = elements[i, 1]
+          elementsLinearIndex[k+3]  = elements[i, 2]
+          elementsLinearIndex[k+4]  = elements[i, 3]
+          elementsLinearIndex[k+5]  = elements[i, 4]
+          elementsLinearIndex[k+6]  = elements[i, 5]
+          elementsLinearIndex[k+7]  = elements[i, 6]
+          elementsLinearIndex[k+8]  = elements[i, 7]
+          elementsLinearIndex[k+9]  = elements[i, 8]
+    else:
+      # allocate memory
+      elementsLinearIndex = numpy.empty(numRows*7).astype(int)
+      cellslocations = numpy.empty(numRows).astype(int)
+      cellstypes = numpy.empty(numRows).astype(int)
+      # for all elements
+      for i in range(numRows):
+          # set cell locations in linearly indexed array
+          k = (numCols + 1) * i
+          cellslocations[i]   = k
+          # set cell type
+          cellstypes[i]   = ct
+          # set elements
+          elementsLinearIndex[k]    = numCols
+          elementsLinearIndex[k+1]  = elements[i, 0]
+          elementsLinearIndex[k+2]  = elements[i, 1]
+          elementsLinearIndex[k+3]  = elements[i, 2]
+          elementsLinearIndex[k+4]  = elements[i, 3]
+          elementsLinearIndex[k+5]  = elements[i, 5]
+          elementsLinearIndex[k+6]  = elements[i, 4]
     
     return elementsLinearIndex, cellstypes, cellslocations
 

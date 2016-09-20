@@ -276,7 +276,7 @@ class fsi(object):
         self.cameraUp0Str     = []
         self.cameraUp1Str     = []
         self.cameraUp2Str     = []
-        self.cameraPos0       = -10.0#-2
+        self.cameraPos0       = 0.0#-2
         self.cameraPos1       = 0.0#2
         self.cameraPos2       = 0.0#2
         self.cameraPos0Str    = []
@@ -1245,14 +1245,26 @@ class fsi(object):
         logging.debug("update fluid mesh quality complete")
     
     def updateQualityS(self):
+        if self.boolUpdateQualityS:
+            if self.meshTypeS == 28:
+                logging.debug("Warning: biquadratic quadrilateral mesh for solid - ignore mesh quality.")
+                self.boolUpdateQualityS = False
+                return
         if self.meshQualityS == [] and (self.numberOfDimensions == 2):
             self.meshQualityS = vtk.vtkMeshQuality()
             logging.debug("set input for solid mesh quality")
-            logging.debug("number of cells (lin): %i" \
-                % self.ugridCellsS.GetNumberOfCells())
-            self.meshQualityS.SetInput(self.ugridCellsS)
-            logging.debug("set solid mesh quality measure")
-            self.meshQualityS.SetTriangleQualityMeasureToRadiusRatio()
+            if self.sgridS == []:
+                logging.debug("number of cells (lin): %i" \
+                    % self.ugridCellsS.GetNumberOfCells())
+                self.meshQualityS.SetInput(self.ugridCellsS)
+                logging.debug("set solid mesh quality measure")
+                self.meshQualityS.SetTriangleQualityMeasureToRadiusRatio()
+            elif self.ugridS == []:
+                logging.debug("number of cells (lin): %i" \
+                    % self.sgridCellsS.GetNumberOfCells())
+                self.meshQualityS.SetInput(self.sgridCellsS)
+                logging.debug("set solid mesh quality measure (radius ratio by default)")
+                self.meshQualityS.SetQuadQualityMeasureToRadiusRatio()
         if self.boolUpdateQualityS:
             logging.debug("compute tet quality (solid)")
             if self.numberOfDimensions == 3:
@@ -1289,8 +1301,12 @@ class fsi(object):
                 self.meshQualityS.Update()
                 self.boolUpdateQualityS = False
                 logging.debug("assign solid mesh quality")
-                self.ugridS.GetCellData().AddArray( \
-                    self.meshQualityS.GetOutput().GetCellData().GetArray("Quality"))
+                if self.sgridS == []:
+                    self.ugridS.GetCellData().AddArray( \
+                        self.meshQualityS.GetOutput().GetCellData().GetArray("Quality"))
+                elif self.ugridS == []:
+                    self.sgridS.GetCellData().AddArray( \
+                        self.meshQualityS.GetOutput().GetCellData().GetArray("Quality"))
             logging.debug("get range of solid mesh quality values")
             if not(self.ugridS == []):
                 self.minQualityS, self.maxQualityS = \
@@ -3259,7 +3275,7 @@ class fsi(object):
                                    numpy_to_vtk(cellslocationsS, deep = 1, \
                                    array_type=vtk.vtkIdTypeArray().GetDataType()),
                                    cellsS)
-        elif (self.meshTypeS == 23) or (self.meshTypeS == 25) or (self.meshTypeS == 29):
+        elif (self.meshTypeS == 28) or (self.meshTypeS == 25) or (self.meshTypeS == 29):
             if self.sgridS == []:
                 # use unstructured grid here as well (for now)
                 self.sgridS      = vtk.vtkUnstructuredGrid()
@@ -3290,7 +3306,30 @@ class fsi(object):
                                    array_type=vtk.vtkIdTypeArray().GetDataType()),
                                    cellsS)
                 elif self.numberOfDimensions == 2:
-                    print "structured grid - 2D ::: not implemented"
+                    print "structured grid - 2D"
+                    self.cellTypesS = vtk.vtkBiQuadraticQuad().GetCellType()
+                    divby = 10
+                    # read quadrilaterals
+                    self.tempElemS = readCheartData.readQuadHex( \
+                        self.baseDirectory \
+                        +self.meshFolder \
+                        +self.filenameTopoQuadS, \
+                        self.numberOfDimensions)
+                    # create cells for unstructured grid
+                    tempElemLinS, cellstypesS, cellslocationsS = \
+                        readCheartData.createTopology2Dquad(self.tempElemS, \
+                        self.cellTypesS)
+                    cellsS = vtk.vtkCellArray()
+                    cellsS.SetCells(int(tempElemLinS.shape[0]/divby), \
+                        numpy_to_vtk(tempElemLinS, deep=1, \
+                        array_type=vtk.vtkIdTypeArray().GetDataType()))
+                    # assign cells
+                    self.sgridS.SetCells( \
+                        numpy_to_vtk(cellstypesS, deep=1, \
+                        array_type=vtk.vtkUnsignedCharArray().GetDataType()), \
+                        numpy_to_vtk(cellslocationsS, deep = 1, \
+                                   array_type=vtk.vtkIdTypeArray().GetDataType()),
+                                   cellsS)
         else:
             print "unsupported mesh type (solid): ", self.meshTypeS
         if self.boolUpdateSpaceS:
@@ -3405,7 +3444,7 @@ class fsi(object):
     # update solid displacement
     def updateDisp(self):
         logging.debug("update solid displacement")
-        if ((self.ugridS == []) or (self.sgridS == [])) or self.boolUpdateSpaceS:
+        if ((self.ugridS == []) and (self.sgridS == [])) or self.boolUpdateSpaceS:
             logging.debug("unstructured grid for solid will be updated first")
             self.updateSpaceS()
         if self.boolUpdateDisp:
@@ -3522,6 +3561,11 @@ class fsi(object):
     # update solid pressure
     def updatePresS(self):
         logging.debug("update solid pressure")
+        if self.boolUpdatePresS:
+            if self.meshTypeS == 28:
+                logging.debug("Warning: biquadratic quadrilateral mesh for solid - pressure approximation might be inaccurate.")
+#                self.boolUpdatePresS = False
+#                return
         if not(self.ugridS == []):
             if self.tempMappingS == []:
                 self.tempMappingS = readCheartData.findMappingLinQuad( \
@@ -3563,13 +3607,26 @@ class fsi(object):
                 self.boolUpdatePresS = False
         else:
             if self.tempMappingS == []:
-                self.tempMappingS = readCheartData.findMappingLinQuad_Hex( \
-                    self.baseDirectory \
-                    +self.meshFolder \
-                    +self.filenameTopoLinS, \
-                    self.baseDirectory \
-                    +self.meshFolder \
-                    +self.filenameTopoQuadS)
+                if self.meshTypeS == 28:
+                    # we trick the function to read a lin-quad mapping
+                    # for quadrilaterals by saying we have three dimensions
+                    # and thus pretending to have tets
+                    self.tempMappingS = readCheartData.findMappingLinQuad( \
+                        self.baseDirectory \
+                        +self.meshFolder \
+                        +self.filenameTopoLinS, \
+                        self.baseDirectory \
+                        +self.meshFolder \
+                        +self.filenameTopoQuadS, \
+                        3)
+                else:
+                    self.tempMappingS = readCheartData.findMappingLinQuad_Hex( \
+                        self.baseDirectory \
+                        +self.meshFolder \
+                        +self.filenameTopoLinS, \
+                        self.baseDirectory \
+                        +self.meshFolder \
+                        +self.filenameTopoQuadS)
             if self.boolUpdateSpaceS:
                 logging.debug("structured grid for solid will be updated first")
                 self.updateSpaceS()
@@ -3580,12 +3637,21 @@ class fsi(object):
                     +self.filenamePresS \
                     +str(self.currentT) \
                     +self.filenameSuffix)
-                tempPresQuadS = readCheartData.interpolateLinToQuad_Hex( \
-                    self.tempElemS, \
-                    vtk_to_numpy(self.sgridS.GetPoints().GetData()), \
-                    tempPresLinS, \
-                    self.tempMappingS, \
-                    self.numberOfDimensions)
+                if self.meshTypeS == 28:
+                    # this is only a poor approximation for now!
+                    tempPresQuadS = readCheartData.interpolateLinToQuad_Quad( \
+                        self.tempElemS, \
+                        vtk_to_numpy(self.sgridS.GetPoints().GetData()), \
+                        tempPresLinS, \
+                        self.tempMappingS, \
+                        self.numberOfDimensions)
+                else:
+                    tempPresQuadS = readCheartData.interpolateLinToQuad_Hex( \
+                        self.tempElemS, \
+                        vtk_to_numpy(self.sgridS.GetPoints().GetData()), \
+                        tempPresLinS, \
+                        self.tempMappingS, \
+                        self.numberOfDimensions)
                 if self.boolEffectiveG.get():
                     tempPresQuadS = readCheartData.changeOfVariables( \
                         vtk_to_numpy(self.sgridS.GetPoints().GetData()), \
@@ -3808,6 +3874,17 @@ class fsi(object):
         self.sphereActor.SetMapper(self.sphereMapper)
         self.renderer.AddActor(self.sphereActor)
     
+    # set camera default position
+    def cameraPosDefault(self):
+        if self.numberOfDimensions == 2:
+            self.cameraPos0       =      0.0
+            self.cameraPos1       =      0.0
+            self.cameraPos2       = 100000.0
+        else:
+            self.cameraPos0       = -100000.0
+            self.cameraPos1       = 0.0
+            self.cameraPos2       = 0.0
+    
     # configure camera
     def configureCamera(self):
         self.cameraUp0Str = Tkinter.StringVar()
@@ -3819,12 +3896,13 @@ class fsi(object):
         self.cameraPos0Str = Tkinter.StringVar()
         self.cameraPos1Str = Tkinter.StringVar()
         self.cameraPos2Str = Tkinter.StringVar()
+        self.cameraPosDefault()
         self.cameraPos0Str.set(str(self.cameraPos0))
         self.cameraPos1Str.set(str(self.cameraPos1))
         self.cameraPos2Str.set(str(self.cameraPos2))
         self.camera = vtk.vtkCamera()
         self.parallelProjection = Tkinter.BooleanVar()
-        self.parallelProjection.set(False)
+        self.parallelProjection.set(self.numberOfDimensions==2)
         self.camera.SetParallelProjection(self.parallelProjection.get())
         self.camera.SetViewUp( \
             self.cameraUp0, self.cameraUp1, self.cameraUp2)
@@ -4115,7 +4193,7 @@ class fsi(object):
                 print "  S: "+str(self.meshTypeS)+" (tri)"
             # quads
             elif len(temp) == 4 and self.numberOfDimensions == 2:
-                self.meshTypeS = 23
+                self.meshTypeS = 28
                 print "  S: "+str(self.meshTypeS)+" (quad)"
             # tets
             elif len(temp) == 4 and self.numberOfDimensions == 3:
@@ -4220,6 +4298,9 @@ class fsi(object):
         self.timeSlider.grid(padx=0, pady=5, column=2, row=win.gridy-1, \
             columnspan=win.gridx-3, sticky = (Tkinter.W, Tkinter.E))
         logging.debug("initial rendering")
+        self.configureCamera()
+        self.renderer.SetActiveCamera(self.camera)
+        self.renderer.ResetCamera()
         self.renderWindow.Render()
         logging.debug("initial rendering completed")
     
