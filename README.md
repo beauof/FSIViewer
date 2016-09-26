@@ -55,4 +55,24 @@ Further, cython files (*.pyx) can be profiled e.g.: <br />
   cython -a cythonfile.pyx <br />
   firefox cythonfile.html & <br />
  <br />
-
+ <br />
+Known bugs:
+ <br />
+ <br />
+ImportError: No module named vtkCommonCorePython <br />
+ <br />
+Add the following two lines to your ~/.bashrc:
+ <br />
+export LD_LIBRARY_PATH=/usr/lib/python2.7/dist-packages/vtk:$LD_LIBRARY_PATH
+ <br />
+export PYTHONPATH=/usr/lib/python2.7/dist-packages/vtk:$PYTHONPATH
+ <br />
+ <br />
+_tkinter.TclError: couldn't load file "libvtkRenderingPythonTkWidgets-6.2.so": libvtkRenderingPythonTkWidgets-6.2.so: cannot open shared object file: No such file or directory
+ <br />
+ <br />
+In: /usr/lib/python2.7/dist-packages/vtk (or similar, depending on your installation), do:
+ <br />
+sudo ln -s libvtkRenderingPythonTkWidgets.x86_64-linux-gnu.so libvtkRenderingPythonTkWidgets-6.2.so
+ <br />
+ <br />
