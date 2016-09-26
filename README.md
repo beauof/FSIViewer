@@ -13,9 +13,10 @@ python-imaging-tk <br />
 python-dev <br />
 python-numpy <br />
 cython <br />
-vtk <br />
+vtk6 <br />
+libvtk6-dev <br />
  <br />
-Note: This software has been developed with VTK 5.8.0 <br />
+Note: This software has been developed with VTK 5.8.0. It was tested with VTK 6.2.0. <br />
  <br />
 To install, open a shell in the installation directory and do: <br />
     make user && make <br />
@@ -51,13 +52,19 @@ Visualize interface <br />
 Filename for domain velocity *.D files <br />
 !=============================================================================================== <br />
  <br />
+!=============================================================================================== <br />
+ <br />
 Further, cython files (*.pyx) can be profiled e.g.: <br />
   cython -a cythonfile.pyx <br />
   firefox cythonfile.html & <br />
+!=============================================================================================== <br />
+!=============================================================================================== <br />
  <br />
  <br />
 Known bugs:
  <br />
+ <br />
+!=============================================================================================== <br />
  <br />
 ImportError: No module named vtkCommonCorePython <br />
  <br />
@@ -67,6 +74,7 @@ export LD_LIBRARY_PATH=/usr/lib/python2.7/dist-packages/vtk:$LD_LIBRARY_PATH
  <br />
 export PYTHONPATH=/usr/lib/python2.7/dist-packages/vtk:$PYTHONPATH
  <br />
+!=============================================================================================== <br />
  <br />
 _tkinter.TclError: couldn't load file "libvtkRenderingPythonTkWidgets-6.2.so": libvtkRenderingPythonTkWidgets-6.2.so: cannot open shared object file: No such file or directory
  <br />

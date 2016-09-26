@@ -1128,7 +1128,7 @@ def interpolateLinToQuad_Quad(ndarray[numpy.int_t, ndim=2] elem, ndarray[numpy.d
     presQuad = numpy.zeros(numberOfNodes).astype(float)
     
     for i in range(numberOfNodes):
-        print i, mapping[i]
+#        print i, mapping[i]
         presQuad[i] = initVal;
     
     for i in range(numScalarsLin):
