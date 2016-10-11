@@ -22,6 +22,9 @@ class fsi(object):
     def __init__(self):
         super(fsi,self).__init__()
         # default values
+        self.vtkVersionMajor   = 0
+        self.vtkVersionMinor   = 0
+        self.vtkVersionBuild   = 0
         self.username           = "user"
         self.visualizeFluid     = True
         self.visualizeSolid     = True
@@ -1768,7 +1771,14 @@ class fsi(object):
     def createDataSetMapperF(self):
         if self.extractF == []:
             self.extractF = vtk.vtkGeometryFilter()
-        self.extractF.SetInput(self.ugridF)
+        if (self.vtkVersionMajor == 5):
+            self.extractF.SetInput(self.ugridF)
+        elif (self.vtkVersionMajor == 6):
+            self.extractF.SetInputData(self.ugridF)
+        else:
+            sys.exit("Incompatible VTK version " \
+                +str(vtk.vtkVersion().GetVTKVersion()) \
+                +". Must use 5.x.x or 6.x.x!")
         if self.linearSubdivisionF == []:
             self.linearSubdivisionF = vtk.vtkLinearSubdivisionFilter()
         self.linearSubdivisionF.SetInputConnection(self.extractF.GetOutputPort())
@@ -1796,9 +1806,23 @@ class fsi(object):
         if self.extractS == []:
             self.extractS = vtk.vtkGeometryFilter()
         if not(self.ugridS == []):
-            self.extractS.SetInput(self.ugridS)
+            if (self.vtkVersionMajor == 5):
+                self.extractS.SetInput(self.ugridS)
+            elif (self.vtkVersionMajor == 6):
+                self.extractS.SetInputData(self.ugridS)
+            else:
+                sys.exit("Incompatible VTK version " \
+                    +str(vtk.vtkVersion().GetVTKVersion()) \
+                    +". Must use 5.x.x or 6.x.x!")
         else:
-            self.extractS.SetInput(self.sgridS)
+            if (self.vtkVersionMajor == 5):
+                self.extractS.SetInput(self.sgridS)
+            elif (self.vtkVersionMajor == 6):
+                self.extractS.SetInputData(self.sgridS)
+            else:
+                sys.exit("Incompatible VTK version " \
+                    +str(vtk.vtkVersion().GetVTKVersion()) \
+                    +". Must use 5.x.x or 6.x.x!")
         if self.linearSubdivisionS == []:
             self.linearSubdivisionS = vtk.vtkLinearSubdivisionFilter()
         self.linearSubdivisionS.SetInputConnection(self.extractS.GetOutputPort())
@@ -1825,7 +1849,14 @@ class fsi(object):
     def createDataSetMapperI(self):
         if self.extractI == []:
             self.extractI = vtk.vtkGeometryFilter()
-        self.extractI.SetInputData(self.ugridI)
+        if (self.vtkVersionMajor == 5):
+            self.extractI.SetInput(self.ugridI)
+        elif (self.vtkVersionMajor == 6):
+            self.extractI.SetInputData(self.ugridI)
+        else:
+            sys.exit("Incompatible VTK version " \
+                +str(vtk.vtkVersion().GetVTKVersion()) \
+                +". Must use 5.x.x or 6.x.x!")
         if self.linearSubdivisionI == []:
             self.linearSubdivisionI = vtk.vtkLinearSubdivisionFilter()
         self.linearSubdivisionI.SetInputConnection( \

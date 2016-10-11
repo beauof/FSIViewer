@@ -72,7 +72,6 @@ def main():
           "You are using VTK", vtk.vtkVersion().GetVTKVersion(), \
           "\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" \
           ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n" \
-          
     
     # create window
     window = gui()
@@ -99,6 +98,12 @@ def main():
     else:
         print "No configuration file found. Please create one."
     
+    # get vtk version
+    visualization.vtkVersionMajor = vtk.vtkVersion().GetVTKMajorVersion()
+    visualization.vtkVersionMinor = vtk.vtkVersion().GetVTKMinorVersion()
+    visualization.vtkVersionBuild = vtk.vtkVersion().GetVTKBuildVersion()
+    
+    # set debug level
     if visualization.DEBUG: logging.basicConfig(level=logging.DEBUG)
     else: logging.basicConfig(level=logging.INFO)
     
