@@ -30,7 +30,7 @@ class fsi(object):
         self.boolUpdateWel    = True
         self.boolUpdatePresF  = True
         self.boolUpdateSpaceF = True
-        self.boolUpdateVort   = True
+        self.boolUpdateVort   = False
         self.boolUpdateVortex = True
         self.boolUpdatePhiF   = True
         self.boolUpdateDisp   = True
@@ -1768,7 +1768,7 @@ class fsi(object):
     def createDataSetMapperF(self):
         if self.extractF == []:
             self.extractF = vtk.vtkGeometryFilter()
-        self.extractF.SetInputData(self.ugridF)
+        self.extractF.SetInput(self.ugridF)
         if self.linearSubdivisionF == []:
             self.linearSubdivisionF = vtk.vtkLinearSubdivisionFilter()
         self.linearSubdivisionF.SetInputConnection(self.extractF.GetOutputPort())
@@ -1796,9 +1796,9 @@ class fsi(object):
         if self.extractS == []:
             self.extractS = vtk.vtkGeometryFilter()
         if not(self.ugridS == []):
-            self.extractS.SetInputData(self.ugridS)
+            self.extractS.SetInput(self.ugridS)
         else:
-            self.extractS.SetInputData(self.sgridS)
+            self.extractS.SetInput(self.sgridS)
         if self.linearSubdivisionS == []:
             self.linearSubdivisionS = vtk.vtkLinearSubdivisionFilter()
         self.linearSubdivisionS.SetInputConnection(self.extractS.GetOutputPort())
