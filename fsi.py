@@ -592,7 +592,10 @@ class fsi(object):
             self.slicePlaneF.SetNormal(0.0, 0.0, 1.0)
         if self.planeCutF == []:
             self.planeCutF = vtk.vtkCutter()
-        self.planeCutF.SetInputData(self.ugridF)
+        if (self.vtkVersionMajor == 5):
+            self.planeCutF.SetInput(self.ugridF)
+        elif (self.vtkVersionMajor == 6):
+            self.planeCutF.SetInputData(self.ugridF)
         self.planeCutF.SetCutFunction(self.slicePlaneF)
         self.planeCutF.Update()
         if self.linearSubdivisionSliceF == []:
@@ -694,7 +697,10 @@ class fsi(object):
         # extract surface of volume
         if self.surfaceF == []:
             self.surfaceF = vtk.vtkDataSetSurfaceFilter()
-        self.surfaceF.SetInputData(self.ugridF)
+        if (self.vtkVersionMajor == 5):
+            self.surfaceF.SetInput(self.ugridF)
+        elif (self.vtkVersionMajor == 6):
+            self.surfaceF.SetInputData(self.ugridF)
         # get enclosed sample points
         if self.enclosedSamplePointsF == []:
             self.enclosedSamplePointsF = vtk.vtkSelectEnclosedPoints()
@@ -862,9 +868,15 @@ class fsi(object):
         # extract surface of volume
         surfaceF = vtk.vtkDataSetSurfaceFilter()
         if self.ugridS == []:
-            surfaceF.SetInputData(self.sgridS)
+            if (self.vtkVersionMajor == 5):
+                surfaceF.SetInput(self.sgridS)
+            elif (self.vtkVersionMajor == 6):
+                surfaceF.SetInputData(self.sgridS)
         else:
-            surfaceF.SetInputData(self.ugridS)
+            if (self.vtkVersionMajor == 5):
+                surfaceF.SetInput(self.ugridS)
+            elif (self.vtkVersionMajor == 6):
+                surfaceF.SetInputData(self.ugridS)
         # get enclosed sample points
         logging.debug("select enclosed points")
         enclosedSamplePointsF = vtk.vtkSelectEnclosedPoints()
@@ -969,7 +981,10 @@ class fsi(object):
         # reduce sample points --> we only want points inside the volume
         # extract surface of volume
         surfaceF = vtk.vtkDataSetSurfaceFilter()
-        surfaceF.SetInputData(self.ugridF)
+        if (self.vtkVersionMajor == 5):
+            surfaceF.SetInput(self.ugridF)
+        elif (self.vtkVersionMajor == 6):
+            surfaceF.SetInputData(self.ugridF)
         # get enclosed sample points
         logging.debug("select enclosed points")
         enclosedSamplePointsF = vtk.vtkSelectEnclosedPoints()
@@ -1071,6 +1086,9 @@ class fsi(object):
     def clipFxyz(self):
         if self.extractGridClipF == []:
             self.extractGridClipF = vtk.vtkBoxClipDataSet()
+        if (self.vtkVersionMajor == 5):
+            self.extractGridClipF.SetInput(self.ugridF)
+        elif (self.vtkVersionMajor == 6):
             self.extractGridClipF.SetInputData(self.ugridF)
             
         #    clippingPlaneF = vtk.vtkPlane()
@@ -1159,7 +1177,10 @@ class fsi(object):
             self.clippingPlaneF.SetNormal(0.0, 0.0, 1.0)
         if self.extractGridClipFpreserve == []:
             self.extractGridClipFpreserve = vtk.vtkExtractGeometry()
-            self.extractGridClipFpreserve.SetInputData(self.ugridF)
+            if (self.vtkVersionMajor == 5):
+                self.extractGridClipFpreserve.SetInput(self.ugridF)
+            elif (self.vtkVersionMajor == 6):
+                self.extractGridClipFpreserve.SetInputData(self.ugridF)
             self.extractGridClipFpreserve.SetImplicitFunction(self.clippingPlaneF)
             self.extractGridClipFpreserve.ExtractInsideOff()
         if self.extractClipFpreserve == []:
@@ -1213,7 +1234,10 @@ class fsi(object):
             logging.debug("set input for fluid mesh quality")
             logging.debug("number of cells (lin): %i" \
                 % self.ugridCellsF.GetNumberOfCells())
-            self.meshQualityF.SetInputData(self.ugridCellsF)
+            if (self.vtkVersionMajor == 5):
+                self.meshQualityF.SetInput(self.ugridCellsF)
+            elif (self.vtkVersionMajor == 6):
+                self.meshQualityF.SetInputData(self.ugridCellsF)
             logging.debug("set fluid mesh quality measure")
             self.meshQualityF.SetTriangleQualityMeasureToRadiusRatio()
         if self.boolUpdateQualityF:
@@ -1264,13 +1288,19 @@ class fsi(object):
             if self.sgridS == []:
                 logging.debug("number of cells (lin): %i" \
                     % self.ugridCellsS.GetNumberOfCells())
-                self.meshQualityS.SetInputData(self.ugridCellsS)
+                if (self.vtkVersionMajor == 5):
+                    self.meshQualityS.SetInput(self.ugridCellsS)
+                elif (self.vtkVersionMajor == 6):
+                    self.meshQualityS.SetInputData(self.ugridCellsS)
                 logging.debug("set solid mesh quality measure")
                 self.meshQualityS.SetTriangleQualityMeasureToRadiusRatio()
             elif self.ugridS == []:
                 logging.debug("number of cells (lin): %i" \
                     % self.sgridCellsS.GetNumberOfCells())
-                self.meshQualityS.SetInputData(self.sgridCellsS)
+                if (self.vtkVersionMajor == 5):
+                    self.meshQualityS.SetInput(self.sgridCellsS)
+                elif (self.vtkVersionMajor == 6):
+                    self.meshQualityS.SetInputData(self.sgridCellsS)
                 logging.debug("set solid mesh quality measure (radius ratio by default)")
                 self.meshQualityS.SetQuadQualityMeasureToRadiusRatio()
         if self.boolUpdateQualityS:
@@ -1646,7 +1676,10 @@ class fsi(object):
                 vortexPoints.SetData(self.ugridF.GetPoints().GetData())
                 
                 vortexThreshold = vtk.vtkThresholdPoints()
-                vortexThreshold.SetInputData(self.ugridF)
+                if (self.vtkVersionMajor == 5):
+                    vortexThreshold.SetInput(self.ugridF)
+                elif (self.vtkVersionMajor == 6):
+                    vortexThreshold.SetInputData(self.ugridF)
                 vortexThreshold.SetInputArrayToProcess(0, 0, 0, \
                     vtk.vtkDataObject.FIELD_ASSOCIATION_POINTS, "vortex_structure")
                 vortexThreshold.ThresholdByUpper(1)
@@ -2001,7 +2034,10 @@ class fsi(object):
     def outlineOnOffF(self):
         if self.outlineF == []:
             self.outlineF = vtk.vtkOutlineFilter()
-            self.outlineF.SetInputData(self.ugridF)
+            if (self.vtkVersionMajor == 5):
+                self.outlineF.SetInput(self.ugridF)
+            elif (self.vtkVersionMajor == 6):
+                self.outlineF.SetInputData(self.ugridF)
             self.outlineMapperF = vtk.vtkPolyDataMapper()
             self.outlineMapperF.SetInputConnection(self.outlineF.GetOutputPort())
             self.outlineActorF = vtk.vtkActor()
@@ -2017,9 +2053,15 @@ class fsi(object):
         if self.outlineS == []:
             self.outlineS = vtk.vtkOutlineFilter()
             if self.ugridS == []:
-                self.outlineS.SetInputData(self.sgridS)
+                if (self.vtkVersionMajor == 5):
+                    self.outlineS.SetInput(self.sgridS)
+                elif (self.vtkVersionMajor == 6):
+                    self.outlineS.SetInputData(self.sgridS)
             else:
-                self.outlineS.SetInputData(self.ugridS)
+                if (self.vtkVersionMajor == 5):
+                    self.outlineS.SetInput(self.ugridS)
+                elif (self.vtkVersionMajor == 6):
+                    self.outlineS.SetInputData(self.ugridS)
             self.outlineMapperS = vtk.vtkPolyDataMapper()
             self.outlineMapperS.SetInputConnection(self.outlineS.GetOutputPort())
             self.outlineActorS = vtk.vtkActor()
@@ -2034,7 +2076,10 @@ class fsi(object):
     def outlineOnOffI(self):
         if self.outlineI == []:
             self.outlineI = vtk.vtkOutlineFilter()
-            self.outlineI.SetInputData(self.ugridI)
+            if (self.vtkVersionMajor == 5):
+                self.outlineI.SetInput(self.sgridI)
+            elif (self.vtkVersionMajor == 6):
+                self.outlineI.SetInputData(self.sgridI)
             self.outlineMapperI = vtk.vtkPolyDataMapper()
             self.outlineMapperI.SetInputConnection(self.outlineI.GetOutputPort())
             self.outlineActorI = vtk.vtkActor()
@@ -3084,7 +3129,10 @@ class fsi(object):
             if not(os.path.exists(filename)):
                 if self.gradientFilterF == []:
                     self.gradientFilterF = vtk.vtkGradientFilter()
-                    self.gradientFilterF.SetInputData(self.ugridF)
+                    if (self.vtkVersionMajor == 5):
+                        self.gradientFilterF.SetInput(self.ugridF)
+                    elif (self.vtkVersionMajor == 6):
+                        self.gradientFilterF.SetInputData(self.ugridF)
                     self.gradientFilterF.SetInputArrayToProcess(0, 0, 0, 0, "velocity")
                     self.gradientFilterF.SetResultArrayName("vorticity")
                     self.gradientFilterF.ComputeVorticityOn()
