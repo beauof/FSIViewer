@@ -31,7 +31,7 @@ class fsi(object):
         self.visualizeInterface = False
         self.boolUpdateVel    = True
         self.boolUpdateWel    = True
-        self.boolUpdatePresF  = True
+        self.boolUpdatePresF  = False
         self.boolUpdateSpaceF = True
         self.boolUpdateVort   = False
         self.boolUpdateVortex = True
