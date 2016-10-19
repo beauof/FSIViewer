@@ -31,7 +31,7 @@ class fsi(object):
         self.visualizeInterface = False
         self.boolUpdateVel    = True
         self.boolUpdateWel    = True
-        self.boolUpdatePresF  = False
+        self.boolUpdatePresF  = True
         self.boolUpdateSpaceF = True
         self.boolUpdateVort   = False
         self.boolUpdateVortex = True
@@ -705,7 +705,10 @@ class fsi(object):
         if self.enclosedSamplePointsF == []:
             self.enclosedSamplePointsF = vtk.vtkSelectEnclosedPoints()
         self.enclosedSamplePointsF.SetInputData(self.samplePolyDataF)
-        self.enclosedSamplePointsF.SetSurface(self.surfaceF.GetOutput())
+        if (self.vtkVersionMajor == 5):
+            self.enclosedSamplePointsF.SetSurface(self.surfaceF.GetOutput())
+        elif (self.vtkVersionMajor == 6):
+            enclosedSamplePointsF.SetSurfaceConnection(self.surfaceF.GetOutputPort())
         self.enclosedSamplePointsF.SetTolerance(0.00001)
         self.enclosedSamplePointsF.Update()
         # threshold points inside/outside
@@ -811,9 +814,15 @@ class fsi(object):
         logging.debug("probe")
         probeFilterF = vtk.vtkProbeFilter()
         if self.ugridS == []:
-            probeFilterF.SetSource(self.sgridS)
+            if (self.vtkVersionMajor == 5):
+                probeFilterF.SetSource(self.sgridS)
+            elif (self.vtkVersionMajor == 6):
+                probeFilterF.SetSourceData(self.sgridS)
         else:
-            probeFilterF.SetSource(self.ugridS)
+            if (self.vtkVersionMajor == 5):
+                probeFilterF.SetSource(self.ugridS)
+            elif (self.vtkVersionMajor == 6):
+                probeFilterF.SetSourceData(self.ugridS)
         probeFilterF.SetInputData(phaseIPolyDataF)
         probeFilterF.Update()
         
@@ -881,7 +890,10 @@ class fsi(object):
         logging.debug("select enclosed points")
         enclosedSamplePointsF = vtk.vtkSelectEnclosedPoints()
         enclosedSamplePointsF.SetInputData(phaseIPolyDataF)
-        enclosedSamplePointsF.SetSurface(surfaceF.GetOutput())
+        if (self.vtkVersionMajor == 5):
+            enclosedSamplePointsF.SetSurface(surfaceF.GetOutput())
+        elif (self.vtkVersionMajor == 6):
+            enclosedSamplePointsF.SetSurfaceConnection(surfaceF.GetOutputPort())
         if self.toleranceI > 0.0:
             enclosedSamplePointsF.SetTolerance(self.toleranceI)
         else:
@@ -903,9 +915,15 @@ class fsi(object):
         logging.debug("probe")
         probeFilterF = vtk.vtkProbeFilter()
         if self.ugridS == []:
-            probeFilterF.SetSource(self.sgridS)
+            if (self.vtkVersionMajor == 5):
+                probeFilterF.SetSource(self.sgridS)
+            elif (self.vtkVersionMajor == 6):
+                probeFilterF.SetSourceData(self.sgridS)
         else:
-            probeFilterF.SetSource(self.ugridS)
+            if (self.vtkVersionMajor == 5):
+                probeFilterF.SetSource(self.ugridS)
+            elif (self.vtkVersionMajor == 6):
+                probeFilterF.SetSourceData(self.ugridS)
         probeFilterF.SetInputConnection(pointsInsideF.GetOutputPort())
         probeFilterF.Update()
         
@@ -989,7 +1007,10 @@ class fsi(object):
         logging.debug("select enclosed points")
         enclosedSamplePointsF = vtk.vtkSelectEnclosedPoints()
         enclosedSamplePointsF.SetInputData(phaseIPolyDataF)
-        enclosedSamplePointsF.SetSurface(surfaceF.GetOutput())
+        if (self.vtkVersionMajor == 5):
+            enclosedSamplePointsF.SetSurface(surfaceF.GetOutput())
+        elif (self.vtkVersionMajor == 6):
+            enclosedSamplePointsF.SetSurfaceConnection(surfaceF.GetOutputPort())
         if self.toleranceI > 0.0:
             enclosedSamplePointsF.SetTolerance(self.toleranceI)
         else:
@@ -1010,7 +1031,10 @@ class fsi(object):
         # probe data set to get scalar data
         logging.debug("probe")
         probeFilterF = vtk.vtkProbeFilter()
-        probeFilterF.SetSource(self.ugridF)
+        if (self.vtkVersionMajor == 5):
+            probeFilterF.SetSource(self.ugridF)
+        elif (self.vtkVersionMajor == 6):
+            probeFilterF.SetSourceData(self.ugridF)
         if self.allProbeVel:
             probeFilterF.SetInputData(phaseIPolyDataF)
         else:
