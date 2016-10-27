@@ -38,7 +38,7 @@ class fsi(object):
         self.boolUpdatePhiF   = True
         self.boolUpdateDisp   = True
         self.boolUpdateSolVel = True
-        self.boolUpdatePresS  = True
+        self.boolUpdatePresS  = False
         self.boolUpdateCauchyStress = True
         self.boolUpdateSpaceS = True
         self.boolUpdateQualityF = True
@@ -4094,7 +4094,7 @@ class fsi(object):
         self.renderWindow.Render()
         if self.window2imageFilter == []:
             self.window2imageFilter = vtk.vtkWindowToImageFilter()
-            self.window2imageFilter.SetInputData(self.renderWindow)
+            self.window2imageFilter.SetInput(self.renderWindow)
         if self.pngWriter == []:
             self.pngWriter = vtk.vtkPNGWriter()
         if self.boolMagnification == False:
