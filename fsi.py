@@ -423,9 +423,12 @@ class fsi(object):
         self.numberOfCellsF   = -1
         self.numberOfCellsS   = -1
         self.numberOfCellsI   = -1
-        self.numberOfNodesF   = -1
-        self.numberOfNodesS   = -1
-        self.numberOfNodesI   = -1
+        self.numberOfNodesLinF  = -1
+        self.numberOfNodesLinS  = -1
+        self.numberOfNodesLinI  = -1
+        self.numberOfNodesQuadF = -1
+        self.numberOfNodesQuadS = -1
+        self.numberOfNodesQuadI = -1
         self.qualityMeasureF  = 0
         self.qualityMeasureS  = 0
         self.qualityMeasureI  = 0
@@ -465,8 +468,13 @@ class fsi(object):
         self.scalarBarNormalizedHeight = 0.1
         self.configFilename   = []
         self.scalarBarFontFamily = 'Arial'
-        
-        
+        self.featureEdgesS      = []
+        self.featureEdgeMapperS = []
+        self.featureEdgeActorS  = []
+        self.meshTubesS         = []
+        self.meshTubesFilterS   = []
+        self.meshTubesMapperS   = []
+        self.meshTubesActorS    = []
     
     # key bindings
     def keypress(self, arg2, event):
@@ -483,9 +491,9 @@ class fsi(object):
     def updateNodeS(self):
         t0 = time.time()
         logging.debug("update tracked node: "+str(self.nodeS.get()))
-        if int(self.nodeS.get()) > self.numberOfNodesS \
+        if int(self.nodeS.get()) > self.numberOfNodesQuadS \
             or int(self.nodeS.get()) < 1:
-            tkMessageBox.showinfo("Invalid node number", "Index range %i-%i" % (1, self.numberOfNodesS))
+            tkMessageBox.showinfo("Invalid node number", "Index range %i-%i" % (1, self.numberOfNodesQuadS))
             self.nodeS.set("1")
         command = "awk 'NR==" \
             +str(int(self.nodeS.get())+1) \
@@ -1525,8 +1533,115 @@ class fsi(object):
                 self.boolEdgesF.get())
         self.renderWindow.Render()
     
+    # show/hide element edges as thick lines
+    def meshTubesOnOffS(self):
+        firstTimeUse = False
+        if (self.meshTubesS == []):
+            firstTimeUse = True
+            self.meshTubesS       = vtk.vtkPolyData()
+            self.meshTubesFilterS = vtk.vtkTubeFilter()
+            self.meshTubesMapperS = vtk.vtkPolyDataMapper()
+            self.meshTubesActorS  = vtk.vtkActor()
+        if (self.sgridS == []):
+            self.meshTubesS.SetPoints(self.ugridS.GetPoints())
+        if (self.ugridS == []):
+            self.meshTubesS.SetPoints(self.sgridS.GetPoints())
+        if ((self.meshTypeS == 28) or (self.meshTypeS == 9)):
+            logging.debug("mesh tubes: quadrilaterals")
+            connectivity, self.numberOfNodesLinS = readCheartData.readScalarInts4( \
+                self.baseDirectory \
+                +self.meshFolder \
+                +self.filenameTopoLinS)
+        if (firstTimeUse):
+            # get lines representing adjacency matrix
+            if ((self.meshTypeS == 28) or (self.meshTypeS == 9)):
+                lines = readCheartData.getAdjacencyList(connectivity, \
+                    self.numberOfNodesLinS, 9)
+            # second argument is not used for modern vtk?
+            self.meshTubesS.Allocate(lines.shape[0], lines.shape[0])
+            tmpLine = vtk.vtkIdList()
+            tmpLine.SetNumberOfIds(lines.shape[1])
+            for i in range(0, lines.shape[0], 1):
+                tmpLine.SetId(0, lines[i][0])
+                tmpLine.SetId(1, lines[i][1])
+                self.meshTubesS.InsertNextCell( \
+                    vtk.vtkLine().GetCellType(), \
+                    tmpLine)
+            if (self.vtkVersionMajor == 5):
+                self.meshTubesMapperS.SetInput(self.meshTubesS)
+            elif (self.vtkVersionMajor == 6):
+                self.meshTubesFilterS.SetInputData(self.meshTubesS)
+                self.meshTubesFilterS.SetRadius(0.025) # default is 0.5
+                self.meshTubesFilterS.SetNumberOfSides(50)
+                self.meshTubesFilterS.Update()
+                self.meshTubesMapperS.SetInputConnection( \
+                    self.meshTubesFilterS.GetOutputPort())
+                #self.meshTubesMapperS.SetInputData(self.meshTubesS)
+            self.meshTubesActorS.SetMapper(self.meshTubesMapperS)
+            self.meshTubesActorS.GetProperty().SetColor(0.8, 0.8, 0.8)
+        if (self.boolEdgesS.get()):
+            self.renderer.AddActor(self.meshTubesActorS)
+        else:
+            self.renderer.RemoveActor(self.meshTubesActorS)
+        self.renderWindow.Render()
+    
     # show/hide element edges
     def edgesOnOffS(self):
+        # firstly, feature edges code. do not use it for now
+        if False:
+            if (self.featureEdgesS == []):
+                logging.debug("feature edges: assign")
+                self.featureEdgesS = vtk.vtkFeatureEdges()
+                self.featureEdgesGeometryFilterS = vtk.vtkGeometryFilter()
+                if (not(self.ugridS == [])):
+                    logging.debug("feature edges: ugrid --> polydata")
+                    if (self.vtkVersionMajor == 5):
+                        self.featureEdgesGeometryFilterS.SetInput(self.ugridS)
+                    elif (self.vtkVersionMajor == 6):
+                        self.featureEdgesGeometryFilterS.SetInputData(self.ugridS)
+                elif (not(self.sgridS == [])):
+                    logging.debug("feature edges: sgrid --> polydata")
+                    if (self.vtkVersionMajor == 5):
+                        self.featureEdgesGeometryFilterS.SetInput(self.sgridS)
+                    elif (self.vtkVersionMajor == 6):
+                        self.featureEdgesGeometryFilterS.SetInputData(self.sgridS)
+                else:
+                    print ">>>WARNING: ugrid/sgrid are not defined for solid!"
+                    return
+                logging.debug("feature edges: polydata update")
+                self.featureEdgesGeometryFilterS.Update()
+                self.featureEdgesS.SetInputConnection( \
+                    self.featureEdgesGeometryFilterS.GetOutputPort())
+                logging.debug("feature edges: defaults")
+                self.featureEdgesS.BoundaryEdgesOff()
+                self.featureEdgesS.FeatureEdgesOff()
+                self.featureEdgesS.ManifoldEdgesOff()
+                self.featureEdgesS.NonManifoldEdgesOff()
+            logging.debug("feature edges: update")
+            self.featureEdgesS.Update()
+            if (self.boolEdgesS.get()):
+                logging.debug("feature edges: on")
+                self.featureEdgesS.ManifoldEdgesOn()
+            else:
+                logging.debug("feature edges: off")
+                self.featureEdgesS.ManifoldEdgesOff()
+            logging.debug("feature edges: update")
+            self.featureEdgesS.Update()
+            if (self.featureEdgeMapperS == []):
+                logging.debug("feature edges: mapper")
+                self.featureEdgeMapperS = vtk.vtkPolyDataMapper()
+                self.featureEdgeMapperS.SetInputConnection( \
+                    self.featureEdgesS.GetOutputPort())
+            if (self.featureEdgeActorS == []):
+                logging.debug("feature edges: actor")
+                self.featureEdgeActorS = vtk.vtkActor()
+                self.featureEdgeActorS.SetMapper(self.featureEdgeMapperS)
+            if (self.boolEdgesS.get()):
+                logging.debug("feature edges: actor on")
+                self.renderer.AddActor(self.featureEdgeActorS)
+            else:
+                logging.debug("feature edges: actor off")
+                self.renderer.RemoveActor(self.featureEdgeActorS)
         if not(self.dataSetActorS == []):
             self.dataSetActorS.GetProperty().SetEdgeVisibility( \
                 self.boolEdgesS.get())
@@ -2788,7 +2903,7 @@ class fsi(object):
                                            +self.filenameSuffix)
             pointsI.SetData(numpy_to_vtk(tempCoord, \
                 deep=1, array_type=vtk.VTK_DOUBLE))
-            self.numberOfNodesI = tempCoord.shape[0]
+            self.numberOfNodesQuadI = tempCoord.shape[0]
             # assign points
             self.ugridI.SetPoints(pointsI)
             self.minXI, self.maxXI, self.minYI, self.maxYI, self.minZI, self.maxZI = \
@@ -3021,7 +3136,7 @@ class fsi(object):
             pointsF = vtk.vtkPoints()
             pointsF.SetData(numpy_to_vtk(tempCoord, \
                 deep=1, array_type=vtk.VTK_DOUBLE))
-            self.numberOfNodesF = tempCoord.shape[0]
+            self.numberOfNodesQuadF = tempCoord.shape[0]
             # assign points
             self.ugridF.SetPoints(pointsF)
             self.ugridCellsF.SetPoints(pointsF)
@@ -3532,7 +3647,7 @@ class fsi(object):
                                                +self.filenameSpaceS \
                                                +str(self.currentT) \
                                                +self.filenameSuffix)
-            self.numberOfNodesS = tempCoordS.shape[0]
+            self.numberOfNodesQuadS = tempCoordS.shape[0]
             pointsS.SetData(numpy_to_vtk(tempCoordS, \
                 deep=1, array_type=vtk.VTK_DOUBLE))
             # assign points

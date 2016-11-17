@@ -393,6 +393,88 @@ def readScalarInts27(str filename):
     return scalars
 
 # reads scalars
+def readScalarInts9(str filename):
+    filename_byte_string = filename.encode("UTF-8")
+    cdef char* fname = filename_byte_string
+    cdef FILE* cfile
+    cdef ndarray[numpy.int_t, ndim=2] scalars
+    cdef unsigned int numberOfComponents, numberOfNodes, i
+    cdef char * line = NULL
+    cdef size_t l = 0
+    cdef ssize_t read
+    cdef double s0, s1, s2, s3, s4, s5, s6, s7, s8
+    
+    cfile = fopen(fname, "rb")
+    if cfile == NULL:
+        print "No such file or directory: '%s'" % filename
+    
+    # first line
+    read = getline(&line, &l, cfile)
+    s0, s1, s2 = splitLine3(line)
+    numberOfNodes = int(s0)
+    numberOfComponents = 9
+    scalars = numpy.empty((numberOfNodes, numberOfComponents), dtype=int)
+    # read all subsequent lines
+    for i in range(numberOfNodes):
+        read = getline(&line, &l, cfile)
+        if read == -1: break
+        s0, s1, s2, s3, s4, s5, s6, s7, s8 = splitLine9(line)
+        scalars[i, 0] = int(s0)
+        scalars[i, 1] = int(s1)
+        scalars[i, 2] = int(s2)
+        scalars[i, 3] = int(s3)
+        scalars[i, 4] = int(s4)
+        scalars[i, 5] = int(s5)
+        scalars[i, 6] = int(s6)
+        scalars[i, 7] = int(s7)
+        scalars[i, 8] = int(s8)
+    fclose(cfile)
+    
+    return scalars, numberOfNodes
+
+# compute adjacency list (based on CHeart 1-based element node list!)
+def getAdjacencyList(ndarray[numpy.int_t, ndim=2] connectivity, int numNodes, int celltype):
+    cdef unsigned int numElems, n0, n1, n2, n3, i, j, numLines
+    cdef ndarray[numpy.int_t, ndim=2] lines
+    
+    numElems = connectivity.shape[0]
+    adj   = numpy.zeros((numNodes, numNodes), dtype=int)
+    
+    # linear quadrilateral
+    if (celltype == 9):
+        for i in range(0, numElems, 1):
+            n0 = connectivity[i][0] - 1
+            n1 = connectivity[i][1] - 1
+            n2 = connectivity[i][2] - 1
+            n3 = connectivity[i][3] - 1
+            adj[n0][n1] = 1
+            adj[n1][n0] = 1
+            adj[n0][n2] = 1
+            adj[n2][n0] = 1
+            adj[n1][n3] = 1
+            adj[n3][n1] = 1
+            adj[n2][n3] = 1
+            adj[n3][n2] = 1
+        numLines = 0
+        for i in range(0, numNodes, 1):
+            for j in range(i+1, numNodes, 1):
+                if (adj[i][j] == 1):
+                    numLines += 1
+        lines = numpy.empty((numLines, 2), dtype=int)
+        linesIter = 0
+        for i in range(0, numNodes, 1):
+            for j in range(i+1, numNodes, 1):
+                if (adj[i][j] == 1):
+                    lines[linesIter][0] = i
+                    lines[linesIter][1] = j
+                    linesIter += 1
+        # sanity check
+        if (linesIter != numLines):
+            return
+    
+    return lines
+
+# reads scalars
 def readScalarInts10(str filename):
     filename_byte_string = filename.encode("UTF-8")
     cdef char* fname = filename_byte_string
@@ -478,7 +560,7 @@ def readScalarInts4(str filename):
     cdef char* fname = filename_byte_string
     cdef FILE* cfile
     cdef ndarray[numpy.int_t, ndim=2] scalars
-    cdef unsigned int numberOfComponents, numberOfNodes, i
+    cdef unsigned int numberOfComponents, numberOfNodes, numberOfElements, i
     cdef char * line = NULL
     cdef size_t l = 0
     cdef ssize_t read
@@ -491,11 +573,12 @@ def readScalarInts4(str filename):
     # first line
     read = getline(&line, &l, cfile)
     s0, s1, s2 = splitLine3(line)
-    numberOfNodes = int(s0)
+    numberOfElements = int(s0)
+    numberOfNodes    = int(s1)
     numberOfComponents = 4
-    scalars = numpy.empty((numberOfNodes, numberOfComponents), dtype=int)
+    scalars = numpy.empty((numberOfElements, numberOfComponents), dtype=int)
     # read all subsequent lines
-    for i in range(numberOfNodes):
+    for i in range(numberOfElements):
         read = getline(&line, &l, cfile)
         if read == -1: break
         s0, s1, s2, s3 = splitLine4(line)
@@ -505,7 +588,7 @@ def readScalarInts4(str filename):
         scalars[i, 3] = int(s3)
     fclose(cfile)
     
-    return scalars
+    return scalars, numberOfNodes
 
 # if the FSI method includes a change-of-variables (tranforming pressure variables such that fluid is free of gravitational effects)
 # then we have to use a reverse transformation to recover the correct pressures including hydrostatic pressure contributions

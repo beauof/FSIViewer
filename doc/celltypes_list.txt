@@ -1,0 +1,62 @@
+   44   // Linear cells
+   45   VTK_EMPTY_CELL       = 0,
+   46   VTK_VERTEX           = 1,
+   47   VTK_POLY_VERTEX      = 2,
+   48   VTK_LINE             = 3,
+   49   VTK_POLY_LINE        = 4,
+   50   VTK_TRIANGLE         = 5,
+   51   VTK_TRIANGLE_STRIP   = 6,
+   52   VTK_POLYGON          = 7,
+   53   VTK_PIXEL            = 8,
+   54   VTK_QUAD             = 9,
+   55   VTK_TETRA            = 10,
+   56   VTK_VOXEL            = 11,
+   57   VTK_HEXAHEDRON       = 12,
+   58   VTK_WEDGE            = 13,
+   59   VTK_PYRAMID          = 14,
+   60   VTK_PENTAGONAL_PRISM = 15,
+   61   VTK_HEXAGONAL_PRISM  = 16,
+   62 
+   63   // Quadratic, isoparametric cells
+   64   VTK_QUADRATIC_EDGE                   = 21,
+   65   VTK_QUADRATIC_TRIANGLE               = 22,
+   66   VTK_QUADRATIC_QUAD                   = 23,
+   67   VTK_QUADRATIC_POLYGON                = 36,
+   68   VTK_QUADRATIC_TETRA                  = 24,
+   69   VTK_QUADRATIC_HEXAHEDRON             = 25,
+   70   VTK_QUADRATIC_WEDGE                  = 26,
+   71   VTK_QUADRATIC_PYRAMID                = 27,
+   72   VTK_BIQUADRATIC_QUAD                 = 28,
+   73   VTK_TRIQUADRATIC_HEXAHEDRON          = 29,
+   74   VTK_QUADRATIC_LINEAR_QUAD            = 30,
+   75   VTK_QUADRATIC_LINEAR_WEDGE           = 31,
+   76   VTK_BIQUADRATIC_QUADRATIC_WEDGE      = 32,
+   77   VTK_BIQUADRATIC_QUADRATIC_HEXAHEDRON = 33,
+   78   VTK_BIQUADRATIC_TRIANGLE             = 34,
+   79 
+   80   // Cubic, isoparametric cell
+   81   VTK_CUBIC_LINE                       = 35,
+   82 
+   83   // Special class of cells formed by convex group of points
+   84   VTK_CONVEX_POINT_SET = 41,
+   85 
+   86   // Polyhedron cell (consisting of polygonal faces)
+   87   VTK_POLYHEDRON = 42,
+   88 
+   89   // Higher order cells in parametric form
+   90   VTK_PARAMETRIC_CURVE        = 51,
+   91   VTK_PARAMETRIC_SURFACE      = 52,
+   92   VTK_PARAMETRIC_TRI_SURFACE  = 53,
+   93   VTK_PARAMETRIC_QUAD_SURFACE = 54,
+   94   VTK_PARAMETRIC_TETRA_REGION = 55,
+   95   VTK_PARAMETRIC_HEX_REGION   = 56,
+   96 
+   97   // Higher order cells
+   98   VTK_HIGHER_ORDER_EDGE        = 60,
+   99   VTK_HIGHER_ORDER_TRIANGLE    = 61,
+  100   VTK_HIGHER_ORDER_QUAD        = 62,
+  101   VTK_HIGHER_ORDER_POLYGON     = 63,
+  102   VTK_HIGHER_ORDER_TETRAHEDRON = 64,
+  103   VTK_HIGHER_ORDER_WEDGE       = 65,
+  104   VTK_HIGHER_ORDER_PYRAMID     = 66,
+  105   VTK_HIGHER_ORDER_HEXAHEDRON  = 67,

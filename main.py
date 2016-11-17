@@ -364,7 +364,7 @@ def main():
     visualization.boolEdgesS.set(False)
     ttk.Checkbutton(window.subframeS, \
         variable=visualization.boolEdgesS, text='Show tri/tet edges', \
-        command=visualization.edgesOnOffS, \
+        command=visualization.meshTubesOnOffS, \
         style='My.TCheckbutton').grid(column=0, row = 7, \
         sticky=(Tkinter.N, Tkinter.W, Tkinter.E, Tkinter.S))
     visualization.boolShowScalarBarS = Tkinter.BooleanVar()
