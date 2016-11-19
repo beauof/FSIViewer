@@ -332,7 +332,242 @@ def readScalarInts(str filename):
         scalars[i] = int(splitLine(line)) #float(data[0])
     fclose(cfile)
     
-    return scalars
+    return scalars, numberOfNodes
+
+
+# reads scalars
+def readScalarInts3(str filename):
+    filename_byte_string = filename.encode("UTF-8")
+    cdef char* fname = filename_byte_string
+    cdef FILE* cfile
+    cdef ndarray[numpy.int_t, ndim=2] scalars
+    cdef unsigned int numberOfComponents, numberOfNodes, numberOfElements, i
+    cdef char * line = NULL
+    cdef size_t l = 0
+    cdef ssize_t read
+    cdef double s0, s1, s2, s3
+    
+    cfile = fopen(fname, "rb")
+    if cfile == NULL:
+        print "No such file or directory: '%s'" % filename
+    
+    # first line
+    read = getline(&line, &l, cfile)
+    s0, s1, s2 = splitLine3(line)
+    numberOfElements = int(s0)
+    numberOfNodes    = int(s1)
+    numberOfComponents = 3
+    scalars = numpy.empty((numberOfElements, numberOfComponents), dtype=int)
+    # read all subsequent lines
+    for i in range(numberOfElements):
+        read = getline(&line, &l, cfile)
+        if read == -1: break
+        s0, s1, s2 = splitLine3(line)
+        scalars[i, 0] = int(s0)
+        scalars[i, 1] = int(s1)
+        scalars[i, 2] = int(s2)
+    fclose(cfile)
+    
+    return scalars, numberOfNodes
+
+
+# reads scalars
+def readScalarInts4(str filename):
+    filename_byte_string = filename.encode("UTF-8")
+    cdef char* fname = filename_byte_string
+    cdef FILE* cfile
+    cdef ndarray[numpy.int_t, ndim=2] scalars
+    cdef unsigned int numberOfComponents, numberOfNodes, numberOfElements, i
+    cdef char * line = NULL
+    cdef size_t l = 0
+    cdef ssize_t read
+    cdef double s0, s1, s2, s3
+    
+    cfile = fopen(fname, "rb")
+    if cfile == NULL:
+        print "No such file or directory: '%s'" % filename
+    
+    # first line
+    read = getline(&line, &l, cfile)
+    s0, s1, s2 = splitLine3(line)
+    numberOfElements = int(s0)
+    numberOfNodes    = int(s1)
+    numberOfComponents = 4
+    scalars = numpy.empty((numberOfElements, numberOfComponents), dtype=int)
+    # read all subsequent lines
+    for i in range(numberOfElements):
+        read = getline(&line, &l, cfile)
+        if read == -1: break
+        s0, s1, s2, s3 = splitLine4(line)
+        scalars[i, 0] = int(s0)
+        scalars[i, 1] = int(s1)
+        scalars[i, 2] = int(s2)
+        scalars[i, 3] = int(s3)
+    fclose(cfile)
+    
+    return scalars, numberOfNodes
+
+
+# reads scalars
+def readScalarInts6(str filename):
+    filename_byte_string = filename.encode("UTF-8")
+    cdef char* fname = filename_byte_string
+    cdef FILE* cfile
+    cdef ndarray[numpy.int_t, ndim=2] scalars
+    cdef unsigned int numberOfComponents, numberOfNodes, i
+    cdef char * line = NULL
+    cdef size_t l = 0
+    cdef ssize_t read
+    cdef double s0, s1, s2, s3, s4, s5
+    
+    cfile = fopen(fname, "rb")
+    if cfile == NULL:
+        print "No such file or directory: '%s'" % filename
+    
+    # first line
+    read = getline(&line, &l, cfile)
+    s0, s1, s2 = splitLine3(line)
+    numberOfNodes = int(s0)
+    numberOfComponents = 6
+    scalars = numpy.empty((numberOfNodes, numberOfComponents), dtype=int)
+    # read all subsequent lines
+    for i in range(numberOfNodes):
+        read = getline(&line, &l, cfile)
+        if read == -1: break
+        s0, s1, s2, s3, s4, s5, s6, s7 = splitLine8(line)
+        scalars[i, 0] = int(s0)
+        scalars[i, 1] = int(s1)
+        scalars[i, 2] = int(s2)
+        scalars[i, 3] = int(s3)
+        scalars[i, 4] = int(s4)
+        scalars[i, 5] = int(s5)
+    fclose(cfile)
+    
+    return scalars, numberOfNodes
+
+
+# reads scalars
+def readScalarInts8(str filename):
+    filename_byte_string = filename.encode("UTF-8")
+    cdef char* fname = filename_byte_string
+    cdef FILE* cfile
+    cdef ndarray[numpy.int_t, ndim=2] scalars
+    cdef unsigned int numberOfComponents, numberOfNodes, i
+    cdef char * line = NULL
+    cdef size_t l = 0
+    cdef ssize_t read
+    cdef double s0, s1, s2, s3, s4, s5, s6, s7
+    
+    cfile = fopen(fname, "rb")
+    if cfile == NULL:
+        print "No such file or directory: '%s'" % filename
+    
+    # first line
+    read = getline(&line, &l, cfile)
+    s0, s1, s2 = splitLine3(line)
+    numberOfNodes = int(s0)
+    numberOfComponents = 8
+    scalars = numpy.empty((numberOfNodes, numberOfComponents), dtype=int)
+    # read all subsequent lines
+    for i in range(numberOfNodes):
+        read = getline(&line, &l, cfile)
+        if read == -1: break
+        s0, s1, s2, s3, s4, s5, s6, s7 = splitLine8(line)
+        scalars[i, 0] = int(s0)
+        scalars[i, 1] = int(s1)
+        scalars[i, 2] = int(s2)
+        scalars[i, 3] = int(s3)
+        scalars[i, 4] = int(s4)
+        scalars[i, 5] = int(s5)
+        scalars[i, 6] = int(s6)
+        scalars[i, 7] = int(s7)
+    fclose(cfile)
+    
+    return scalars, numberOfNodes
+
+
+# reads scalars
+def readScalarInts9(str filename):
+    filename_byte_string = filename.encode("UTF-8")
+    cdef char* fname = filename_byte_string
+    cdef FILE* cfile
+    cdef ndarray[numpy.int_t, ndim=2] scalars
+    cdef unsigned int numberOfComponents, numberOfNodes, i
+    cdef char * line = NULL
+    cdef size_t l = 0
+    cdef ssize_t read
+    cdef double s0, s1, s2, s3, s4, s5, s6, s7, s8
+    
+    cfile = fopen(fname, "rb")
+    if cfile == NULL:
+        print "No such file or directory: '%s'" % filename
+    
+    # first line
+    read = getline(&line, &l, cfile)
+    s0, s1, s2 = splitLine3(line)
+    numberOfNodes = int(s0)
+    numberOfComponents = 9
+    scalars = numpy.empty((numberOfNodes, numberOfComponents), dtype=int)
+    # read all subsequent lines
+    for i in range(numberOfNodes):
+        read = getline(&line, &l, cfile)
+        if read == -1: break
+        s0, s1, s2, s3, s4, s5, s6, s7, s8 = splitLine9(line)
+        scalars[i, 0] = int(s0)
+        scalars[i, 1] = int(s1)
+        scalars[i, 2] = int(s2)
+        scalars[i, 3] = int(s3)
+        scalars[i, 4] = int(s4)
+        scalars[i, 5] = int(s5)
+        scalars[i, 6] = int(s6)
+        scalars[i, 7] = int(s7)
+        scalars[i, 8] = int(s8)
+    fclose(cfile)
+    
+    return scalars, numberOfNodes
+
+
+# reads scalars
+def readScalarInts10(str filename):
+    filename_byte_string = filename.encode("UTF-8")
+    cdef char* fname = filename_byte_string
+    cdef FILE* cfile
+    cdef ndarray[numpy.int_t, ndim=2] scalars
+    cdef unsigned int numberOfComponents, numberOfNodes, i
+    cdef char * line = NULL
+    cdef size_t l = 0
+    cdef ssize_t read
+    cdef double s0, s1, s2, s3, s4, s5, s6, s7, s8, s9
+    
+    cfile = fopen(fname, "rb")
+    if cfile == NULL:
+        print "No such file or directory: '%s'" % filename
+    
+    # first line
+    read = getline(&line, &l, cfile)
+    s0, s1, s2 = splitLine3(line)
+    numberOfNodes = int(s0)
+    numberOfComponents = 10
+    scalars = numpy.empty((numberOfNodes, numberOfComponents), dtype=int)
+    # read all subsequent lines
+    for i in range(numberOfNodes):
+        read = getline(&line, &l, cfile)
+        if read == -1: break
+        s0, s1, s2, s3, s4, s5, s6, s7, s8, s9 = splitLine10(line)
+        scalars[i, 0] = int(s0)
+        scalars[i, 1] = int(s1)
+        scalars[i, 2] = int(s2)
+        scalars[i, 3] = int(s3)
+        scalars[i, 4] = int(s4)
+        scalars[i, 5] = int(s5)
+        scalars[i, 6] = int(s6)
+        scalars[i, 7] = int(s7)
+        scalars[i, 8] = int(s8)
+        scalars[i, 9] = int(s9)
+    fclose(cfile)
+    
+    return scalars, numberOfNodes
+
 
 # reads scalars
 def readScalarInts27(str filename):
@@ -390,46 +625,6 @@ def readScalarInts27(str filename):
         scalars[i, 26] = int(s26)
     fclose(cfile)
     
-    return scalars
-
-# reads scalars
-def readScalarInts9(str filename):
-    filename_byte_string = filename.encode("UTF-8")
-    cdef char* fname = filename_byte_string
-    cdef FILE* cfile
-    cdef ndarray[numpy.int_t, ndim=2] scalars
-    cdef unsigned int numberOfComponents, numberOfNodes, i
-    cdef char * line = NULL
-    cdef size_t l = 0
-    cdef ssize_t read
-    cdef double s0, s1, s2, s3, s4, s5, s6, s7, s8
-    
-    cfile = fopen(fname, "rb")
-    if cfile == NULL:
-        print "No such file or directory: '%s'" % filename
-    
-    # first line
-    read = getline(&line, &l, cfile)
-    s0, s1, s2 = splitLine3(line)
-    numberOfNodes = int(s0)
-    numberOfComponents = 9
-    scalars = numpy.empty((numberOfNodes, numberOfComponents), dtype=int)
-    # read all subsequent lines
-    for i in range(numberOfNodes):
-        read = getline(&line, &l, cfile)
-        if read == -1: break
-        s0, s1, s2, s3, s4, s5, s6, s7, s8 = splitLine9(line)
-        scalars[i, 0] = int(s0)
-        scalars[i, 1] = int(s1)
-        scalars[i, 2] = int(s2)
-        scalars[i, 3] = int(s3)
-        scalars[i, 4] = int(s4)
-        scalars[i, 5] = int(s5)
-        scalars[i, 6] = int(s6)
-        scalars[i, 7] = int(s7)
-        scalars[i, 8] = int(s8)
-    fclose(cfile)
-    
     return scalars, numberOfNodes
 
 # compute adjacency list (based on CHeart 1-based element node list!)
@@ -440,8 +635,36 @@ def getAdjacencyList(ndarray[numpy.int_t, ndim=2] connectivity, int numNodes, in
     numElems = connectivity.shape[0]
     adj   = numpy.zeros((numNodes, numNodes), dtype=int)
     
+    # linear triangle
+    if (celltype == 5):
+        for i in range(0, numElems, 1):
+            n0 = connectivity[i][0] - 1
+            n1 = connectivity[i][1] - 1
+            n2 = connectivity[i][2] - 1
+            adj[n0][n1] = 1
+            adj[n1][n0] = 1
+            adj[n0][n2] = 1
+            adj[n2][n0] = 1
+            adj[n1][n2] = 1
+            adj[n2][n1] = 1
+        numLines = 0
+        for i in range(0, numNodes, 1):
+            for j in range(i+1, numNodes, 1):
+                if (adj[i][j] == 1):
+                    numLines += 1
+        lines = numpy.empty((numLines, 2), dtype=int)
+        linesIter = 0
+        for i in range(0, numNodes, 1):
+            for j in range(i+1, numNodes, 1):
+                if (adj[i][j] == 1):
+                    lines[linesIter][0] = i
+                    lines[linesIter][1] = j
+                    linesIter += 1
+        # sanity check
+        if (linesIter != numLines):
+            return
     # linear quadrilateral
-    if (celltype == 9):
+    elif (celltype == 9):
         for i in range(0, numElems, 1):
             n0 = connectivity[i][0] - 1
             n1 = connectivity[i][1] - 1
@@ -471,124 +694,94 @@ def getAdjacencyList(ndarray[numpy.int_t, ndim=2] connectivity, int numNodes, in
         # sanity check
         if (linesIter != numLines):
             return
+    # linear tetra
+    elif (celltype == 10):
+        for i in range(0, numElems, 1):
+            n0 = connectivity[i][0] - 1
+            n1 = connectivity[i][1] - 1
+            n2 = connectivity[i][2] - 1
+            n3 = connectivity[i][3] - 1
+            adj[n0][n1] = 1
+            adj[n1][n0] = 1
+            adj[n0][n2] = 1
+            adj[n2][n0] = 1
+            adj[n1][n2] = 1
+            adj[n2][n1] = 1
+            adj[n0][n3] = 1
+            adj[n3][n0] = 1
+            adj[n1][n3] = 1
+            adj[n3][n1] = 1
+            adj[n2][n3] = 1
+            adj[n3][n2] = 1
+        numLines = 0
+        for i in range(0, numNodes, 1):
+            for j in range(i+1, numNodes, 1):
+                if (adj[i][j] == 1):
+                    numLines += 1
+        lines = numpy.empty((numLines, 2), dtype=int)
+        linesIter = 0
+        for i in range(0, numNodes, 1):
+            for j in range(i+1, numNodes, 1):
+                if (adj[i][j] == 1):
+                    lines[linesIter][0] = i
+                    lines[linesIter][1] = j
+                    linesIter += 1
+        # sanity check
+        if (linesIter != numLines):
+            return
+    # linear hexahedron
+    elif (celltype == 12):
+        for i in range(0, numElems, 1):
+            n0 = connectivity[i][0] - 1
+            n1 = connectivity[i][1] - 1
+            n2 = connectivity[i][2] - 1
+            n3 = connectivity[i][3] - 1
+            n4 = connectivity[i][4] - 1
+            n5 = connectivity[i][5] - 1
+            n6 = connectivity[i][6] - 1
+            n7 = connectivity[i][7] - 1
+            adj[n0][n1] = 1
+            adj[n1][n0] = 1
+            adj[n0][n2] = 1
+            adj[n2][n0] = 1
+            adj[n1][n3] = 1
+            adj[n3][n1] = 1
+            adj[n2][n3] = 1
+            adj[n3][n2] = 1
+            adj[n4][n5] = 1
+            adj[n5][n4] = 1
+            adj[n4][n6] = 1
+            adj[n6][n4] = 1
+            adj[n5][n7] = 1
+            adj[n7][n5] = 1
+            adj[n6][n7] = 1
+            adj[n7][n6] = 1
+            adj[n0][n4] = 1
+            adj[n4][n1] = 1
+            adj[n1][n5] = 1
+            adj[n5][n1] = 1
+            adj[n2][n6] = 1
+            adj[n6][n2] = 1
+            adj[n3][n7] = 1
+            adj[n7][n3] = 1
+        numLines = 0
+        for i in range(0, numNodes, 1):
+            for j in range(i+1, numNodes, 1):
+                if (adj[i][j] == 1):
+                    numLines += 1
+        lines = numpy.empty((numLines, 2), dtype=int)
+        linesIter = 0
+        for i in range(0, numNodes, 1):
+            for j in range(i+1, numNodes, 1):
+                if (adj[i][j] == 1):
+                    lines[linesIter][0] = i
+                    lines[linesIter][1] = j
+                    linesIter += 1
+        # sanity check
+        if (linesIter != numLines):
+            return
     
     return lines
-
-# reads scalars
-def readScalarInts10(str filename):
-    filename_byte_string = filename.encode("UTF-8")
-    cdef char* fname = filename_byte_string
-    cdef FILE* cfile
-    cdef ndarray[numpy.int_t, ndim=2] scalars
-    cdef unsigned int numberOfComponents, numberOfNodes, i
-    cdef char * line = NULL
-    cdef size_t l = 0
-    cdef ssize_t read
-    cdef double s0, s1, s2, s3, s4, s5, s6, s7, s8, s9
-    
-    cfile = fopen(fname, "rb")
-    if cfile == NULL:
-        print "No such file or directory: '%s'" % filename
-    
-    # first line
-    read = getline(&line, &l, cfile)
-    s0, s1, s2 = splitLine3(line)
-    numberOfNodes = int(s0)
-    numberOfComponents = 10
-    scalars = numpy.empty((numberOfNodes, numberOfComponents), dtype=int)
-    # read all subsequent lines
-    for i in range(numberOfNodes):
-        read = getline(&line, &l, cfile)
-        if read == -1: break
-        s0, s1, s2, s3, s4, s5, s6, s7, s8, s9 = splitLine10(line)
-        scalars[i, 0] = int(s0)
-        scalars[i, 1] = int(s1)
-        scalars[i, 2] = int(s2)
-        scalars[i, 3] = int(s3)
-        scalars[i, 4] = int(s4)
-        scalars[i, 5] = int(s5)
-        scalars[i, 6] = int(s6)
-        scalars[i, 7] = int(s7)
-        scalars[i, 8] = int(s8)
-        scalars[i, 9] = int(s9)
-    fclose(cfile)
-    
-    return scalars
-
-# reads scalars
-def readScalarInts8(str filename):
-    filename_byte_string = filename.encode("UTF-8")
-    cdef char* fname = filename_byte_string
-    cdef FILE* cfile
-    cdef ndarray[numpy.int_t, ndim=2] scalars
-    cdef unsigned int numberOfComponents, numberOfNodes, i
-    cdef char * line = NULL
-    cdef size_t l = 0
-    cdef ssize_t read
-    cdef double s0, s1, s2, s3, s4, s5, s6, s7
-    
-    cfile = fopen(fname, "rb")
-    if cfile == NULL:
-        print "No such file or directory: '%s'" % filename
-    
-    # first line
-    read = getline(&line, &l, cfile)
-    s0, s1, s2 = splitLine3(line)
-    numberOfNodes = int(s0)
-    numberOfComponents = 8
-    scalars = numpy.empty((numberOfNodes, numberOfComponents), dtype=int)
-    # read all subsequent lines
-    for i in range(numberOfNodes):
-        read = getline(&line, &l, cfile)
-        if read == -1: break
-        s0, s1, s2, s3, s4, s5, s6, s7 = splitLine8(line)
-        scalars[i, 0] = int(s0)
-        scalars[i, 1] = int(s1)
-        scalars[i, 2] = int(s2)
-        scalars[i, 3] = int(s3)
-        scalars[i, 4] = int(s4)
-        scalars[i, 5] = int(s5)
-        scalars[i, 6] = int(s6)
-        scalars[i, 7] = int(s7)
-    fclose(cfile)
-    
-    return scalars
-
-# reads scalars
-def readScalarInts4(str filename):
-    filename_byte_string = filename.encode("UTF-8")
-    cdef char* fname = filename_byte_string
-    cdef FILE* cfile
-    cdef ndarray[numpy.int_t, ndim=2] scalars
-    cdef unsigned int numberOfComponents, numberOfNodes, numberOfElements, i
-    cdef char * line = NULL
-    cdef size_t l = 0
-    cdef ssize_t read
-    cdef double s0, s1, s2, s3
-    
-    cfile = fopen(fname, "rb")
-    if cfile == NULL:
-        print "No such file or directory: '%s'" % filename
-    
-    # first line
-    read = getline(&line, &l, cfile)
-    s0, s1, s2 = splitLine3(line)
-    numberOfElements = int(s0)
-    numberOfNodes    = int(s1)
-    numberOfComponents = 4
-    scalars = numpy.empty((numberOfElements, numberOfComponents), dtype=int)
-    # read all subsequent lines
-    for i in range(numberOfElements):
-        read = getline(&line, &l, cfile)
-        if read == -1: break
-        s0, s1, s2, s3 = splitLine4(line)
-        scalars[i, 0] = int(s0)
-        scalars[i, 1] = int(s1)
-        scalars[i, 2] = int(s2)
-        scalars[i, 3] = int(s3)
-    fclose(cfile)
-    
-    return scalars, numberOfNodes
 
 # if the FSI method includes a change-of-variables (tranforming pressure variables such that fluid is free of gravitational effects)
 # then we have to use a reverse transformation to recover the correct pressures including hydrostatic pressure contributions
@@ -600,6 +793,7 @@ def changeOfVariables(ndarray[numpy.double_t, ndim=2] coord, ndarray[numpy.doubl
         pres[i] = pres[i] + density * (gx * coord[i, 0] + gy * coord[i, 1] + gz * coord[i, 2]) + PO
     
     return pres
+
 
 def readTriQuadAsLin(str filename, int numDim=2):
     filename_byte_string = filename.encode("UTF-8")
@@ -774,7 +968,57 @@ def readInterfaceElementsLin(str filename, int numDim=2):
     
     return elements
 
-def readQuadHex(str filename, int numDim=2):
+
+def readHexahedron(str filename):
+    filename_byte_string = filename.encode("UTF-8")
+    cdef char* fname = filename_byte_string
+    cdef FILE* cfile
+    cdef ndarray[numpy.int_t, ndim=2] elements
+    cdef unsigned int numberOfElements, numberOfNodes, i
+    cdef char * line = NULL
+    cdef size_t l = 0
+    cdef ssize_t read
+    cdef int s0, s1, s2, s3, s4, s5, s6, s7
+    
+    cfile = fopen(fname, "rb")
+    if cfile == NULL:
+        print "No such file or directory: '%s'" % filename
+    
+    # first line
+    read = getline(&line, &l, cfile)
+    s0, s1 = splitLine2(line)
+    numberOfElements = int(s0)
+    numberOfNodes = int(s1)
+    elements = numpy.empty((numberOfElements, 8)).astype(int)
+    # read all subsequent lines
+    for i in range(numberOfElements):
+        read = getline(&line, &l, cfile)
+        if read == -1: break
+        s0, s1, s2, s3, s4, s5, s6, s7 = splitLine8(line)
+        # VTK node numbers          Cheart node numbers
+        #top                        top
+        # 7--6                      6--7
+        # |  |                      |  |
+        # 4--5                      4--5
+        #
+        #bottom
+        # 3--2                      2--3
+        # |  |                      |  |
+        # 0--1                      0--1
+        elements[i, 0] = int(s0-1)
+        elements[i, 1] = int(s1-1)
+        elements[i, 2] = int(s3-1)
+        elements[i, 3] = int(s2-1)
+        elements[i, 4] = int(s4-1)
+        elements[i, 5] = int(s5-1)
+        elements[i, 6] = int(s7-1)
+        elements[i, 7] = int(s6-1)
+    fclose(cfile)
+    
+    return elements
+
+
+def readTriQuadraticHexahedron(str filename):
     filename_byte_string = filename.encode("UTF-8")
     cdef char* fname = filename_byte_string
     cdef FILE* cfile
@@ -794,88 +1038,328 @@ def readQuadHex(str filename, int numDim=2):
     s0, s1 = splitLine2(line)
     numberOfElements = int(s0)
     numberOfNodes = int(s1)
-    if numDim == 2:
-        elements = numpy.empty((numberOfElements, 9)).astype(int)
-        # read all subsequent lines
-        for i in range(numberOfElements):
-            read = getline(&line, &l, cfile)
-            if read == -1: break
-            s0, s1, s2, s3, s4, s5, s6, s7, s8 = splitLine9(line)
-            # VTK node numbers          Cheart node numbers
-            # 3--6--2                   2--8--3
-            # |  |  |                   |  |  |
-            # 7--8--5                   5--6--7
-            # |  |  |                   |  |  |
-            # 0--4--1                   0--4--1
-            elements[i, 0] = int(s0-1)
-            elements[i, 1] = int(s1-1)
-            elements[i, 2] = int(s3-1)
-            elements[i, 3] = int(s2-1)
-            elements[i, 4] = int(s4-1)
-            elements[i, 5] = int(s7-1)
-            elements[i, 6] = int(s8-1)
-            elements[i, 7] = int(s5-1)
-            elements[i, 8] = int(s6-1)
-    else:
-        elements = numpy.empty((numberOfElements, 27)).astype(int)
-        # read all subsequent lines
-        for i in range(numberOfElements):
-            read = getline(&line, &l, cfile)
-            if read == -1: break
-            s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15, s16, s17, s18, s19, s20, s21, s22, s23, s24, s25, s26 = splitLine27(line)
-            # VTK node numbers          Cheart node numbers
-            #top                        top
-            # 7--14--6                   6--26--7
-            # |      |                   |      |
-            #15  25  13                 19--20--21
-            # |      |                   |      |
-            # 4--12--5                   2--12--3
-            #
-            # middle
-            #19--23--18                 23--24--25
-            # |      |                   |      |
-            #20  26  21                 16  17  18
-            # |      |                   |      |
-            #16--22--17                  9--10--11
-            #
-            #bottom
-            # 3--10--2                   4--22--5
-            # |      |                   |      |
-            #11  24  9                  13  14  15
-            # |      |                   |      |
-            # 0-- 8--1                   0-- 8--1
-            elements[i,  0] =  int(s0-1)
-            elements[i,  1] =  int(s1-1)
-            elements[i,  2] =  int(s5-1)
-            elements[i,  3] =  int(s4-1)
-            elements[i,  4] =  int(s2-1)
-            elements[i,  5] =  int(s3-1)
-            elements[i,  6] =  int(s7-1)
-            elements[i,  7] =  int(s6-1)
-            elements[i,  8] =  int(s8-1)
-            elements[i,  9] = int(s15-1)
-            elements[i, 10] = int(s22-1)
-            elements[i, 11] = int(s13-1)
-            elements[i, 12] = int(s12-1)
-            elements[i, 13] = int(s21-1)
-            elements[i, 14] = int(s26-1)
-            elements[i, 15] = int(s19-1)
-            elements[i, 16] =  int(s9-1)
-            elements[i, 17] = int(s11-1)
-            elements[i, 18] = int(s25-1)
-            elements[i, 19] = int(s23-1)
-            elements[i, 20] = int(s16-1)
-            elements[i, 21] = int(s18-1)
-            elements[i, 22] = int(s10-1)
-            elements[i, 23] = int(s24-1)
-            elements[i, 24] = int(s14-1)
-            elements[i, 25] = int(s20-1)
-            elements[i, 26] = int(s17-1)
+    elements = numpy.empty((numberOfElements, 27)).astype(int)
+    # read all subsequent lines
+    for i in range(numberOfElements):
+        read = getline(&line, &l, cfile)
+        if read == -1: break
+        s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15, s16, s17, s18, s19, s20, s21, s22, s23, s24, s25, s26 = splitLine27(line)
+        # VTK node numbers          Cheart node numbers
+        #top                        top
+        # 7--14--6                   6--26--7
+        # |      |                   |      |
+        #15  25  13                 19--20--21
+        # |      |                   |      |
+        # 4--12--5                   2--12--3
+        #
+        # middle
+        #19--23--18                 23--24--25
+        # |      |                   |      |
+        #20  26  21                 16  17  18
+        # |      |                   |      |
+        #16--22--17                  9--10--11
+        #
+        #bottom
+        # 3--10--2                   4--22--5
+        # |      |                   |      |
+        #11  24  9                  13  14  15
+        # |      |                   |      |
+        # 0-- 8--1                   0-- 8--1
+        elements[i,  0] =  int(s0-1)
+        elements[i,  1] =  int(s1-1)
+        elements[i,  2] =  int(s5-1)
+        elements[i,  3] =  int(s4-1)
+        elements[i,  4] =  int(s2-1)
+        elements[i,  5] =  int(s3-1)
+        elements[i,  6] =  int(s7-1)
+        elements[i,  7] =  int(s6-1)
+        elements[i,  8] =  int(s8-1)
+        elements[i,  9] = int(s15-1)
+        elements[i, 10] = int(s22-1)
+        elements[i, 11] = int(s13-1)
+        elements[i, 12] = int(s12-1)
+        elements[i, 13] = int(s21-1)
+        elements[i, 14] = int(s26-1)
+        elements[i, 15] = int(s19-1)
+        elements[i, 16] =  int(s9-1)
+        elements[i, 17] = int(s11-1)
+        elements[i, 18] = int(s25-1)
+        elements[i, 19] = int(s23-1)
+        elements[i, 20] = int(s16-1)
+        elements[i, 21] = int(s18-1)
+        elements[i, 22] = int(s10-1)
+        elements[i, 23] = int(s24-1)
+        elements[i, 24] = int(s14-1)
+        elements[i, 25] = int(s20-1)
+        elements[i, 26] = int(s17-1)
     fclose(cfile)
     
     return elements
 
+
+def readTriangle(str filename):
+    filename_byte_string = filename.encode("UTF-8")
+    cdef char* fname = filename_byte_string
+    cdef FILE* cfile
+    cdef ndarray[numpy.int_t, ndim=2] elements
+    cdef unsigned int numberOfElements, numberOfNodes, i
+    cdef char * line = NULL
+    cdef size_t l = 0
+    cdef ssize_t read
+    cdef int s0, s1, s2
     
+    cfile = fopen(fname, "rb")
+    if cfile == NULL:
+        print "No such file or directory: '%s'" % filename
+    
+    # first line
+    read = getline(&line, &l, cfile)
+    s0, s1 = splitLine2(line)
+    numberOfElements = int(s0)
+    numberOfNodes = int(s1)
+    elements = numpy.empty((numberOfElements, 4)).astype(int)
+    # read all subsequent lines
+    for i in range(numberOfElements):
+        read = getline(&line, &l, cfile)
+        if read == -1: break
+        s0, s1, s2, s3 = splitLine4(line)
+        # VTK node numbers          Cheart node numbers
+        # 2                        2
+        # | \                      | \
+        # 0--1                     0--1
+        elements[i, 0] = int(s0-1)
+        elements[i, 1] = int(s1-1)
+        elements[i, 2] = int(s2-1)
+    fclose(cfile)
+    
+    return elements
+
+
+def readQuadraticTriangle(str filename):
+    filename_byte_string = filename.encode("UTF-8")
+    cdef char* fname = filename_byte_string
+    cdef FILE* cfile
+    cdef ndarray[numpy.int_t, ndim=2] elements
+    cdef unsigned int numberOfElements, numberOfNodes, i
+    cdef char * line = NULL
+    cdef size_t l = 0
+    cdef ssize_t read
+    cdef int s0, s1, s2, s3, s4, s5
+    
+    cfile = fopen(fname, "rb")
+    if cfile == NULL:
+        print "No such file or directory: '%s'" % filename
+    
+    # first line
+    read = getline(&line, &l, cfile)
+    s0, s1 = splitLine2(line)
+    numberOfElements = int(s0)
+    numberOfNodes = int(s1)
+    elements = numpy.empty((numberOfElements, 6)).astype(int)
+    # read all subsequent lines
+    for i in range(numberOfElements):
+        read = getline(&line, &l, cfile)
+        if read == -1: break
+        s0, s1, s2, s3, s4, s5 = splitLine6(line)
+        # VTK node numbers          Cheart node numbers
+        # 2                         2
+        # | \                       | \
+        # 5  4                      4  5
+        # |    \                    |    \
+        # 0--3--1                   0--3--1
+        elements[i, 0] = int(s0-1)
+        elements[i, 1] = int(s1-1)
+        elements[i, 2] = int(s2-1)
+        elements[i, 3] = int(s3-1)
+        elements[i, 4] = int(s5-1)
+        elements[i, 5] = int(s4-1)
+    
+    fclose(cfile)
+    
+    return elements
+
+
+def readTetra(str filename):
+    filename_byte_string = filename.encode("UTF-8")
+    cdef char* fname = filename_byte_string
+    cdef FILE* cfile
+    cdef ndarray[numpy.int_t, ndim=2] elements
+    cdef unsigned int numberOfElements, numberOfNodes, i
+    cdef char * line = NULL
+    cdef size_t l = 0
+    cdef ssize_t read
+    cdef int s0, s1, s2, s3
+    
+    cfile = fopen(fname, "rb")
+    if cfile == NULL:
+        print "No such file or directory: '%s'" % filename
+    
+    # first line
+    read = getline(&line, &l, cfile)
+    s0, s1 = splitLine2(line)
+    numberOfElements = int(s0)
+    numberOfNodes = int(s1)
+    elements = numpy.empty((numberOfElements, 4)).astype(int)
+    # read all subsequent lines
+    for i in range(numberOfElements):
+        read = getline(&line, &l, cfile)
+        if read == -1: break
+        s0, s1, s2, s3 = splitLine4(line)
+        # VTK node numbers          Cheart node numbers
+        # 2                         2
+        # | \    3                  | \    3
+        # 0--1                      0--1
+        elements[i, 0] = int(s0-1)
+        elements[i, 1] = int(s1-1)
+        elements[i, 2] = int(s2-1)
+        elements[i, 3] = int(s3-1)
+    fclose(cfile)
+    
+    return elements
+
+
+def readQuadraticTetra(str filename):
+    filename_byte_string = filename.encode("UTF-8")
+    cdef char* fname = filename_byte_string
+    cdef FILE* cfile
+    cdef ndarray[numpy.int_t, ndim=2] elements
+    cdef unsigned int numberOfElements, numberOfNodes, i
+    cdef char * line = NULL
+    cdef size_t l = 0
+    cdef ssize_t read
+    cdef int s0, s1, s2, s3, s4, s5, s6, s7, s8, s9
+    
+    cfile = fopen(fname, "rb")
+    if cfile == NULL:
+        print "No such file or directory: '%s'" % filename
+    
+    # first line
+    read = getline(&line, &l, cfile)
+    s0, s1 = splitLine2(line)
+    numberOfElements = int(s0)
+    numberOfNodes = int(s1)
+    elements = numpy.empty((numberOfElements, 10)).astype(int)
+    # read all subsequent lines
+    for i in range(numberOfElements):
+        read = getline(&line, &l, cfile)
+        if read == -1: break
+        s0, s1, s2, s3, s4, s5, s6, s7, s8, s9 = splitLine10(line)
+        # VTK node numbers          Cheart node numbers
+        #
+        #   3                         3
+        #
+        #  9                         9
+        #  | \                       | \
+        #  7--8                      7--8
+        #
+        # 2                         2
+        # | \                       | \
+        # 6  5                      5   6
+        # |    \                    |    \
+        # 0--4--1                   0--4--1
+        #
+        elements[i, 0] = int(s0-1)
+        elements[i, 1] = int(s1-1)
+        elements[i, 2] = int(s2-1)
+        elements[i, 3] = int(s3-1)
+        elements[i, 4] = int(s4-1)
+        elements[i, 5] = int(s6-1)
+        elements[i, 6] = int(s5-1)
+        elements[i, 7] = int(s7-1)
+        elements[i, 8] = int(s8-1)
+        elements[i, 9] = int(s9-1)
+    
+    fclose(cfile)
+    
+    return elements
+
+
+def readQuad(str filename):
+    filename_byte_string = filename.encode("UTF-8")
+    cdef char* fname = filename_byte_string
+    cdef FILE* cfile
+    cdef ndarray[numpy.int_t, ndim=2] elements
+    cdef unsigned int numberOfElements, numberOfNodes, i
+    cdef char * line = NULL
+    cdef size_t l = 0
+    cdef ssize_t read
+    cdef int s0, s1, s2, s3
+    
+    cfile = fopen(fname, "rb")
+    if cfile == NULL:
+        print "No such file or directory: '%s'" % filename
+    
+    # first line
+    read = getline(&line, &l, cfile)
+    s0, s1 = splitLine2(line)
+    numberOfElements = int(s0)
+    numberOfNodes = int(s1)
+    elements = numpy.empty((numberOfElements, 4)).astype(int)
+    # read all subsequent lines
+    for i in range(numberOfElements):
+        read = getline(&line, &l, cfile)
+        if read == -1: break
+        s0, s1, s2, s3 = splitLine4(line)
+        # VTK node numbers          Cheart node numbers
+        # 3----2                   2----3
+        # |    |                   |    |
+        # 0----1                   0----1
+        elements[i, 0] = int(s0-1)
+        elements[i, 1] = int(s1-1)
+        elements[i, 2] = int(s3-1)
+        elements[i, 3] = int(s2-1)
+    
+    fclose(cfile)
+    
+    return elements
+
+
+def readBiQuadraticQuad(str filename):
+    filename_byte_string = filename.encode("UTF-8")
+    cdef char* fname = filename_byte_string
+    cdef FILE* cfile
+    cdef ndarray[numpy.int_t, ndim=2] elements
+    cdef unsigned int numberOfElements, numberOfNodes, i
+    cdef char * line = NULL
+    cdef size_t l = 0
+    cdef ssize_t read
+    cdef int s0, s1, s2, s3, s4, s5, s6, s7, s8
+    
+    cfile = fopen(fname, "rb")
+    if cfile == NULL:
+        print "No such file or directory: '%s'" % filename
+    
+    # first line
+    read = getline(&line, &l, cfile)
+    s0, s1 = splitLine2(line)
+    numberOfElements = int(s0)
+    numberOfNodes = int(s1)
+    elements = numpy.empty((numberOfElements, 9)).astype(int)
+    # read all subsequent lines
+    for i in range(numberOfElements):
+        read = getline(&line, &l, cfile)
+        if read == -1: break
+        s0, s1, s2, s3, s4, s5, s6, s7, s8 = splitLine9(line)
+        # VTK node numbers          Cheart node numbers
+        # 3--6--2                   2--8--3
+        # |  |  |                   |  |  |
+        # 7--8--5                   5--6--7
+        # |  |  |                   |  |  |
+        # 0--4--1                   0--4--1
+        elements[i, 0] = int(s0-1)
+        elements[i, 1] = int(s1-1)
+        elements[i, 2] = int(s3-1)
+        elements[i, 3] = int(s2-1)
+        elements[i, 4] = int(s4-1)
+        elements[i, 5] = int(s7-1)
+        elements[i, 6] = int(s8-1)
+        elements[i, 7] = int(s5-1)
+        elements[i, 8] = int(s6-1)
+    
+    fclose(cfile)
+    
+    return elements
+
 
 def findMapping2D(str filename1, str filename2):
     """Find mapping from linear to quadratic mesh"""
@@ -925,8 +1409,8 @@ def findMapping2D(str filename1, str filename2):
     
     return mapping
 
-
-def findMappingLinQuad(str filename1, str filename2, int numDim=2):
+# find mapping vtkQuad --> vtkBiQuadraticQuad
+def findMappingQuad(str filename1, str filename2):
     """Find mapping from linear to quadratic mesh"""
     filename1_byte_string = filename1.encode("UTF-8")
     filename2_byte_string = filename2.encode("UTF-8")
@@ -969,14 +1453,113 @@ def findMappingLinQuad(str filename1, str filename2, int numDim=2):
         mapping[l0-1] = q0-1
         mapping[l1-1] = q1-1
         mapping[l2-1] = q2-1
-        if numDim == 3: mapping[l3-1] = q3-1
+        mapping[l3-1] = q3-1
+    fclose(cfile1)
+    fclose(cfile2)
+    
+    return mapping
+
+# find mapping vtkTriangle --> vtkQuadraticTriangle
+def findMappingTriangle(str filename1, str filename2):
+    """Find mapping from linear to quadratic mesh"""
+    filename1_byte_string = filename1.encode("UTF-8")
+    filename2_byte_string = filename2.encode("UTF-8")
+    cdef char* fname1 = filename1_byte_string
+    cdef char* fname2 = filename2_byte_string
+    cdef FILE* cfile1
+    cdef FILE* cfile2
+    cdef ndarray[numpy.int_t, ndim=1] mapping
+    cdef unsigned int numberOfElements, numberOfNodes, i
+    cdef char * line1 = NULL
+    cdef char * line2 = NULL
+    cdef size_t ll1 = 0
+    cdef size_t ll2 = 0
+    cdef ssize_t read1
+    cdef ssize_t read2
+    cdef int l0, l1, l2, q0, q1, q2
+    
+    cfile1 = fopen(fname1, "rb")
+    cfile2 = fopen(fname2, "rb")
+    if cfile1 == NULL:
+        print "No such file or directory: '%s'" % filename1
+    if cfile2 == NULL:
+        print "No such file or directory: '%s'" % filename2
+    
+    # first line
+    read1 = getline(&line1, &ll1, cfile1)
+    read2 = getline(&line2, &ll2, cfile2)
+    l0, l1, l2 = splitLine3(line1)
+    numberOfElements = int(l0)
+    numberOfNodes = int(l1)
+    mapping = numpy.empty(numberOfNodes).astype(int)
+    # read all subsequent lines
+    for i in range(numberOfElements):
+        read1 = getline(&line1, &ll1, cfile1)
+        read2 = getline(&line2, &ll2, cfile2)
+        if read1 == -1: break
+        if read2 == -1: break
+        l0, l1, l2 = splitLine3(line1)
+        q0, q1, q2 = splitLine3(line2)
+        mapping[l0-1] = q0-1
+        mapping[l1-1] = q1-1
+        mapping[l2-1] = q2-1
+    fclose(cfile1)
+    fclose(cfile2)
+    
+    return mapping
+
+# find mapping vtkTetra --> vtkQuadraticTetra
+def findMappingTetra(str filename1, str filename2):
+    """Find mapping from linear to quadratic mesh"""
+    filename1_byte_string = filename1.encode("UTF-8")
+    filename2_byte_string = filename2.encode("UTF-8")
+    cdef char* fname1 = filename1_byte_string
+    cdef char* fname2 = filename2_byte_string
+    cdef FILE* cfile1
+    cdef FILE* cfile2
+    cdef ndarray[numpy.int_t, ndim=1] mapping
+    cdef unsigned int numberOfElements, numberOfNodes, i
+    cdef char * line1 = NULL
+    cdef char * line2 = NULL
+    cdef size_t ll1 = 0
+    cdef size_t ll2 = 0
+    cdef ssize_t read1
+    cdef ssize_t read2
+    cdef int l0, l1, l2, l3, q0, q1, q2, q3
+    
+    cfile1 = fopen(fname1, "rb")
+    cfile2 = fopen(fname2, "rb")
+    if cfile1 == NULL:
+        print "No such file or directory: '%s'" % filename1
+    if cfile2 == NULL:
+        print "No such file or directory: '%s'" % filename2
+    
+    # first line
+    read1 = getline(&line1, &ll1, cfile1)
+    read2 = getline(&line2, &ll2, cfile2)
+    l0, l1, l2 = splitLine3(line1)
+    numberOfElements = int(l0)
+    numberOfNodes = int(l1)
+    mapping = numpy.empty(numberOfNodes).astype(int)
+    # read all subsequent lines
+    for i in range(numberOfElements):
+        read1 = getline(&line1, &ll1, cfile1)
+        read2 = getline(&line2, &ll2, cfile2)
+        if read1 == -1: break
+        if read2 == -1: break
+        l0, l1, l2, l3 = splitLine4(line1)
+        q0, q1, q2, q3 = splitLine4(line2)
+        mapping[l0-1] = q0-1
+        mapping[l1-1] = q1-1
+        mapping[l2-1] = q2-1
+        mapping[l3-1] = q3-1
     fclose(cfile1)
     fclose(cfile2)
     
     return mapping
 
 
-def findMappingLinQuad_Hex(str filename1, str filename2):
+def findMappingHexahedron(str filename1, str filename2):
     """Find mapping from linear to quadratic mesh"""
     filename1_byte_string = filename1.encode("UTF-8")
     filename2_byte_string = filename2.encode("UTF-8")
@@ -1028,6 +1611,7 @@ def findMappingLinQuad_Hex(str filename1, str filename2):
     fclose(cfile2)
     
     return mapping
+
 
 def interpolateLinToQuad2D(ndarray[numpy.int_t, ndim=2] elem, ndarray[numpy.double_t, ndim=2] coord, ndarray[numpy.double_t, ndim=1] presLin, ndarray[numpy.int_t, ndim=1] mapping):
     
@@ -2004,144 +2588,325 @@ def createTopologyInterface3Dlin(ndarray[numpy.int_t, ndim=2] elements, int ct):
         
     return elementsLinearIndex, cellstypes, cellslocations
 
-def createTopology3Dquad(ndarray[numpy.int_t, ndim=2] elements, int ct):
-    cdef unsigned int numRows, numCols, i, k
+
+def createTopologyHexahedron(ndarray[numpy.int_t, ndim=2] elements):
+    cdef unsigned int numRows, numCols, i, k, ct
     cdef ndarray[numpy.int_t, ndim=1] elementsLinearIndex
     cdef ndarray[numpy.int_t, ndim=1] cellslocations
     cdef ndarray[numpy.int_t, ndim=1] cellstypes
+    
+    # cell type
+    ct = 12
     
     # number of elements
     numRows = elements.shape[0]
     # number of nodes per element
     numCols = elements.shape[1]
     
-    # quadratic tetrahedron
-    if ct == 24:
-        # allocate memory
-        elementsLinearIndex = numpy.empty(numRows*11).astype(int)
-        cellslocations = numpy.empty(numRows).astype(int)
-        cellstypes = numpy.empty(numRows).astype(int)
-        
-        # for all elements
-        for i in range(numRows):
-            # set cell locations in linearly indexed array
-            k = (numCols + 1) * i
-            cellslocations[i]   = k
-            # set cell type
-            cellstypes[i]   = ct
-            # set elements
-            elementsLinearIndex[k]    = numCols
-            elementsLinearIndex[k+1]  = elements[i, 0]
-            elementsLinearIndex[k+2]  = elements[i, 1]
-            elementsLinearIndex[k+3]  = elements[i, 2]
-            elementsLinearIndex[k+4]  = elements[i, 3]
-            elementsLinearIndex[k+5]  = elements[i, 4]
-            elementsLinearIndex[k+6]  = elements[i, 5]
-            elementsLinearIndex[k+7]  = elements[i, 6]
-            elementsLinearIndex[k+8]  = elements[i, 7]
-            elementsLinearIndex[k+9]  = elements[i, 8]
-            elementsLinearIndex[k+10] = elements[i, 9]
-    # tri-quadratic hexahedron
-    elif ct == 29:
-        # allocate memory
-        elementsLinearIndex = numpy.empty(numRows*28).astype(int)
-        cellslocations = numpy.empty(numRows).astype(int)
-        cellstypes = numpy.empty(numRows).astype(int)
-        
-        # for all elements
-        for i in range(numRows):
-            # set cell locations in linearly indexed array
-            k = (numCols + 1) * i
-            cellslocations[i]   = k
-            # set cell type
-            cellstypes[i]   = ct
-            # set elements
-            elementsLinearIndex[k]    = numCols
-            elementsLinearIndex[k+1]  = elements[i, 0]
-            elementsLinearIndex[k+2]  = elements[i, 1]
-            elementsLinearIndex[k+3]  = elements[i, 2]
-            elementsLinearIndex[k+4]  = elements[i, 3]
-            elementsLinearIndex[k+5]  = elements[i, 4]
-            elementsLinearIndex[k+6]  = elements[i, 5]
-            elementsLinearIndex[k+7]  = elements[i, 6]
-            elementsLinearIndex[k+8]  = elements[i, 7]
-            elementsLinearIndex[k+9]  = elements[i, 8]
-            elementsLinearIndex[k+10] = elements[i, 9]
-            elementsLinearIndex[k+11] = elements[i, 10]
-            elementsLinearIndex[k+12] = elements[i, 11]
-            elementsLinearIndex[k+13] = elements[i, 12]
-            elementsLinearIndex[k+14] = elements[i, 13]
-            elementsLinearIndex[k+15] = elements[i, 14]
-            elementsLinearIndex[k+16] = elements[i, 15]
-            elementsLinearIndex[k+17] = elements[i, 16]
-            elementsLinearIndex[k+18] = elements[i, 17]
-            elementsLinearIndex[k+19] = elements[i, 18]
-            elementsLinearIndex[k+20] = elements[i, 19]
-            elementsLinearIndex[k+21] = elements[i, 20]
-            elementsLinearIndex[k+22] = elements[i, 21]
-            elementsLinearIndex[k+23] = elements[i, 22]
-            elementsLinearIndex[k+24] = elements[i, 23]
-            elementsLinearIndex[k+25] = elements[i, 24]
-            elementsLinearIndex[k+26] = elements[i, 25]
-            elementsLinearIndex[k+27] = elements[i, 26]
+    # allocate memory
+    elementsLinearIndex = numpy.empty(numRows*9).astype(int)
+    cellslocations = numpy.empty(numRows).astype(int)
+    cellstypes = numpy.empty(numRows).astype(int)
+    
+    # for all elements
+    for i in range(numRows):
+        # set cell locations in linearly indexed array
+        k = (numCols + 1) * i
+        cellslocations[i]   = k
+        # set cell type
+        cellstypes[i]   = ct
+        # set elements
+        elementsLinearIndex[k]    = numCols
+        elementsLinearIndex[k+1]  = elements[i, 0]
+        elementsLinearIndex[k+2]  = elements[i, 1]
+        elementsLinearIndex[k+3]  = elements[i, 2]
+        elementsLinearIndex[k+4]  = elements[i, 3]
+        elementsLinearIndex[k+5]  = elements[i, 4]
+        elementsLinearIndex[k+6]  = elements[i, 5]
+        elementsLinearIndex[k+7]  = elements[i, 6]
+        elementsLinearIndex[k+8]  = elements[i, 7]
         
     return elementsLinearIndex, cellstypes, cellslocations
 
-def createTopology2Dquad(ndarray[numpy.int_t, ndim=2] elements, int ct):
-    cdef unsigned int numRows, numCols, i, k
+
+def createTopologyTriQuadraticHexahedron(ndarray[numpy.int_t, ndim=2] elements):
+    cdef unsigned int numRows, numCols, i, k, ct
     cdef ndarray[numpy.int_t, ndim=1] elementsLinearIndex
     cdef ndarray[numpy.int_t, ndim=1] cellslocations
     cdef ndarray[numpy.int_t, ndim=1] cellstypes
+    
+    # cell type
+    ct = 29
     
     # number of elements
     numRows = elements.shape[0]
     # number of nodes per element
     numCols = elements.shape[1]
     
-    # biquadratic quad
-    if ct == 28:
-      # allocate memory
-      elementsLinearIndex = numpy.empty(numRows*10).astype(int)
-      cellslocations = numpy.empty(numRows).astype(int)
-      cellstypes = numpy.empty(numRows).astype(int)
-      # for all elements
-      for i in range(numRows):
-          # set cell locations in linearly indexed array
-          k = (numCols + 1) * i
-          cellslocations[i]   = k
-          # set cell type
-          cellstypes[i]   = ct
-          # set elements
-          elementsLinearIndex[k]    = numCols
-          elementsLinearIndex[k+1]  = elements[i, 0]
-          elementsLinearIndex[k+2]  = elements[i, 1]
-          elementsLinearIndex[k+3]  = elements[i, 2]
-          elementsLinearIndex[k+4]  = elements[i, 3]
-          elementsLinearIndex[k+5]  = elements[i, 4]
-          elementsLinearIndex[k+6]  = elements[i, 5]
-          elementsLinearIndex[k+7]  = elements[i, 6]
-          elementsLinearIndex[k+8]  = elements[i, 7]
-          elementsLinearIndex[k+9]  = elements[i, 8]
-    else:
-      # allocate memory
-      elementsLinearIndex = numpy.empty(numRows*7).astype(int)
-      cellslocations = numpy.empty(numRows).astype(int)
-      cellstypes = numpy.empty(numRows).astype(int)
-      # for all elements
-      for i in range(numRows):
-          # set cell locations in linearly indexed array
-          k = (numCols + 1) * i
-          cellslocations[i]   = k
-          # set cell type
-          cellstypes[i]   = ct
-          # set elements
-          elementsLinearIndex[k]    = numCols
-          elementsLinearIndex[k+1]  = elements[i, 0]
-          elementsLinearIndex[k+2]  = elements[i, 1]
-          elementsLinearIndex[k+3]  = elements[i, 2]
-          elementsLinearIndex[k+4]  = elements[i, 3]
-          elementsLinearIndex[k+5]  = elements[i, 5]
-          elementsLinearIndex[k+6]  = elements[i, 4]
+    # allocate memory
+    elementsLinearIndex = numpy.empty(numRows*28).astype(int)
+    cellslocations = numpy.empty(numRows).astype(int)
+    cellstypes = numpy.empty(numRows).astype(int)
+    
+    # for all elements
+    for i in range(numRows):
+        # set cell locations in linearly indexed array
+        k = (numCols + 1) * i
+        cellslocations[i]   = k
+        # set cell type
+        cellstypes[i]   = ct
+        # set elements
+        elementsLinearIndex[k]    = numCols
+        elementsLinearIndex[k+1]  = elements[i, 0]
+        elementsLinearIndex[k+2]  = elements[i, 1]
+        elementsLinearIndex[k+3]  = elements[i, 2]
+        elementsLinearIndex[k+4]  = elements[i, 3]
+        elementsLinearIndex[k+5]  = elements[i, 4]
+        elementsLinearIndex[k+6]  = elements[i, 5]
+        elementsLinearIndex[k+7]  = elements[i, 6]
+        elementsLinearIndex[k+8]  = elements[i, 7]
+        elementsLinearIndex[k+9]  = elements[i, 8]
+        elementsLinearIndex[k+10] = elements[i, 9]
+        elementsLinearIndex[k+11] = elements[i, 10]
+        elementsLinearIndex[k+12] = elements[i, 11]
+        elementsLinearIndex[k+13] = elements[i, 12]
+        elementsLinearIndex[k+14] = elements[i, 13]
+        elementsLinearIndex[k+15] = elements[i, 14]
+        elementsLinearIndex[k+16] = elements[i, 15]
+        elementsLinearIndex[k+17] = elements[i, 16]
+        elementsLinearIndex[k+18] = elements[i, 17]
+        elementsLinearIndex[k+19] = elements[i, 18]
+        elementsLinearIndex[k+20] = elements[i, 19]
+        elementsLinearIndex[k+21] = elements[i, 20]
+        elementsLinearIndex[k+22] = elements[i, 21]
+        elementsLinearIndex[k+23] = elements[i, 22]
+        elementsLinearIndex[k+24] = elements[i, 23]
+        elementsLinearIndex[k+25] = elements[i, 24]
+        elementsLinearIndex[k+26] = elements[i, 25]
+        elementsLinearIndex[k+27] = elements[i, 26]
+        
+    return elementsLinearIndex, cellstypes, cellslocations
+
+
+def createTopologyTriangle(ndarray[numpy.int_t, ndim=2] elements):
+    cdef unsigned int numRows, numCols, i, k, ct
+    cdef ndarray[numpy.int_t, ndim=1] elementsLinearIndex
+    cdef ndarray[numpy.int_t, ndim=1] cellslocations
+    cdef ndarray[numpy.int_t, ndim=1] cellstypes
+    
+    # cell type
+    ct = 5
+    
+    # number of elements
+    numRows = elements.shape[0]
+    # number of nodes per element
+    numCols = elements.shape[1]
+    
+    # allocate memory
+    elementsLinearIndex = numpy.empty(numRows*4).astype(int)
+    cellslocations = numpy.empty(numRows).astype(int)
+    cellstypes = numpy.empty(numRows).astype(int)
+    # for all elements
+    for i in range(numRows):
+        # set cell locations in linearly indexed array
+        k = (numCols + 1) * i
+        cellslocations[i]   = k
+        # set cell type
+        cellstypes[i]   = ct
+        # set elements
+        elementsLinearIndex[k]    = numCols
+        elementsLinearIndex[k+1]  = elements[i, 0]
+        elementsLinearIndex[k+2]  = elements[i, 1]
+        elementsLinearIndex[k+3]  = elements[i, 2]
+    
+    return elementsLinearIndex, cellstypes, cellslocations
+
+
+def createTopologyQuadraticTriangle(ndarray[numpy.int_t, ndim=2] elements):
+    cdef unsigned int numRows, numCols, i, k
+    cdef ndarray[numpy.int_t, ndim=1] elementsLinearIndex
+    cdef ndarray[numpy.int_t, ndim=1] cellslocations
+    cdef ndarray[numpy.int_t, ndim=1] cellstypes
+    
+    # cell type
+    ct = 22
+    
+    # number of elements
+    numRows = elements.shape[0]
+    # number of nodes per element
+    numCols = elements.shape[1]
+    
+    # allocate memory
+    elementsLinearIndex = numpy.empty(numRows*7).astype(int)
+    cellslocations = numpy.empty(numRows).astype(int)
+    cellstypes = numpy.empty(numRows).astype(int)
+    # for all elements
+    for i in range(numRows):
+        # set cell locations in linearly indexed array
+        k = (numCols + 1) * i
+        cellslocations[i]   = k
+        # set cell type
+        cellstypes[i]   = ct
+        # set elements
+        elementsLinearIndex[k]    = numCols
+        elementsLinearIndex[k+1]  = elements[i, 0]
+        elementsLinearIndex[k+2]  = elements[i, 1]
+        elementsLinearIndex[k+3]  = elements[i, 2]
+        elementsLinearIndex[k+4]  = elements[i, 3]
+        elementsLinearIndex[k+5]  = elements[i, 4]
+        elementsLinearIndex[k+6]  = elements[i, 5]
+    
+    return elementsLinearIndex, cellstypes, cellslocations
+
+
+def createTopologyTetra(ndarray[numpy.int_t, ndim=2] elements):
+    cdef unsigned int numRows, numCols, i, k, ct
+    cdef ndarray[numpy.int_t, ndim=1] elementsLinearIndex
+    cdef ndarray[numpy.int_t, ndim=1] cellslocations
+    cdef ndarray[numpy.int_t, ndim=1] cellstypes
+    
+    # cell type
+    ct = 10
+    
+    # number of elements
+    numRows = elements.shape[0]
+    # number of nodes per element
+    numCols = elements.shape[1]
+    
+    # allocate memory
+    elementsLinearIndex = numpy.empty(numRows*5).astype(int)
+    cellslocations = numpy.empty(numRows).astype(int)
+    cellstypes = numpy.empty(numRows).astype(int)
+    # for all elements
+    for i in range(numRows):
+        # set cell locations in linearly indexed array
+        k = (numCols + 1) * i
+        cellslocations[i]   = k
+        # set cell type
+        cellstypes[i]   = ct
+        # set elements
+        elementsLinearIndex[k]    = numCols
+        elementsLinearIndex[k+1]  = elements[i, 0]
+        elementsLinearIndex[k+2]  = elements[i, 1]
+        elementsLinearIndex[k+3]  = elements[i, 2]
+        elementsLinearIndex[k+4]  = elements[i, 3]
+    
+    return elementsLinearIndex, cellstypes, cellslocations
+
+
+def createTopologyQuadraticTetra(ndarray[numpy.int_t, ndim=2] elements):
+    cdef unsigned int numRows, numCols, i, k
+    cdef ndarray[numpy.int_t, ndim=1] elementsLinearIndex
+    cdef ndarray[numpy.int_t, ndim=1] cellslocations
+    cdef ndarray[numpy.int_t, ndim=1] cellstypes
+    
+    # cell type
+    ct = 24
+    
+    # number of elements
+    numRows = elements.shape[0]
+    # number of nodes per element
+    numCols = elements.shape[1]
+    
+    # allocate memory
+    elementsLinearIndex = numpy.empty(numRows*11).astype(int)
+    cellslocations = numpy.empty(numRows).astype(int)
+    cellstypes = numpy.empty(numRows).astype(int)
+    
+    # for all elements
+    for i in range(numRows):
+        # set cell locations in linearly indexed array
+        k = (numCols + 1) * i
+        cellslocations[i]   = k
+        # set cell type
+        cellstypes[i]   = ct
+        # set elements
+        elementsLinearIndex[k]    = numCols
+        elementsLinearIndex[k+ 1] = elements[i, 0]
+        elementsLinearIndex[k+ 2] = elements[i, 1]
+        elementsLinearIndex[k+ 3] = elements[i, 2]
+        elementsLinearIndex[k+ 4] = elements[i, 3]
+        elementsLinearIndex[k+ 5] = elements[i, 4]
+        elementsLinearIndex[k+ 6] = elements[i, 5]
+        elementsLinearIndex[k+ 7] = elements[i, 6]
+        elementsLinearIndex[k+ 8] = elements[i, 7]
+        elementsLinearIndex[k+ 9] = elements[i, 8]
+        elementsLinearIndex[k+10] = elements[i, 9]
+        
+    return elementsLinearIndex, cellstypes, cellslocations
+
+
+def createTopologyQuad(ndarray[numpy.int_t, ndim=2] elements):
+    cdef unsigned int numRows, numCols, i, k, ct
+    cdef ndarray[numpy.int_t, ndim=1] elementsLinearIndex
+    cdef ndarray[numpy.int_t, ndim=1] cellslocations
+    cdef ndarray[numpy.int_t, ndim=1] cellstypes
+    
+    # cell type
+    ct = 9
+    
+    # number of elements
+    numRows = elements.shape[0]
+    # number of nodes per element
+    numCols = elements.shape[1]
+    
+    # allocate memory
+    elementsLinearIndex = numpy.empty(numRows*5).astype(int)
+    cellslocations = numpy.empty(numRows).astype(int)
+    cellstypes = numpy.empty(numRows).astype(int)
+    # for all elements
+    for i in range(numRows):
+        # set cell locations in linearly indexed array
+        k = (numCols + 1) * i
+        cellslocations[i]   = k
+        # set cell type
+        cellstypes[i]   = ct
+        # set elements
+        elementsLinearIndex[k]    = numCols
+        elementsLinearIndex[k+1]  = elements[i, 0]
+        elementsLinearIndex[k+2]  = elements[i, 1]
+        elementsLinearIndex[k+3]  = elements[i, 2]
+        elementsLinearIndex[k+4]  = elements[i, 3]
+    
+    return elementsLinearIndex, cellstypes, cellslocations
+
+
+def createTopologyBiQuadraticQuad(ndarray[numpy.int_t, ndim=2] elements):
+    cdef unsigned int numRows, numCols, i, k, ct
+    cdef ndarray[numpy.int_t, ndim=1] elementsLinearIndex
+    cdef ndarray[numpy.int_t, ndim=1] cellslocations
+    cdef ndarray[numpy.int_t, ndim=1] cellstypes
+    
+    # cell type
+    ct = 28
+    
+    # number of elements
+    numRows = elements.shape[0]
+    # number of nodes per element
+    numCols = elements.shape[1]
+    
+    # allocate memory
+    elementsLinearIndex = numpy.empty(numRows*10).astype(int)
+    cellslocations = numpy.empty(numRows).astype(int)
+    cellstypes = numpy.empty(numRows).astype(int)
+    # for all elements
+    for i in range(numRows):
+        # set cell locations in linearly indexed array
+        k = (numCols + 1) * i
+        cellslocations[i]   = k
+        # set cell type
+        cellstypes[i]   = ct
+        # set elements
+        elementsLinearIndex[k]    = numCols
+        elementsLinearIndex[k+1]  = elements[i, 0]
+        elementsLinearIndex[k+2]  = elements[i, 1]
+        elementsLinearIndex[k+3]  = elements[i, 2]
+        elementsLinearIndex[k+4]  = elements[i, 3]
+        elementsLinearIndex[k+5]  = elements[i, 4]
+        elementsLinearIndex[k+6]  = elements[i, 5]
+        elementsLinearIndex[k+7]  = elements[i, 6]
+        elementsLinearIndex[k+8]  = elements[i, 7]
+        elementsLinearIndex[k+9]  = elements[i, 8]
     
     return elementsLinearIndex, cellstypes, cellslocations
 

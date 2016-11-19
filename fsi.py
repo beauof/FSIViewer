@@ -38,11 +38,13 @@ class fsi(object):
         self.boolUpdatePhiF   = True
         self.boolUpdateDisp   = True
         self.boolUpdateSolVel = True
-        self.boolUpdatePresS  = False
+        self.boolUpdatePresS  = True
         self.boolUpdateCauchyStress = True
-        self.boolUpdateSpaceS = True
+        self.boolUpdateSpaceLinS  = True
+        self.boolUpdateSpaceQuadS = True
         self.boolUpdateQualityF = True
-        self.boolUpdateQualityS = True
+        self.boolUpdateQualityLinS  = True
+        self.boolUpdateQualityQuadS = True
         self.boolUpdateSpaceI = True
         self.boolUpdateLMult  = True
         self.DEBUG            = True
@@ -86,18 +88,34 @@ class fsi(object):
         self.filenameQualityS = "SolidMeshQuality-"
         self.filenameSpaceI   = "BndrySpace-"
         self.filenameLM       = "LMult-"
-        self.filenameTopoLinF     = "domainF_lin_FE.T"
-        self.filenameTopoQuadF    = "domainF_quad_FE.T"
+        self.filenameLinXF    = "domainF_lin_FE.X"
+        self.filenameQuadXF   = "domainF_quad_FE.X"
+        self.filenameLinTF    = "domainF_lin_FE.T"
+        self.filenameQuadTF   = "domainF_quad_FE.T"
+        self.filenameLinBF    = "domainF_lin_FE.B"
+        self.filenameQuadBF   = "domainF_quad_FE.B"
         self.filenameTopoLinFvtk  = "domainF_lin_FE.vtk"
         self.filenameTopoQuadFvtk = "domainF_quad_FE.vtk"
         self.filenameTopoLinFct   = "domainF_lin_FE.ct"
         self.filenameTopoQuadFct  = "domainF_quad_FE.ct"
         self.filenameTopoLinFcl   = "domainF_lin_FE.cl"
         self.filenameTopoQuadFcl  = "domainF_quad_FE.cl"
-        self.filenameTopoLinS     = "domainS_lin_FE.T"
-        self.filenameTopoQuadS    = "domainS_quad_FE.T"
-        self.filenameXQuadS       = "domainS_quad_FE.X"
-        self.filenameTopoQuadI    = "lm_quad_FE.T"
+        self.filenameLinXS     = "domainS_lin_FE.X"
+        self.filenameQuadXS    = "domainS_quad_FE.X"
+        self.filenameLinTS     = "domainS_lin_FE.T"
+        self.filenameQuadTS    = "domainS_quad_FE.T"
+        self.filenameLinBS     = "domainS_lin_FE.B"
+        self.filenameQuadBS    = "domainS_quad_FE.B"
+        self.filenameLinQuadTS = "domainS_lin_quad_FE.T"
+        self.filenameLinXI    = "lm_lin_FE.X"
+        self.filenameQuadXI   = "lm_quad_FE.X"
+        self.filenameLinTI    = "lm_lin_FE.T"
+        self.filenameQuadTI   = "lm_quad_FE.T"
+        self.filenameLinBI    = "lm_lin_FE.B"
+        self.filenameQuadBI   = "lm_quad_FE.B"
+        self.filenameXI       = ""
+        self.filenameTI       = ""
+        self.filenameBI       = ""
         self.currentT         = 1
         self.currentIndexT    = 0
         self.fromT            = 1
@@ -130,21 +148,23 @@ class fsi(object):
         self.renderWidget     = []
         self.numberOfDimensions = 3
         self.ugridF           = []
-        self.ugridS           = []
+        self.ugridLinS        = []
+        self.ugridQuadS       = []
         self.ugridI           = []
         self.sgridF           = []
-        self.sgridS           = []
+        self.sgridLinS        = []
+        self.sgridQuadS       = []
         self.ugridCellsF      = []
-        self.ugridCellsS      = []
         self.cellTypesF       = []
         self.cellTypesVort    = []
         self.cellTypesS       = []
         self.cellTypesI       = []
         self.tempElemF        = []
-        self.tempElemS        = []
+        self.tempElemLinS     = []
+        self.tempElemQuadS    = []
         self.tempElemI        = []
         self.tempMappingF     = []
-        self.tempMappingS     = []
+        self.tempMappingLinQuadS = []
         self.tempMappingI     = []
         self.densityF         = 1.0
         self.gravity_x        = 0.0
@@ -336,10 +356,12 @@ class fsi(object):
         self.currentCTFS      = []
         self.currentCTFI      = []
         self.dataSetMapperF   = []
-        self.dataSetMapperS   = []
+        self.dataSetMapperLinS  = []
+        self.dataSetMapperQuadS = []
         self.dataSetMapperI   = []
         self.dataSetActorF    = []
-        self.dataSetActorS    = []
+        self.dataSetActorLinS  = []
+        self.dataSetActorQuadS = []
         self.dataSetActorI    = []
         self.scalarBarF       = []
         self.scalarBarS       = []
@@ -360,19 +382,25 @@ class fsi(object):
         self.outlineI         = []
         self.outlineMapperI   = []
         self.outlineActorI    = []
-        self.extractF         = []
-        self.extractS         = []
-        self.extractI         = []
-        self.linearSubdivisionF = []
-        self.linearSubdivisionS = []
-        self.linearSubdivisionI = []
-        self.dsmFnumberOfSubdivisions = 2
-        self.dsmSnumberOfSubdivisions = 2
-        self.dsmInumberOfSubdivisions = 2
+        self.extractF               = []
+        self.extractLinS            = []
+        self.extractQuadS           = []
+        self.triangleFilterLinS     = []
+        self.triangleFilterQuadS    = []
+        self.extractI               = []
+        self.linearSubdivisionF     = []
+        self.linearSubdivisionLinS  = []
+        self.linearSubdivisionQuadS = []
+        self.linearSubdivisionI     = []
+        self.dsmFnumberOfSubdivisions     = 2
+        self.dsmLinSnumberOfSubdivisions  = 2
+        self.dsmQuadSnumberOfSubdivisions = 2
+        self.dsmInumberOfSubdivisions     = 2
         self.boolFirstExec    = True
         self.gradientFilterF  = []
         self.meshQualityF     = []
-        self.meshQualityS     = []
+        self.meshQualityLinS  = []
+        self.meshQualityQuadS = []
         self.meshQualityI     = []
         self.minQualityF      = 0.0
         self.maxQualityF      = 1.0
@@ -424,16 +452,17 @@ class fsi(object):
         self.numberOfCellsS   = -1
         self.numberOfCellsI   = -1
         self.numberOfNodesLinF  = -1
-        self.numberOfNodesLinS  = -1
-        self.numberOfNodesLinI  = -1
         self.numberOfNodesQuadF = -1
+        self.numberOfNodesLinS  = -1
         self.numberOfNodesQuadS = -1
-        self.numberOfNodesQuadI = -1
+        self.numberOfNodesI     = -1
         self.qualityMeasureF  = 0
         self.qualityMeasureS  = 0
         self.qualityMeasureI  = 0
-        self.meshTypeF        = []
-        self.meshTypeS        = []
+        self.meshTypeLinF     = []
+        self.meshTypeQuadF    = []
+        self.meshTypeLinS     = []
+        self.meshTypeQuadS    = []
         self.meshTypeI        = []
         self.samplePointsF    = []
         self.samplePolyDataF  = []
@@ -475,6 +504,10 @@ class fsi(object):
         self.meshTubesFilterS   = []
         self.meshTubesMapperS   = []
         self.meshTubesActorS    = []
+        self.meshTubesOnFTopo   = 1
+        self.meshTubesOnSTopo   = 1
+        self.meshQualityOnFTopo = 1
+        self.meshQualityOnSTopo = 1
     
     # key bindings
     def keypress(self, arg2, event):
@@ -500,7 +533,7 @@ class fsi(object):
             +"' " \
             +self.baseDirectory \
             +self.meshFolder \
-            +self.filenameXQuadS
+            +self.filenameQuadXS
         output = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
         (x, err) = output.communicate()
         xref = x.split()
@@ -821,16 +854,16 @@ class fsi(object):
         # probe data set to get scalar data
         logging.debug("probe")
         probeFilterF = vtk.vtkProbeFilter()
-        if self.ugridS == []:
+        if self.ugridQuadS == []:
             if (self.vtkVersionMajor == 5):
-                probeFilterF.SetSource(self.sgridS)
+                probeFilterF.SetSource(self.sgridQuadS)
             elif (self.vtkVersionMajor == 6):
-                probeFilterF.SetSourceData(self.sgridS)
+                probeFilterF.SetSourceData(self.sgridQuadS)
         else:
             if (self.vtkVersionMajor == 5):
-                probeFilterF.SetSource(self.ugridS)
+                probeFilterF.SetSource(self.ugridQuadS)
             elif (self.vtkVersionMajor == 6):
-                probeFilterF.SetSourceData(self.ugridS)
+                probeFilterF.SetSourceData(self.ugridQuadS)
         probeFilterF.SetInputData(phaseIPolyDataF)
         probeFilterF.Update()
         
@@ -884,16 +917,16 @@ class fsi(object):
         # reduce sample points --> we only want points inside the volume
         # extract surface of volume
         surfaceF = vtk.vtkDataSetSurfaceFilter()
-        if self.ugridS == []:
+        if self.ugridQuadS == []:
             if (self.vtkVersionMajor == 5):
-                surfaceF.SetInput(self.sgridS)
+                surfaceF.SetInput(self.sgridQuadS)
             elif (self.vtkVersionMajor == 6):
-                surfaceF.SetInputData(self.sgridS)
+                surfaceF.SetInputData(self.sgridQuadS)
         else:
             if (self.vtkVersionMajor == 5):
-                surfaceF.SetInput(self.ugridS)
+                surfaceF.SetInput(self.ugridQuadS)
             elif (self.vtkVersionMajor == 6):
-                surfaceF.SetInputData(self.ugridS)
+                surfaceF.SetInputData(self.ugridQuadS)
         # get enclosed sample points
         logging.debug("select enclosed points")
         enclosedSamplePointsF = vtk.vtkSelectEnclosedPoints()
@@ -922,16 +955,16 @@ class fsi(object):
         # probe data set to get scalar data
         logging.debug("probe")
         probeFilterF = vtk.vtkProbeFilter()
-        if self.ugridS == []:
+        if self.ugridQuadS == []:
             if (self.vtkVersionMajor == 5):
-                probeFilterF.SetSource(self.sgridS)
+                probeFilterF.SetSource(self.sgridQuadS)
             elif (self.vtkVersionMajor == 6):
-                probeFilterF.SetSourceData(self.sgridS)
+                probeFilterF.SetSourceData(self.sgridQuadS)
         else:
             if (self.vtkVersionMajor == 5):
-                probeFilterF.SetSource(self.ugridS)
+                probeFilterF.SetSource(self.ugridQuadS)
             elif (self.vtkVersionMajor == 6):
-                probeFilterF.SetSourceData(self.ugridS)
+                probeFilterF.SetSourceData(self.ugridQuadS)
         probeFilterF.SetInputConnection(pointsInsideF.GetOutputPort())
         probeFilterF.Update()
         
@@ -1309,88 +1342,96 @@ class fsi(object):
         logging.debug("update fluid mesh quality complete")
     
     def updateQualityS(self):
-        if self.boolUpdateQualityS:
-            if self.meshTypeS == 28:
-                logging.debug("Warning: biquadratic quadrilateral mesh for solid - ignore mesh quality.")
-                self.boolUpdateQualityS = False
-                return
-        if self.meshQualityS == [] and (self.numberOfDimensions == 2):
-            self.meshQualityS = vtk.vtkMeshQuality()
-            logging.debug("set input for solid mesh quality")
-            if self.sgridS == []:
-                logging.debug("number of cells (lin): %i" \
-                    % self.ugridCellsS.GetNumberOfCells())
-                if (self.vtkVersionMajor == 5):
-                    self.meshQualityS.SetInput(self.ugridCellsS)
-                elif (self.vtkVersionMajor == 6):
-                    self.meshQualityS.SetInputData(self.ugridCellsS)
-                logging.debug("set solid mesh quality measure")
-                self.meshQualityS.SetTriangleQualityMeasureToRadiusRatio()
-            elif self.ugridS == []:
-                logging.debug("number of cells (lin): %i" \
-                    % self.sgridCellsS.GetNumberOfCells())
-                if (self.vtkVersionMajor == 5):
-                    self.meshQualityS.SetInput(self.sgridCellsS)
-                elif (self.vtkVersionMajor == 6):
-                    self.meshQualityS.SetInputData(self.sgridCellsS)
-                logging.debug("set solid mesh quality measure (radius ratio by default)")
-                self.meshQualityS.SetQuadQualityMeasureToRadiusRatio()
-        if self.boolUpdateQualityS:
-            logging.debug("compute tet quality (solid)")
-            if self.numberOfDimensions == 3:
-                filename = self.baseDirectory \
-                    +self.dataFolder \
-                    +self.filenameQualityS \
-                    +str(self.currentT) \
-                    +self.filenameSuffix
-                if not(os.path.exists(filename)):
-                    if not(self.ugridS == []):
-                        tempQualityS = readCheartData.computeTetQuality( \
-                            vtk_to_numpy(self.ugridS.GetPoints().GetData()), \
-                            self.tempElemS, \
-                            self.qualityMeasureS)
-                    else:
-                        self.qualityMeasureS = 123456789
-                        tempQualityS = readCheartData.computeTetQuality( \
-                            vtk_to_numpy(self.sgridS.GetPoints().GetData()), \
-                            self.tempElemS, \
-                            self.qualityMeasureS)
-                    readCheartData.writeScalars(tempQualityS, filename)
-                else:
-                    tempQualityS = readCheartData.readScalars(filename)
-                logging.debug("compute tet quality (solid) complete")
-                self.boolUpdateQualityS = False
-                if not(self.ugridS == []):
-                    self.ugridS.GetCellData().AddArray( \
-                        organiseData.numpy2vtkDataArray1(tempQualityS, "Quality"))
-                else:
-                    self.sgridS.GetCellData().AddArray( \
-                        organiseData.numpy2vtkDataArray1(tempQualityS, "Quality"))
-                logging.debug("assign solid mesh quality")
-            elif self.numberOfDimensions == 2:
-                self.meshQualityS.Update()
-                self.boolUpdateQualityS = False
-                logging.debug("assign solid mesh quality")
-                if self.sgridS == []:
-                    self.ugridS.GetCellData().AddArray( \
-                        self.meshQualityS.GetOutput().GetCellData().GetArray("Quality"))
-                elif self.ugridS == []:
-                    self.sgridS.GetCellData().AddArray( \
-                        self.meshQualityS.GetOutput().GetCellData().GetArray("Quality"))
-            logging.debug("get range of solid mesh quality values")
-            if not(self.ugridS == []):
-                self.minQualityS, self.maxQualityS = \
-                    self.ugridS.GetCellData().GetArray("Quality").GetRange()
-                self.numberOfCellsS = \
-                    self.ugridS.GetCellData().GetArray("Quality").GetNumberOfTuples()
-            else:
-                self.minQualityS, self.maxQualityS = \
-                    self.sgridS.GetCellData().GetArray("Quality").GetRange()
-                self.numberOfCellsS = \
-                    self.sgridS.GetCellData().GetArray("Quality").GetNumberOfTuples()
-            logging.debug("number of cells: %i" % self.numberOfCellsS)
-            logging.debug("solid cell quality range: [%.2f, %.2f]" \
-                % (self.minQualityS, self.maxQualityS))
+        logging.debug("update solid mesh quality")
+        if (self.boolUpdateSpaceLinS or self.boolUpdateSpaceQuadS):
+            logging.debug("unstructured grid for solid will be updated first")
+            self.updateSpaceS()
+        if (self.meshQualityOnSTopo == 1):
+            if (self.meshQualityLinS == []):
+                self.meshQualityLinS = vtk.vtkMeshQuality()
+                if not(self.ugridLinS == []):
+                    if (self.vtkVersionMajor == 5):
+                        self.meshQualityLinS.SetInput(self.ugridLinS)
+                    elif (self.vtkVersionMajor == 6):
+                        self.meshQualityLinS.SetInputData(self.ugridLinS)
+                elif not(self.sgridLinS == []):
+                    if (self.vtkVersionMajor == 5):
+                        self.meshQualityLinS.SetInput(self.sgridLinS)
+                    elif (self.vtkVersionMajor == 6):
+                        self.meshQualityLinS.SetInputData(self.sgridLinS)
+                logging.debug("    set measure for  tri  : radius ratio")
+                logging.debug("                     quad : radius ratio")
+                logging.debug("                     tet  : radius ratio")
+                logging.debug("                     hex  : edge   ratio")
+                self.meshQualityLinS.SetTriangleQualityMeasureToRadiusRatio()
+                self.meshQualityLinS.SetQuadQualityMeasureToRadiusRatio()
+                self.meshQualityLinS.SetTetQualityMeasureToRadiusRatio()
+                self.meshQualityLinS.SetHexQualityMeasureToEdgeRatio()
+            if self.boolUpdateQualityLinS:
+                self.meshQualityLinS.Update()
+                self.boolUpdateQualityLinS = False
+                if not(self.ugridLinS == []):
+                    self.ugridLinS.GetCellData().AddArray( \
+                        self.meshQualityLinS.GetOutput().GetCellData().GetArray("Quality"))
+                elif not(self.sgridLinS == []):
+                    self.sgridLinS.GetCellData().AddArray( \
+                        self.meshQualityLinS.GetOutput().GetCellData().GetArray("Quality"))
+                if not(self.ugridLinS == []):
+                    self.minQualityS, self.maxQualityS = \
+                        self.ugridLinS.GetCellData().GetArray("Quality").GetRange()
+                    self.numberOfCellsS = \
+                        self.ugridLinS.GetCellData().GetArray("Quality").GetNumberOfTuples()
+                elif not(self.sgridLinS == []):
+                    self.minQualityS, self.maxQualityS = \
+                        self.sgridLinS.GetCellData().GetArray("Quality").GetRange()
+                    self.numberOfCellsS = \
+                        self.sgridLinS.GetCellData().GetArray("Quality").GetNumberOfTuples()
+                logging.debug("number of cells: %i" % self.numberOfCellsS)
+                logging.debug("solid cell quality range: [%.2f, %.2f]" \
+                    % (self.minQualityS, self.maxQualityS))
+        elif (self.meshQualityOnSTopo == 2):
+            if (self.meshQualityQuadS == []):
+                self.meshQualityQuadS = vtk.vtkMeshQuality()
+                if not(self.ugridQuadS == []):
+                    if (self.vtkVersionMajor == 5):
+                        self.meshQualityQuadS.SetInput(self.ugridQuadS)
+                    elif (self.vtkVersionMajor == 6):
+                        self.meshQualityQuadS.SetInputData(self.ugridQuadS)
+                elif not(self.sgridQuadS == []):
+                    if (self.vtkVersionMajor == 5):
+                        self.meshQualityQuadS.SetInput(self.sgridQuadS)
+                    elif (self.vtkVersionMajor == 6):
+                        self.meshQualityQuadS.SetInputData(self.sgridQuadS)
+                logging.debug("    set measure for  tri  : radius ratio")
+                logging.debug("                     quad : radius ratio")
+                logging.debug("                     tet  : radius ratio")
+                logging.debug("                     hex  : edge   ratio")
+                self.meshQualityQuadS.SetTriangleQualityMeasureToRadiusRatio()
+                self.meshQualityQuadS.SetQuadQualityMeasureToRadiusRatio()
+                self.meshQualityQuadS.SetTetQualityMeasureToRadiusRatio()
+                self.meshQualityQuadS.SetHexQualityMeasureToEdgeRatio()
+            if self.boolUpdateQualityQuadS:
+                self.meshQualityQuadS.Update()
+                self.boolUpdateQualityQuadS = False
+                if not(self.ugridQuadS == []):
+                    self.ugridQuadS.GetCellData().AddArray( \
+                        self.meshQualityQuadS.GetOutput().GetCellData().GetArray("Quality"))
+                elif not(self.sgridQuadS == []):
+                    self.sgridQuadS.GetCellData().AddArray( \
+                        self.meshQualityQuadS.GetOutput().GetCellData().GetArray("Quality"))
+                if not(self.ugridQuadS == []):
+                    self.minQualityS, self.maxQualityS = \
+                        self.ugridQuadS.GetCellData().GetArray("Quality").GetRange()
+                    self.numberOfCellsS = \
+                        self.ugridQuadS.GetCellData().GetArray("Quality").GetNumberOfTuples()
+                elif not(self.sgridQuadS == []):
+                    self.minQualityS, self.maxQualityS = \
+                        self.sgridQuadS.GetCellData().GetArray("Quality").GetRange()
+                    self.numberOfCellsS = \
+                        self.sgridQuadS.GetCellData().GetArray("Quality").GetNumberOfTuples()
+                logging.debug("number of cells: %i" % self.numberOfCellsS)
+                logging.debug("solid cell quality range: [%.2f, %.2f]" \
+                    % (self.minQualityS, self.maxQualityS))
         logging.debug("update solid mesh quality complete")
     
     # t - dt
@@ -1428,21 +1469,23 @@ class fsi(object):
         logging.debug("current time step: %i" % self.currentT)
         # new timestep --> all data sets need updates
         if self.visualizeFluid.get():
-            self.boolUpdateVel    = True
-            self.boolUpdateWel    = True
-            self.boolUpdatePresF  = True
-            self.boolUpdateSpaceF = True
-            self.boolUpdateVort   = True
-            self.boolUpdateVortex = True
+            self.boolUpdateVel      = True
+            self.boolUpdateWel      = True
+            self.boolUpdatePresF    = True
+            self.boolUpdateSpaceF   = True
+            self.boolUpdateVort     = True
+            self.boolUpdateVortex   = True
             self.boolUpdateQualityF = True
-            self.boolUpdatePhiF   = True
+            self.boolUpdatePhiF     = True
         if self.visualizeSolid.get():
-            self.boolUpdateDisp   = True
-            self.boolUpdateSolVel = True
-            self.boolUpdatePresS  = True
+            self.boolUpdateDisp         = True
+            self.boolUpdateSolVel       = True
+            self.boolUpdatePresS        = True
             self.boolUpdateCauchyStress = True
-            self.boolUpdateSpaceS = True
-            self.boolUpdateQualityS = True
+            self.boolUpdateSpaceLinS    = True
+            self.boolUpdateSpaceQuadS   = True
+            self.boolUpdateQualityLinS  = True
+            self.boolUpdateQualityQuadS = True
         if self.visualizeInterface.get():
             self.boolUpdateSpaceI = True
             self.boolUpdateLMult  = True
@@ -1451,18 +1494,18 @@ class fsi(object):
             if not(self.showF.get() == "none"): self.updateSpaceF()
             self.progress["value"] = 10
             self.progress.update()
-            if self.showF.get() == "vel": self.updateVel()
+            if self.showF.get() == "vel":       self.updateVel()
             self.progress["value"] = 30
             self.progress.update()
-            if self.showF.get() == "wel": self.updateWel()
+            if self.showF.get() == "wel":       self.updateWel()
             self.progress["value"] = 40
             self.progress.update()
-            if self.showF.get() == "presF": self.updatePresF()
+            if self.showF.get() == "presF":     self.updatePresF()
             self.progress["value"] = 50
             self.progress.update()
-            if self.showF.get() == "vort": self.updateVort()
-            if self.showF.get() == "quality": self.updateQualityF()
-            if self.showF.get() == "phi": self.updatePhiF()
+            if self.showF.get() == "vort":      self.updateVort()
+            if self.showF.get() == "quality":   self.updateQualityF()
+            if self.showF.get() == "phi":       self.updatePhiF()
             self.scalarBarOnOffF()
         self.progress["value"] = 70
         self.progress.update()
@@ -1470,18 +1513,18 @@ class fsi(object):
             if not(self.showS.get() == "none"): self.updateSpaceS()
             self.progress["value"] = 80
             self.progress.update()
-            if self.showS.get() == "disp": self.updateDisp()
+            if self.showS.get() == "disp":      self.updateDisp()
             if not(self.showS.get() == "none"): self.updateNodeS()
             self.progress["value"] = 90
             self.progress.update()
-            if self.showS.get() == "vel": self.updateSolVel()
-            if self.showS.get() == "cauchy": self.updateCauchyStress()
-            if self.showS.get() == "presS": self.updatePresS()
-            if self.showS.get() == "quality": self.updateQualityS()
+            if self.showS.get() == "vel":       self.updateSolVel()
+            if self.showS.get() == "cauchy":    self.updateCauchyStress()
+            if self.showS.get() == "presS":     self.updatePresS()
+            if self.showS.get() == "quality":   self.updateQualityS()
             self.scalarBarOnOffS()
         if self.visualizeInterface.get():
             if not(self.showI.get() == "none"): self.updateSpaceI()
-            if self.showI.get() == "lm": self.updateLMult()
+            if self.showI.get() == "lm":        self.updateLMult()
             self.scalarBarOnOffI()
         self.progress["value"] = 100
         self.progress.update()
@@ -1542,41 +1585,106 @@ class fsi(object):
             self.meshTubesFilterS = vtk.vtkTubeFilter()
             self.meshTubesMapperS = vtk.vtkPolyDataMapper()
             self.meshTubesActorS  = vtk.vtkActor()
-        if (self.sgridS == []):
-            self.meshTubesS.SetPoints(self.ugridS.GetPoints())
-        if (self.ugridS == []):
-            self.meshTubesS.SetPoints(self.sgridS.GetPoints())
-        if ((self.meshTypeS == 28) or (self.meshTypeS == 9)):
-            logging.debug("mesh tubes: quadrilaterals")
-            connectivity, self.numberOfNodesLinS = readCheartData.readScalarInts4( \
-                self.baseDirectory \
-                +self.meshFolder \
-                +self.filenameTopoLinS)
+        if (self.meshTubesOnSTopo == 1):
+            if not(self.ugridLinS == []):
+                self.meshTubesS.SetPoints(self.ugridLinS.GetPoints())
+            if not(self.sgridLinS == []):
+                self.meshTubesS.SetPoints(self.sgridLinS.GetPoints())
+        elif (self.meshTubesOnSTopo == 2):
+            if not(self.ugridQuadS == []):
+                self.meshTubesS.SetPoints(self.ugridQuadS.GetPoints())
+            if not(self.sgridQuadS == []):
+                self.meshTubesS.SetPoints(self.sgridQuadS.GetPoints())
         if (firstTimeUse):
-            # get lines representing adjacency matrix
-            if ((self.meshTypeS == 28) or (self.meshTypeS == 9)):
+            if (self.meshTubesOnSTopo == 1):
+                self.meshTubesOnSTopo = 1
+                logging.debug(">>> WARNING: Edges for quadratic elements" \
+                    + " not fully implemented. Defaulting to linear elements.")
+            if (self.meshTubesOnSTopo == 1):
+                if (self.meshTypeLinS == vtk.vtkTriangle().GetCellType()):
+                    logging.debug("mesh tubes: vtkTriangle")
+                    connectivity, arg2 = readCheartData.readScalarInts3( \
+                        self.baseDirectory \
+                        +self.meshFolder \
+                        +self.filenameLinTS)
+                elif (self.meshTypeLinS == vtk.vtkQuad().GetCellType()):
+                    logging.debug("mesh tubes: vtkQuad")
+                    connectivity, arg2 = readCheartData.readScalarInts4( \
+                        self.baseDirectory \
+                        +self.meshFolder \
+                        +self.filenameLinTS)
+                elif (self.meshTypeLinS == vtk.vtkTetra().GetCellType()):
+                    logging.debug("mesh tubes: vtkTetra")
+                    connectivity, arg2 = readCheartData.readScalarInts4( \
+                        self.baseDirectory \
+                        +self.meshFolder \
+                        +self.filenameLinTS)
+                elif (self.meshTypeLinS == vtk.vtkHexahedron().GetCellType()):
+                    logging.debug("mesh tubes: vtkHexahedron")
+                    connectivity, arg2 = readCheartData.readScalarInts8( \
+                        self.baseDirectory \
+                        +self.meshFolder \
+                        +self.filenameLinTS)
+                # get lines representing adjacency matrix
                 lines = readCheartData.getAdjacencyList(connectivity, \
-                    self.numberOfNodesLinS, 9)
-            # second argument is not used for modern vtk?
-            self.meshTubesS.Allocate(lines.shape[0], lines.shape[0])
-            tmpLine = vtk.vtkIdList()
-            tmpLine.SetNumberOfIds(lines.shape[1])
-            for i in range(0, lines.shape[0], 1):
-                tmpLine.SetId(0, lines[i][0])
-                tmpLine.SetId(1, lines[i][1])
-                self.meshTubesS.InsertNextCell( \
-                    vtk.vtkLine().GetCellType(), \
-                    tmpLine)
+                    self.numberOfNodesLinS, self.meshTypeLinS)
+    #            if (self.vtkVersionMajor == 5):
+    #                myvtkCellArray = vtk.vtkCellArray()
+    #                tmpLine = vtk.vtkIdList()
+    #                tmpLine.SetNumberOfIds(lines.shape[1])
+    #                for i in range(0, lines.shape[1], 1):
+    #                    tmpLine.SetId(0, lines[i][0])
+    #                    tmpLine.SetId(1, lines[i][1])
+    #                    myvtkCellArray.InsertNextCell(tmpLine)
+    #                self.meshTubesS.SetLines(myvtkCellArray)
+    #            elif (self.vtkVersionMajor == 6):
+                # second argument is not used for modern vtk?
+                self.meshTubesS.Allocate(lines.shape[0], lines.shape[0])
+                tmpLine = vtk.vtkIdList()
+                tmpLine.SetNumberOfIds(lines.shape[1])
+                for i in range(0, lines.shape[0], 1):
+                    tmpLine.SetId(0, lines[i][0])
+                    tmpLine.SetId(1, lines[i][1])
+                    self.meshTubesS.InsertNextCell( \
+                        vtk.vtkLine().GetCellType(), \
+                        tmpLine)
+            elif (self.meshTubesOnSTopo == 2):
+                if (self.meshTypeLinS == vtk.vtkQuadraticTriangle().GetCellType()):
+                    logging.debug("mesh tubes: vtkQuadraticTriangle")
+                    connectivity, arg2 = readCheartData.readScalarInts6( \
+                        self.baseDirectory \
+                        +self.meshFolder \
+                        +self.filenameQuadTS)
+                elif (self.meshTypeLinS == vtk.vtkBiQuadraticQuad().GetCellType()):
+                    logging.debug("mesh tubes: vtkBiQuadraticQuad")
+                    connectivity, arg2 = readCheartData.readScalarInts9( \
+                        self.baseDirectory \
+                        +self.meshFolder \
+                        +self.filenameQuadTS)
+                elif (self.meshTypeLinS == vtk.vtkQuadraticTetra().GetCellType()):
+                    logging.debug("mesh tubes: vtkQuadraticTetra")
+                    connectivity, arg2 = readCheartData.readScalarInts10( \
+                        self.baseDirectory \
+                        +self.meshFolder \
+                        +self.filenameQuadTS)
+                elif (self.meshTypeLinS == vtk.vtkTriQuadraticHexahedron().GetCellType()):
+                    logging.debug("mesh tubes: vtkTriQuadraticHexahedron")
+                    connectivity, arg2 = readCheartData.readScalarInts27( \
+                        self.baseDirectory \
+                        +self.meshFolder \
+                        +self.filenameQuadTS)
+                # get lines representing adjacency matrix
+                lines = readCheartData.getAdjacencyList(connectivity, \
+                    self.numberOfNodesQuadS, self.meshTypeQuadS)
             if (self.vtkVersionMajor == 5):
                 self.meshTubesMapperS.SetInput(self.meshTubesS)
             elif (self.vtkVersionMajor == 6):
                 self.meshTubesFilterS.SetInputData(self.meshTubesS)
-                self.meshTubesFilterS.SetRadius(0.025) # default is 0.5
-                self.meshTubesFilterS.SetNumberOfSides(50)
-                self.meshTubesFilterS.Update()
-                self.meshTubesMapperS.SetInputConnection( \
-                    self.meshTubesFilterS.GetOutputPort())
-                #self.meshTubesMapperS.SetInputData(self.meshTubesS)
+            self.meshTubesFilterS.SetRadius(0.025) # default is 0.5
+            self.meshTubesFilterS.SetNumberOfSides(50)
+            self.meshTubesFilterS.Update()
+            self.meshTubesMapperS.SetInputConnection( \
+                self.meshTubesFilterS.GetOutputPort())
             self.meshTubesActorS.SetMapper(self.meshTubesMapperS)
             self.meshTubesActorS.GetProperty().SetColor(0.8, 0.8, 0.8)
         if (self.boolEdgesS.get()):
@@ -1593,18 +1701,18 @@ class fsi(object):
                 logging.debug("feature edges: assign")
                 self.featureEdgesS = vtk.vtkFeatureEdges()
                 self.featureEdgesGeometryFilterS = vtk.vtkGeometryFilter()
-                if (not(self.ugridS == [])):
+                if (not(self.ugridQuadS == [])):
                     logging.debug("feature edges: ugrid --> polydata")
                     if (self.vtkVersionMajor == 5):
-                        self.featureEdgesGeometryFilterS.SetInput(self.ugridS)
+                        self.featureEdgesGeometryFilterS.SetInput(self.ugridQuadS)
                     elif (self.vtkVersionMajor == 6):
-                        self.featureEdgesGeometryFilterS.SetInputData(self.ugridS)
-                elif (not(self.sgridS == [])):
+                        self.featureEdgesGeometryFilterS.SetInputData(self.ugridQuadS)
+                elif (not(self.sgridQuadS == [])):
                     logging.debug("feature edges: sgrid --> polydata")
                     if (self.vtkVersionMajor == 5):
-                        self.featureEdgesGeometryFilterS.SetInput(self.sgridS)
+                        self.featureEdgesGeometryFilterS.SetInput(self.sgridQuadS)
                     elif (self.vtkVersionMajor == 6):
-                        self.featureEdgesGeometryFilterS.SetInputData(self.sgridS)
+                        self.featureEdgesGeometryFilterS.SetInputData(self.sgridQuadS)
                 else:
                     print ">>>WARNING: ugrid/sgrid are not defined for solid!"
                     return
@@ -1642,9 +1750,6 @@ class fsi(object):
             else:
                 logging.debug("feature edges: actor off")
                 self.renderer.RemoveActor(self.featureEdgeActorS)
-        if not(self.dataSetActorS == []):
-            self.dataSetActorS.GetProperty().SetEdgeVisibility( \
-                self.boolEdgesS.get())
         self.renderWindow.Render()
     
     # show/hide element edges
@@ -1868,52 +1973,68 @@ class fsi(object):
     # update solid data set mapper
     def updateSolid(self):
         if self.showS.get() == "none":
-            if not(self.dataSetActorS == []):
-                self.renderer.RemoveActor(self.dataSetActorS)
-            self.boolShowDisp  = False
-            self.boolShowSolVel = False
+            if not(self.dataSetActorLinS == []):
+                self.renderer.RemoveActor(self.dataSetActorLinS)
+            if not(self.dataSetActorQuadS == []):
+                self.renderer.RemoveActor(self.dataSetActorQuadS)
+            self.boolShowDisp         = False
+            self.boolShowSolVel       = False
             self.boolShowCauchyStress = False
-            self.boolShowPresF = False
-            self.boolShowQualityS = False
+            self.boolShowPresF        = False
+            self.boolShowQualityS     = False
             self.boolShowScalarBarS.set(False)
         else:
-            if self.showS.get() == "disp":
-                self.boolShowDisp  = True
-                self.boolShowSolVel = False
+            if (self.showS.get() == "disp"):
+                self.boolShowDisp         = True
+                self.boolShowSolVel       = False
                 self.boolShowCauchyStress = False
-                self.boolShowPresS = False
-                self.boolShowQualityS = False
+                self.boolShowPresS        = False
+                self.boolShowQualityS     = False
                 self.updateDisp()
-            elif self.showS.get() == "vel":
-                self.boolShowDisp   = False
-                self.boolShowSolVel = True
+            elif (self.showS.get() == "vel"):
+                self.boolShowDisp         = False
+                self.boolShowSolVel       = True
                 self.boolShowCauchyStress = False
-                self.boolShowPresS  = False
-                self.boolShowQualityS = False
+                self.boolShowPresS        = False
+                self.boolShowQualityS     = False
                 self.updateSolVel()
-            elif self.showS.get() == "cauchy":
-                self.boolShowDisp   = False
-                self.boolShowSolVel = False
+            elif (self.showS.get() == "cauchy"):
+                self.boolShowDisp         = False
+                self.boolShowSolVel       = False
                 self.boolShowCauchyStress = True
-                self.boolShowPresS  = False
-                self.boolShowQualityS = False
+                self.boolShowPresS        = False
+                self.boolShowQualityS     = False
                 self.updateSolVel()
-            elif self.showS.get() == "presS":
-                self.boolShowDisp  = False
-                self.boolShowSolVel = False
+            elif (self.showS.get() == "presS"):
+                self.boolShowDisp         = False
+                self.boolShowSolVel       = False
                 self.boolShowCauchyStress = False
-                self.boolShowPresS = True
-                self.boolShowQualityS = False
+                self.boolShowPresS        = True
+                self.boolShowQualityS     = False
                 self.updatePresS()
-            elif self.showS.get() == "quality":
-                self.boolShowDisp  = False
-                self.boolShowSolVel = False
+            elif (self.showS.get() == "quality"):
+                self.boolShowDisp         = False
+                self.boolShowSolVel       = False
                 self.boolShowCauchyStress = False
-                self.boolShowPresS = False
-                self.boolShowQualityS = True
+                self.boolShowPresS        = False
+                self.boolShowQualityS     = True
                 self.updateQualityS()
             self.selectColorArrayS()
-            self.renderer.AddActor(self.dataSetActorS)
+            if ((self.showS.get() == "disp") \
+                or (self.showS.get() == "vel") \
+                or (self.showS.get() == "cauchy")):
+                self.renderer.RemoveActor(self.dataSetActorLinS)
+                self.renderer.AddActor(self.dataSetActorQuadS)
+            elif (self.showS.get() == "presS"):
+                self.renderer.RemoveActor(self.dataSetActorQuadS)
+                self.renderer.AddActor(self.dataSetActorLinS)
+            elif (self.showS.get() == "quality"):
+                if (self.meshQualityOnSTopo == 1):
+                    self.renderer.RemoveActor(self.dataSetActorQuadS)
+                    self.renderer.AddActor(self.dataSetActorLinS)
+                elif (self.meshQualityOnSTopo == 2):
+                    self.renderer.RemoveActor(self.dataSetActorLinS)
+                    self.renderer.AddActor(self.dataSetActorQuadS)
         self.scalarBarOnOffS()
         self.renderWindow.Render()
     
@@ -1975,46 +2096,73 @@ class fsi(object):
     
     # create data set mapper for solid
     def createDataSetMapperS(self):
-        if self.extractS == []:
-            self.extractS = vtk.vtkGeometryFilter()
-        if not(self.ugridS == []):
+        if (self.extractQuadS == []):
+            self.extractLinS = vtk.vtkGeometryFilter()
+            self.extractQuadS = vtk.vtkGeometryFilter()
+            self.triangleFilterLinS = vtk.vtkTriangleFilter()
+            self.triangleFilterQuadS = vtk.vtkTriangleFilter()
+        if not(self.ugridQuadS == []):
             if (self.vtkVersionMajor == 5):
-                self.extractS.SetInput(self.ugridS)
+                self.extractLinS.SetInput(self.ugridLinS)
+                self.extractQuadS.SetInput(self.ugridQuadS)
             elif (self.vtkVersionMajor == 6):
-                self.extractS.SetInputData(self.ugridS)
+                self.extractLinS.SetInputData(self.ugridLinS)
+                self.extractQuadS.SetInputData(self.ugridQuadS)
             else:
                 sys.exit("Incompatible VTK version " \
                     +str(vtk.vtkVersion().GetVTKVersion()) \
                     +". Must use 5.x.x or 6.x.x!")
         else:
             if (self.vtkVersionMajor == 5):
-                self.extractS.SetInput(self.sgridS)
+                self.extractLinS.SetInput(self.sgridLinS)
+                self.extractQuadS.SetInput(self.sgridQuadS)
             elif (self.vtkVersionMajor == 6):
-                self.extractS.SetInputData(self.sgridS)
+                self.extractLinS.SetInputData(self.sgridLinS)
+                self.extractQuadS.SetInputData(self.sgridQuadS)
             else:
                 sys.exit("Incompatible VTK version " \
                     +str(vtk.vtkVersion().GetVTKVersion()) \
                     +". Must use 5.x.x or 6.x.x!")
-        if self.linearSubdivisionS == []:
-            self.linearSubdivisionS = vtk.vtkLinearSubdivisionFilter()
-        self.linearSubdivisionS.SetInputConnection(self.extractS.GetOutputPort())
-        self.linearSubdivisionS.SetNumberOfSubdivisions( \
-            self.dsmSnumberOfSubdivisions)
-        if self.dataSetMapperS == []:
-            self.dataSetMapperS = vtk.vtkDataSetMapper()
-        self.dataSetMapperS.SetInputConnection( \
-            self.linearSubdivisionS.GetOutputPort())
-        if self.currentCTFS == []:
+        self.triangleFilterLinS.SetInputConnection( \
+            self.extractLinS.GetOutputPort())
+        self.triangleFilterQuadS.SetInputConnection( \
+            self.extractQuadS.GetOutputPort())
+        self.triangleFilterLinS.Update()
+        self.triangleFilterQuadS.Update()
+        if (self.linearSubdivisionQuadS == []):
+            self.linearSubdivisionLinS  = vtk.vtkLinearSubdivisionFilter()
+            self.linearSubdivisionQuadS = vtk.vtkLinearSubdivisionFilter()
+        self.linearSubdivisionLinS.SetInputConnection( \
+            self.triangleFilterLinS.GetOutputPort())
+        self.linearSubdivisionQuadS.SetInputConnection( \
+            self.triangleFilterQuadS.GetOutputPort())
+        self.linearSubdivisionLinS.SetNumberOfSubdivisions( \
+            self.dsmLinSnumberOfSubdivisions)
+        self.linearSubdivisionQuadS.SetNumberOfSubdivisions( \
+            self.dsmQuadSnumberOfSubdivisions)
+        if self.dataSetMapperQuadS == []:
+            self.dataSetMapperLinS  = vtk.vtkDataSetMapper()
+            self.dataSetMapperQuadS = vtk.vtkDataSetMapper()
+        self.dataSetMapperLinS.SetInputConnection( \
+            self.linearSubdivisionLinS.GetOutputPort())
+        self.dataSetMapperQuadS.SetInputConnection( \
+            self.linearSubdivisionQuadS.GetOutputPort())
+        if (self.currentCTFS == []):
             self.scalarBarOnOffS()
-        self.dataSetMapperS.SetLookupTable(self.currentCTFS)
-        if self.dataSetActorS == []:
-            self.dataSetActorS = vtk.vtkActor()
-        self.dataSetActorS.SetMapper(self.dataSetMapperS)
-        self.dataSetActorS.GetProperty().SetEdgeVisibility( \
-            self.boolEdgesS.get())
-        self.dataSetActorS.GetProperty().SetInterpolationToGouraud()
+        self.dataSetMapperLinS.SetLookupTable(self.currentCTFS)
+        self.dataSetMapperQuadS.SetLookupTable(self.currentCTFS)
+        if self.dataSetActorQuadS == []:
+            self.dataSetActorLinS  = vtk.vtkActor()
+            self.dataSetActorQuadS = vtk.vtkActor()
+        self.dataSetActorLinS.SetMapper(self.dataSetMapperLinS)
+        self.dataSetActorQuadS.SetMapper(self.dataSetMapperQuadS)
+        self.dataSetActorLinS.GetProperty().SetEdgeVisibility(False)
+        self.dataSetActorQuadS.GetProperty().SetEdgeVisibility(False)
+        self.dataSetActorLinS.GetProperty().SetInterpolationToGouraud()
+        self.dataSetActorQuadS.GetProperty().SetInterpolationToGouraud()
         self.selectColorArrayS()
-        self.renderer.AddActor(self.dataSetActorS)
+        #self.renderer.AddActor(self.dataSetActorLinS)
+        self.renderer.AddActor(self.dataSetActorQuadS)
         self.renderWindow.Render()
     
     # create data set mapper for solid
@@ -2145,22 +2293,32 @@ class fsi(object):
     # select variable for color map
     def selectColorArrayS(self):
         if self.boolShowDisp:
-            self.dataSetMapperS.SetScalarModeToUsePointFieldData()
-            self.dataSetMapperS.SelectColorArray("displacement")
+            self.dataSetMapperQuadS.SetScalarModeToUsePointFieldData()
+            self.dataSetMapperQuadS.SelectColorArray("displacement")
+            self.dataSetMapperQuadS.SetLookupTable(self.currentCTFS)
         elif self.boolShowSolVel:
-            self.dataSetMapperS.SetScalarModeToUsePointFieldData()
-            self.dataSetMapperS.SelectColorArray("velocity")
+            self.dataSetMapperQuadS.SetScalarModeToUsePointFieldData()
+            self.dataSetMapperQuadS.SelectColorArray("velocity")
+            self.dataSetMapperQuadS.SetLookupTable(self.currentCTFS)
         elif self.boolShowCauchyStress:
-            self.dataSetMapperS.SetScalarModeToUsePointFieldData()
-            self.dataSetMapperS.SelectColorArray("cauchy")
+            self.dataSetMapperQuadS.SetScalarModeToUsePointFieldData()
+            self.dataSetMapperQuadS.SelectColorArray("cauchy")
+            self.dataSetMapperQuadS.SetLookupTable(self.currentCTFS)
         elif self.boolShowPresS:
-            self.dataSetMapperS.SetScalarModeToUsePointData()
-            self.dataSetMapperS.SetUseLookupTableScalarRange(True)
+            self.dataSetMapperLinS.SetScalarModeToUsePointData()
+            self.dataSetMapperLinS.SetUseLookupTableScalarRange(True)
+            self.dataSetMapperLinS.SetLookupTable(self.currentCTFS)
         elif self.boolShowQualityS:
-            self.dataSetMapperS.SetScalarModeToUseCellFieldData()
-            self.dataSetMapperS.SelectColorArray("Quality")
-            self.dataSetMapperS.SetUseLookupTableScalarRange(True)
-        self.dataSetMapperS.SetLookupTable(self.currentCTFS)
+            if (self.meshTubesOnSTopo == 1):
+                self.dataSetMapperLinS.SetScalarModeToUseCellFieldData()
+                self.dataSetMapperLinS.SelectColorArray("Quality")
+                self.dataSetMapperLinS.SetUseLookupTableScalarRange(True)
+                self.dataSetMapperLinS.SetLookupTable(self.currentCTFS)
+            elif (self.meshTubesOnSTopo == 2):
+                self.dataSetMapperQuadS.SetScalarModeToUseCellFieldData()
+                self.dataSetMapperQuadS.SelectColorArray("Quality")
+                self.dataSetMapperQuadS.SetUseLookupTableScalarRange(True)
+                self.dataSetMapperQuadS.SetLookupTable(self.currentCTFS)
     
     # select variable for color map
     def selectColorArrayI(self):
@@ -2191,16 +2349,16 @@ class fsi(object):
     def outlineOnOffS(self):
         if self.outlineS == []:
             self.outlineS = vtk.vtkOutlineFilter()
-            if self.ugridS == []:
+            if self.ugridQuadS == []:
                 if (self.vtkVersionMajor == 5):
-                    self.outlineS.SetInput(self.sgridS)
+                    self.outlineS.SetInput(self.sgridQuadS)
                 elif (self.vtkVersionMajor == 6):
-                    self.outlineS.SetInputData(self.sgridS)
+                    self.outlineS.SetInputData(self.sgridQuadS)
             else:
                 if (self.vtkVersionMajor == 5):
-                    self.outlineS.SetInput(self.ugridS)
+                    self.outlineS.SetInput(self.ugridQuadS)
                 elif (self.vtkVersionMajor == 6):
-                    self.outlineS.SetInputData(self.ugridS)
+                    self.outlineS.SetInputData(self.ugridQuadS)
             self.outlineMapperS = vtk.vtkPolyDataMapper()
             self.outlineMapperS.SetInputConnection(self.outlineS.GetOutputPort())
             self.outlineActorS = vtk.vtkActor()
@@ -2691,17 +2849,24 @@ class fsi(object):
         self.filenamePresS      = config[11]
         self.boolVarDispSpace   = Tkinter.BooleanVar()
         self.boolVarDispSpace.set(config[12] == 'True')
-        self.filenameTopoLinF   = config[13] + "_lin_FE.T"
-        self.filenameTopoQuadF  = config[13] + "_quad_FE.T"
+        self.filenameLinXF      = config[13] + "_lin_FE.X"
+        self.filenameQuadXF     = config[13] + "_quad_FE.X"
+        self.filenameLinTF      = config[13] + "_lin_FE.T"
+        self.filenameQuadTF     = config[13] + "_quad_FE.T"
+        self.filenameLinBF      = config[13] + "_lin_FE.B"
+        self.filenameQuadBF     = config[13] + "_quad_FE.B"
         self.filenameTopoLinFvtk  = config[13] + "_lin_FE.vtk"
         self.filenameTopoQuadFvtk = config[13] + "_quad_FE.vtk"
         self.filenameTopoLinFct   = config[13] + "_lin_FE.ct"
         self.filenameTopoQuadFct  = config[13] + "_quad_FE.ct"
         self.filenameTopoLinFcl   = config[13] + "_lin_FE.cl"
         self.filenameTopoQuadFcl  = config[13] + "_quad_FE.cl"
-        self.filenameTopoLinS   = config[14] + "_lin_FE.T"
-        self.filenameTopoQuadS  = config[14] + "_quad_FE.T"
-        self.filenameXQuadS     = config[14] + "_quad_FE.X"
+        self.filenameLinTS      = config[14] + "_lin_FE.T"
+        self.filenameLinBS      = config[14] + "_lin_FE.B"
+        self.filenameQuadTS     = config[14] + "_quad_FE.T"
+        self.filenameQuadBS     = config[14] + "_quad_FE.B"
+        self.filenameQuadXS     = config[14] + "_quad_FE.X"
+        self.filenameLinQuadTS  = config[14] + "_lin_quad_FE.T"
         self.DEBUG              = (config[15] == 'True')
         self.densityF           = float(config[16])
         self.gravity_x          = float(config[17])
@@ -2722,11 +2887,16 @@ class fsi(object):
         self.scalarBarNormalizedHeight = float(config[29])
         self.scalarBarFontFamily = str(config[30])
         self.dsmFnumberOfSubdivisions = int(config[31])
-        self.dsmSnumberOfSubdivisions = int(config[32])
+        self.dsmLinSnumberOfSubdivisions  = int(config[32])
+        self.dsmQuadSnumberOfSubdivisions = int(config[32])
         self.dsmInumberOfSubdivisions = int(config[33])
         self.clipFnumberOfSubdivisions = int(config[34])
         self.sliceFnumberOfSubdivisions = int(config[35])
         self.filenameCauchyStress = config[36]
+        self.meshTubesFOnTopo = int(config[37])
+        self.meshTubesSOnTopo = int(config[38])
+        self.meshQualityOnFTopo = int(config[39])
+        self.meshQualityOnSTopo = int(config[40])
         # other hard-coded defaults
         self.boolAutoRangeF     = Tkinter.BooleanVar()
         self.boolAutoRangeF.set(True)
@@ -2782,16 +2952,24 @@ class fsi(object):
             self.scalarBarFontFamily = str(config[30])
             self.scalarBarFont()
             self.dsmFnumberOfSubdivisions = int(config[31])
-            self.dsmSnumberOfSubdivisions = int(config[32])
+            self.dsmLinSnumberOfSubdivisions  = int(config[32])
+            self.dsmQuadSnumberOfSubdivisions = int(config[32])
             self.dsmInumberOfSubdivisions = int(config[33])
             self.clipFnumberOfSubdivisions = int(config[34])
             self.sliceFnumberOfSubdivisions = int(config[35])
+            self.meshTubesFOnTopo = int(config[37])
+            self.meshTubesSOnTopo = int(config[38])
+            self.meshQualityOnFTopo = int(config[39])
+            self.meshQualityOnSTopo = int(config[40])
             if not(self.linearSubdivisionF == []):
                 self.linearSubdivisionF.SetNumberOfSubdivisions( \
                     self.dsmFnumberOfSubdivisions)
-            if not(self.linearSubdivisionS == []):
-                self.linearSubdivisionS.SetNumberOfSubdivisions( \
-                    self.dsmSnumberOfSubdivisions)
+            if not(self.linearSubdivisionLinS == []):
+                self.linearSubdivisionLinS.SetNumberOfSubdivisions( \
+                    self.dsmLinSnumberOfSubdivisions)
+            if not(self.linearSubdivisionQuadS == []):
+                self.linearSubdivisionQuadS.SetNumberOfSubdivisions( \
+                    self.dsmQuadSnumberOfSubdivisions)
             if not(self.linearSubdivisionI == []):
                 self.linearSubdivisionI.SetNumberOfSubdivisions( \
                     self.dsmInumberOfSubdivisions)
@@ -2842,7 +3020,7 @@ class fsi(object):
         if self.ugridI == []:
             self.ugridI      = vtk.vtkUnstructuredGrid()
             if self.numberOfDimensions == 3:
-                if self.meshTypeI == 22:
+                if self.meshTypeI == vtk.vtkQuadraticTriangle().GetCellType():
                     # quadratic triangle mesh
                     self.cellTypesI = vtk.vtkQuadraticTriangle().GetCellType()
                     divby = 7
@@ -2850,7 +3028,7 @@ class fsi(object):
                     self.tempElemI = readCheartData.readInterfaceElementsQuad( \
                         self.baseDirectory \
                         +self.meshFolder \
-                        +self.filenameTopoQuadI, \
+                        +self.filenameTI, \
                         self.numberOfDimensions)
                     # create cells for unstructured grid
                     tempElemLinI, cellstypesI, cellslocationsI = \
@@ -2874,7 +3052,7 @@ class fsi(object):
                     self.tempElemI = readCheartData.readInterfaceElementsLin( \
                         self.baseDirectory \
                         +self.meshFolder \
-                        +self.filenameTopoQuadI, \
+                        +self.filenameTI, \
                         self.numberOfDimensions)
                     # create cells for unstructured grid
                     tempElemLinI, cellstypesI, cellslocationsI = \
@@ -2903,7 +3081,9 @@ class fsi(object):
                                            +self.filenameSuffix)
             pointsI.SetData(numpy_to_vtk(tempCoord, \
                 deep=1, array_type=vtk.VTK_DOUBLE))
-            self.numberOfNodesQuadI = tempCoord.shape[0]
+            numNodesI = tempCoord.shape[0]
+            if (numNodesI != self.numberOfNodesI):
+                raise ValueError("Inconsistent number of nodes (interface).")
             # assign points
             self.ugridI.SetPoints(pointsI)
             self.minXI, self.maxXI, self.minYI, self.maxYI, self.minZI, self.maxZI = \
@@ -2914,7 +3094,7 @@ class fsi(object):
     # update solid displacement
     def updateLMult(self):
         logging.debug("update Lagrange multiplier")
-        if ((self.ugridS == []) or self.boolUpdateSpaceS):
+        if ((self.ugridI == []) or self.boolUpdateSpaceI):
             logging.debug("unstructured grid for interface will be updated first")
             self.updateSpaceI()
         if self.boolUpdateLMult:
@@ -2965,7 +3145,7 @@ class fsi(object):
             self.ugridF      = vtk.vtkUnstructuredGrid()
             self.ugridCellsF = vtk.vtkUnstructuredGrid()
             if self.numberOfDimensions == 3:
-                if self.meshTypeF == 24:
+                if self.meshTypeQuadF == vtk.vtkQuadraticTetra().GetCellType():
                     # quadratic tetrahedral mesh
                     self.cellTypesF = vtk.vtkQuadraticTetra().GetCellType()
                     divby = 11
@@ -2976,13 +3156,13 @@ class fsi(object):
                     self.tempElemF = readCheartData.readTriQuadAsLin( \
                         self.baseDirectory \
                         +self.meshFolder \
-                        +self.filenameTopoQuadF, \
+                        +self.filenameQuadTF, \
                         self.numberOfDimensions)
                     if not(os.path.exists(filename)):
                         # create cells for unstructured grid
                         tempElemLinF, cellstypesF, cellslocationsF = \
-                            readCheartData.createTopology3Dquad(self.tempElemF, \
-                            self.cellTypesF)
+                            readCheartData.createTopologyQuadraticTetra( \
+                            self.tempElemF)
                         logging.debug("export "+str(filename))
                         # export cell data, such that we're faster next time
                         readCheartData.writeScalarInts(tempElemLinF, \
@@ -3000,19 +3180,19 @@ class fsi(object):
                     else:
                         # cell data files exist - import!
                         logging.debug("import "+str(filename))
-                        tempElemLinF    = readCheartData.readScalarInts( \
+                        tempElemLinF, arg2 = readCheartData.readScalarInts( \
                             filename)
                         filename = self.baseDirectory \
                             +self.meshFolder \
                             +self.filenameTopoQuadFct
-                        cellstypesF     = readCheartData.readScalarInts( \
+                        cellstypesF, arg2 = readCheartData.readScalarInts( \
                             filename)
                         filename = self.baseDirectory \
                             +self.meshFolder \
                             +self.filenameTopoQuadFcl
-                        cellslocationsF = readCheartData.readScalarInts( \
+                        cellslocationsF, arg2 = readCheartData.readScalarInts( \
                             filename)
-                elif self.meshTypeF == 10:
+                elif self.meshTypeQuadF == 10:
                     # linear tetrahedral mesh
                     self.cellTypesF = vtk.vtkTetra().GetCellType()
                     divby = 5
@@ -3020,7 +3200,7 @@ class fsi(object):
                     self.tempElemF = readCheartData.readTriTetLin( \
                         self.baseDirectory \
                         +self.meshFolder \
-                        +self.filenameTopoQuadF, \
+                        +self.filenameQuadTF, \
                         self.numberOfDimensions)
                     self.tempElemF = readCheartData.flipTets(self.tempElemF, \
                         tempCoord)
@@ -3067,17 +3247,17 @@ class fsi(object):
                 else:
                     # cell data files exist - import!
                     logging.debug("import "+str(filename))
-                    tempElemLinF    = readCheartData.readScalarInts( \
+                    tempElemLinF, arg2 = readCheartData.readScalarInts( \
                         filename)
                     filename = self.baseDirectory \
                         +self.meshFolder \
                         +self.filenameTopoLinFct
-                    cellstypesF     = readCheartData.readScalarInts( \
+                    cellstypesF, arg2 = readCheartData.readScalarInts( \
                         filename)
                     filename = self.baseDirectory \
                         +self.meshFolder \
                         +self.filenameTopoLinFcl
-                    cellslocationsF = readCheartData.readScalarInts( \
+                    cellslocationsF, arg2 = readCheartData.readScalarInts( \
                         filename)
                 cellsF = vtk.vtkCellArray()
                 cellsF.SetCells(int(tempElemLinF.shape[0]/divby), \
@@ -3097,12 +3277,12 @@ class fsi(object):
                 self.tempElemF = readCheartData.readTriQuadAsLin( \
                     self.baseDirectory \
                     +self.meshFolder \
-                    +self.filenameTopoQuadF, \
+                    +self.filenameQuadTF, \
                     self.numberOfDimensions)
                 # create cells for unstructured grid
                 tempElemLinF, cellstypesF, cellslocationsF = \
-                    readCheartData.createTopology2Dquad(self.tempElemF, \
-                    self.cellTypesF)
+                    readCheartData.createTopologyQuadraticTriangle( \
+                    self.tempElemF)
                 cellsF = vtk.vtkCellArray()
                 cellsF.SetCells(int(tempElemLinF.shape[0]/divby), \
                     numpy_to_vtk(tempElemLinF, deep=1, \
@@ -3136,7 +3316,9 @@ class fsi(object):
             pointsF = vtk.vtkPoints()
             pointsF.SetData(numpy_to_vtk(tempCoord, \
                 deep=1, array_type=vtk.VTK_DOUBLE))
-            self.numberOfNodesQuadF = tempCoord.shape[0]
+            numNodesQuadF = tempCoord.shape[0]
+            if (numNodesQuadF != self.numberOfNodesQuadF):
+                raise ValueError("Inconsistent number of nodes (fluid, quad).")
             # assign points
             self.ugridF.SetPoints(pointsF)
             self.ugridCellsF.SetPoints(pointsF)
@@ -3309,15 +3491,10 @@ class fsi(object):
     # update fluid pressure
     def updatePresF(self):
         logging.debug("update fluid pressure")
-        if self.tempMappingF == [] and not(self.meshTypeF == 10):
-            self.tempMappingF = readCheartData.findMappingLinQuad( \
-                self.baseDirectory \
-                +self.meshFolder \
-                +self.filenameTopoLinF, \
-                self.baseDirectory \
-                +self.meshFolder \
-                +self.filenameTopoQuadF, \
-                self.numberOfDimensions)
+        if self.tempMappingF == [] and not(self.meshTypeQuadF == 10):
+            self.tempMappingF = readCheartData.findMappingTetra( \
+                self.baseDirectory+self.meshFolder+self.filenameLinTF, \
+                self.baseDirectory+self.meshFolder+self.filenameQuadTF)
         if self.boolUpdateSpaceF:
             logging.debug("unstructured grid for fluid will be updated first")
             self.updateSpaceF()
@@ -3333,7 +3510,7 @@ class fsi(object):
                 +self.filenamePresF \
                 +str(self.currentT) \
                 +self.filenameSuffix)
-            if not(self.meshTypeF == 10):
+            if not(self.meshTypeQuadF == 10):
                 tempPresQuadF = readCheartData.interpolateLinToQuad( \
                     self.tempElemF, \
                     vtk_to_numpy(self.ugridF.GetPoints().GetData()), \
@@ -3375,7 +3552,7 @@ class fsi(object):
                  +self.filenameVortex \
                  +str(self.currentT) \
                  +self.filenameSuffix)):
-            tempVortex = readCheartData.readScalarInts( \
+            tempVortex, arg2 = readCheartData.readScalarInts( \
                 self.baseDirectory \
                 +self.dataFolder \
                 +self.filenameVortex \
@@ -3415,265 +3592,337 @@ class fsi(object):
     
     # update solid node coordinates
     def updateSpaceS(self):
-        logging.debug("update solid space")
-        if (self.meshTypeS == 22) or (self.meshTypeS == 24):
-            if self.ugridS == []:
-                self.ugridS      = vtk.vtkUnstructuredGrid()
-                self.ugridCellsS = vtk.vtkUnstructuredGrid()
-                if self.numberOfDimensions == 3:
-                    self.cellTypesS = vtk.vtkQuadraticTetra().GetCellType()
-                    divby = 11
-                    # read tetrahedrons
-                    self.tempElemS = readCheartData.readTriQuadAsLin( \
-                        self.baseDirectory \
-                        +self.meshFolder \
-                        +self.filenameTopoQuadS, \
-                        self.numberOfDimensions)
-                    # create cells for unstructured grid
-                    tempElemLinS, cellstypesS, cellslocationsS = \
-                        readCheartData.createTopology3Dquad(self.tempElemS, \
-                        self.cellTypesS)
-                    cellsS = vtk.vtkCellArray()
-                    cellsS.SetCells(int(tempElemLinS.shape[0]/divby), \
-                        numpy_to_vtk(tempElemLinS, deep=1, \
-                        array_type=vtk.vtkIdTypeArray().GetDataType()))
-                    # assign cells
-                    self.ugridS.SetCells( \
-                        numpy_to_vtk(cellstypesS, deep=1, \
-                        array_type=vtk.vtkUnsignedCharArray().GetDataType()), \
-                        numpy_to_vtk(cellslocationsS, deep = 1, \
-                                   array_type=vtk.vtkIdTypeArray().GetDataType()),
-                                   cellsS)
-                    # linears (see fluid)
-                    ct = vtk.vtkTetra().GetCellType()
-                    divby = 5
-                    # create cells for unstructured grid
-                    tempElemLinS, cellstypesS, cellslocationsS = \
-                        readCheartData.createTopology3Dcells(self.tempElemS, \
-                        ct)
-                    cellsS = vtk.vtkCellArray()
-                    cellsS.SetCells(int(tempElemLinS.shape[0]/divby), \
-                        numpy_to_vtk(tempElemLinS, deep=1, \
-                        array_type=vtk.vtkIdTypeArray().GetDataType()))
-                    # assign cells
-                    self.ugridCellsS.SetCells( \
-                        numpy_to_vtk(cellstypesS, deep=1, \
-                        array_type=vtk.vtkUnsignedCharArray().GetDataType()), \
-                        numpy_to_vtk(cellslocationsS, deep = 1, \
-                                   array_type=vtk.vtkIdTypeArray().GetDataType()),
-                                   cellsS)
-                else:
-                    # quadratic triangle mesh
-                    self.cellTypesS = vtk.vtkQuadraticTriangle().GetCellType()
-                    divby = 7
-                    # read triangles
-                    self.tempElemS = readCheartData.readTriQuadAsLin( \
-                        self.baseDirectory \
-                        +self.meshFolder \
-                        +self.filenameTopoQuadS, \
-                        self.numberOfDimensions)
-                    # create cells for unstructured grid
-                    tempElemLinS, cellstypesS, cellslocationsS = \
-                        readCheartData.createTopology2Dquad(self.tempElemS, \
-                        self.cellTypesS)
-                    cellsS = vtk.vtkCellArray()
-                    cellsS.SetCells(int(tempElemLinS.shape[0]/divby), \
-                        numpy_to_vtk(tempElemLinS, deep=1, \
-                        array_type=vtk.vtkIdTypeArray().GetDataType()))
-                    # assign cells
-                    self.ugridS.SetCells(numpy_to_vtk(cellstypesS, deep=1, \
-                        array_type=vtk.vtkUnsignedCharArray().GetDataType()),
-                                   numpy_to_vtk(cellslocationsS, deep = 1, \
-                                   array_type=vtk.vtkIdTypeArray().GetDataType()),
-                                   cellsS)
-                    
-                    ## create a linear triangle mesh too for cell quality
-                    ct = vtk.vtkTriangle().GetCellType()
-                    divby = 4
-                    # create cells for unstructured grid
-                    tempElemLinS, cellstypesS, cellslocationsS = \
-                        readCheartData.createTopology2D(self.tempElemS, \
-                        ct)
-                    cellsS = vtk.vtkCellArray()
-                    cellsS.SetCells(int(tempElemLinS.shape[0]/divby), \
-                        numpy_to_vtk(tempElemLinS, deep=1, \
-                        array_type=vtk.vtkIdTypeArray().GetDataType()))
-                    # assign cells
-                    self.ugridCellsS.SetCells(numpy_to_vtk(cellstypesS, deep=1, \
-                        array_type=vtk.vtkUnsignedCharArray().GetDataType()),
-                                   numpy_to_vtk(cellslocationsS, deep = 1, \
-                                   array_type=vtk.vtkIdTypeArray().GetDataType()),
-                                   cellsS)
-        elif (self.meshTypeS == 28) or (self.meshTypeS == 25) or (self.meshTypeS == 29):
-            if self.sgridS == []:
-                # use unstructured grid here as well (for now)
-                self.sgridS      = vtk.vtkUnstructuredGrid()
-                self.sgridCellsS = vtk.vtkUnstructuredGrid()
-                if self.numberOfDimensions == 3:
-                    print "structured grid - 3D"
-                    self.cellTypesS = vtk.vtkTriQuadraticHexahedron().GetCellType()
-                    divby = 28
-                    # read hexahedrons
-                    self.tempElemS = readCheartData.readQuadHex( \
-                        self.baseDirectory \
-                        +self.meshFolder \
-                        +self.filenameTopoQuadS, \
-                        self.numberOfDimensions)
-                    # create cells for unstructured grid
-                    tempElemLinS, cellstypesS, cellslocationsS = \
-                        readCheartData.createTopology3Dquad(self.tempElemS, \
-                        self.cellTypesS)
-                    cellsS = vtk.vtkCellArray()
-                    cellsS.SetCells(int(tempElemLinS.shape[0]/divby), \
-                        numpy_to_vtk(tempElemLinS, deep=1, \
-                        array_type=vtk.vtkIdTypeArray().GetDataType()))
-                    # assign cells
-                    self.sgridS.SetCells( \
-                        numpy_to_vtk(cellstypesS, deep=1, \
-                        array_type=vtk.vtkUnsignedCharArray().GetDataType()), \
-                        numpy_to_vtk(cellslocationsS, deep = 1, \
-                                   array_type=vtk.vtkIdTypeArray().GetDataType()),
-                                   cellsS)
-                elif self.numberOfDimensions == 2:
-                    print "structured grid - 2D"
-                    self.cellTypesS = vtk.vtkBiQuadraticQuad().GetCellType()
-                    divby = 10
-                    # read quadrilaterals
-                    self.tempElemS = readCheartData.readQuadHex( \
-                        self.baseDirectory \
-                        +self.meshFolder \
-                        +self.filenameTopoQuadS, \
-                        self.numberOfDimensions)
-                    # create cells for unstructured grid
-                    tempElemLinS, cellstypesS, cellslocationsS = \
-                        readCheartData.createTopology2Dquad(self.tempElemS, \
-                        self.cellTypesS)
-                    cellsS = vtk.vtkCellArray()
-                    cellsS.SetCells(int(tempElemLinS.shape[0]/divby), \
-                        numpy_to_vtk(tempElemLinS, deep=1, \
-                        array_type=vtk.vtkIdTypeArray().GetDataType()))
-                    # assign cells
-                    self.sgridS.SetCells( \
-                        numpy_to_vtk(cellstypesS, deep=1, \
-                        array_type=vtk.vtkUnsignedCharArray().GetDataType()), \
-                        numpy_to_vtk(cellslocationsS, deep = 1, \
-                                   array_type=vtk.vtkIdTypeArray().GetDataType()),
-                                   cellsS)
-        else:
-            print "unsupported mesh type (solid): ", self.meshTypeS
-        if self.boolUpdateSpaceS:
+        boolDispWasUpdatedHere = False
+        ########################################################################
+        ########################################################################
+        logging.debug("update solid space (lin)")
+        # linear topology (sgrid for vtkQuad, vtkHexahedron)
+        if ((self.sgridLinS == []) and \
+            ((self.meshTypeLinS == vtk.vtkQuad().GetCellType()) \
+             or (self.meshTypeLinS == vtk.vtkHexahedron().GetCellType()))):
+            # use unstructured grid here as well (for now?)
+            self.sgridLinS = vtk.vtkUnstructuredGrid()
+            # vtkQuad
+            if (self.meshTypeLinS == vtk.vtkQuad().GetCellType()):
+                if (self.tempMappingLinQuadS == []):
+                    self.tempMappingLinQuadS = readCheartData.findMappingQuad( \
+                        self.baseDirectory+self.meshFolder+self.filenameLinTS, \
+                        self.baseDirectory+self.meshFolder+self.filenameQuadTS)
+                divby = 5
+                # read topology
+                self.tempElemLinS = readCheartData.readQuad( \
+                    self.baseDirectory+self.meshFolder+self.filenameLinTS)
+                # create cells for unstructured grid
+                tempElemLinLinS, cellstypesLinS, cellslocationsLinS = \
+                    readCheartData.createTopologyQuad(self.tempElemLinS)
+            # vtkHexahedron
+            elif (self.meshTypeLinS == vtk.vtkHexahedron().GetCellType()):
+                if (self.tempMappingLinQuadS == []):
+                    self.tempMappingLinQuadS = \
+                        readCheartData.findMappingHexahedron( \
+                        self.baseDirectory+self.meshFolder+self.filenameLinTS, \
+                        self.baseDirectory+self.meshFolder+self.filenameQuadTS)
+                divby = 9
+                # read topology
+                self.tempElemLinS = readCheartData.readHexahedron( \
+                    self.baseDirectory+self.meshFolder+self.filenameLinTS)
+                # create cells for unstructured grid
+                tempElemLinLinS, cellstypesLinS, cellslocationsLinS = \
+                    readCheartData.createTopologyHexahedron(self.tempElemLinS)
+            # this is what we do for all cell types
+            cellsLinS = vtk.vtkCellArray()
+            cellsLinS.SetCells(int(tempElemLinLinS.shape[0]/divby), \
+                numpy_to_vtk(tempElemLinLinS, deep=1, \
+                array_type=vtk.vtkIdTypeArray().GetDataType()))
+            # assign cells
+            self.sgridLinS.SetCells( \
+                numpy_to_vtk(cellstypesLinS, deep=1, \
+                array_type=vtk.vtkUnsignedCharArray().GetDataType()), \
+                numpy_to_vtk(cellslocationsLinS, deep = 1, \
+                array_type=vtk.vtkIdTypeArray().GetDataType()),
+                cellsLinS)
+        # linear topology (ugrid for vtkTriangle, vtkTetra)
+        if ((self.ugridLinS == []) and \
+            ((self.meshTypeLinS == vtk.vtkTriangle().GetCellType()) \
+             or (self.meshTypeLinS == vtk.vtkTetra().GetCellType()))):
+            self.ugridLinS = vtk.vtkUnstructuredGrid()
+            # vtkTriangle
+            if (self.meshTypeLinS == vtk.vtkTriangle().GetCellType()):
+                if (self.tempMappingLinQuadS == []):
+                    self.tempMappingLinQuadS = \
+                        readCheartData.findMappingTriangle( \
+                        self.baseDirectory+self.meshFolder+self.filenameLinTS, \
+                        self.baseDirectory+self.meshFolder+self.filenameQuadTS)
+                divby = 4
+                # read topology
+                self.tempElemLinS = readCheartData.readTriangle( \
+                    self.baseDirectory+self.meshFolder+self.filenameLinTS)
+                # create cells for unstructured grid
+                tempElemLinLinS, cellstypesLinS, cellslocationsLinS = \
+                    readCheartData.createTopologyTriangle(self.tempElemLinS)
+            # vtkTetra
+            elif (self.meshTypeLinS == vtk.vtkTetra().GetCellType()):
+                if (self.tempMappingLinQuadS == []):
+                    self.tempMappingLinQuadS = readCheartData.findMappingTetra( \
+                        self.baseDirectory+self.meshFolder+self.filenameLinTS, \
+                        self.baseDirectory+self.meshFolder+self.filenameQuadTS)
+                divby = 5
+                # read topology
+                self.tempElemLinS = readCheartData.readTetra( \
+                    self.baseDirectory+self.meshFolder+self.filenameLinTS)
+                # create cells for unstructured grid
+                tempElemLinLinS, cellstypesLinS, cellslocationsLinS = \
+                    readCheartData.createTopologyTetra(self.tempElemLinS)
+            # this is what we do for all cell types
+            cellsLinS = vtk.vtkCellArray()
+            cellsLinS.SetCells(int(tempElemLinLinS.shape[0]/divby), \
+                numpy_to_vtk(tempElemLinLinS, deep=1, \
+                array_type=vtk.vtkIdTypeArray().GetDataType()))
+            # assign cells
+            self.ugridLinS.SetCells( \
+                numpy_to_vtk(cellstypesLinS, deep=1, \
+                array_type=vtk.vtkUnsignedCharArray().GetDataType()), \
+                numpy_to_vtk(cellslocationsLinS, deep = 1, \
+                array_type=vtk.vtkIdTypeArray().GetDataType()),
+                cellsLinS)
+        if self.boolUpdateSpaceLinS:
             # read points
-            pointsS = vtk.vtkPoints()
-            if self.boolVarDispSpace.get() and not(self.boolShowOnReferenceS.get()):
-                filename1 = self.baseDirectory \
-                    +self.dataFolder \
-                    +self.filenameSpaceS \
-                    +"1" \
-                    +self.filenameSuffix
-                if not(os.path.exists(filename1)):
-                    filename1 = self.baseDirectory \
-                        +self.dataFolder \
-                        +self.filenameSpaceS \
-                        +str(self.fromT) \
-                        +self.filenameSuffix
-                    if not(os.path.exists(filename1)):
-                        print "The following file does not exist:\n" \
-                            +filename1
-                        return -1
-                filename2 = self.baseDirectory \
-                    +self.dataFolder \
-                    +self.filenameDisp \
-                    +str(self.currentT) \
-                    +self.filenameSuffix
-                tempCoordS, tempDisp, self.numberOfDimensions = \
-                    readCheartData.readCoordDisp(filename1, filename2)
-                if not(self.ugridS == []):
-                    self.ugridS.GetPointData().SetVectors( \
-                        organiseData.numpy2vtkDataArray(tempDisp, "displacement"))
-                    self.minMagDisp, self.maxMagDisp = \
-                        self.ugridS.GetPointData().GetVectors("displacement").GetRange(-1)
-                    self.minDisp0, self.maxDisp0 = \
-                        self.ugridS.GetPointData().GetVectors("displacement").GetRange(0)
-                    self.minDisp1, self.maxDisp1 = \
-                        self.ugridS.GetPointData().GetVectors("displacement").GetRange(1)
-                    self.minDisp2, self.maxDisp2 = \
-                        self.ugridS.GetPointData().GetVectors("displacement").GetRange(2)
+            pointsLinS = vtk.vtkPoints()
+            # set coordinate values to current configuration
+            # where Space = SolidSpace + Disp
+            if (self.boolVarDispSpace.get() \
+                and not(self.boolShowOnReferenceS.get())):
+                refname  = self.baseDirectory + self.meshFolder + self.filenameLinXS
+                dispname = self.baseDirectory + self.dataFolder + self.filenameDisp \
+                    + str(self.currentT) + self.filenameSuffix
+                refSpaceLinS, arg2 = readCheartData.readVectors(refname)
+                dispQuadS,    arg2 = readCheartData.readVectors(dispname)
+                boolDispWasUpdatedHere = True
+                dispLinS = numpy.zeros((self.numberOfNodesLinS, 3), dtype=float)
+                for i in range(0, self.numberOfNodesLinS, 1):
+                    dispLinS[i][0:3:1] = \
+                        dispQuadS[self.tempMappingLinQuadS[i]][0:3:1]
+                tempCoordLinS = refSpaceLinS + dispLinS
+            # set coordinate values to current configuration
+            # where Space = SolidSpace
+            elif (not(self.boolVarDispSpace.get()) \
+                and not(self.boolShowOnReferenceS.get())):
+                refname  = self.baseDirectory + self.meshFolder + self.filenameLinXS
+                currname = self.baseDirectory + self.dataFolder \
+                    + self.filenameSpaceS + "1" + self.filenameSuffix
+                if not(os.path.exists(currname)):
+                    logging.debug(">>>WARNING: file "+currname+" does not exist." \
+                        +" Defaulting to reference configuration.")
+                    tempCoordLinS, arg2 = readCheartData.readVectors(refname)
                 else:
-                    self.sgridS.GetPointData().SetVectors( \
-                        organiseData.numpy2vtkDataArray(tempDisp, "displacement"))
-                    self.minMagDisp, self.maxMagDisp = \
-                        self.sgridS.GetPointData().GetVectors("displacement").GetRange(-1)
-                    self.minDisp0, self.maxDisp0 = \
-                        self.sgridS.GetPointData().GetVectors("displacement").GetRange(0)
-                    self.minDisp1, self.maxDisp1 = \
-                        self.sgridS.GetPointData().GetVectors("displacement").GetRange(1)
-                    self.minDisp2, self.maxDisp2 = \
-                        self.sgridS.GetPointData().GetVectors("displacement").GetRange(2)
-                    self.boolUpdateDisp = False
-                logging.debug("solid displacement magnitude range: [%.2f, %.2f]" \
-                              % (self.minMagDisp, self.maxMagDisp))
-                logging.debug("solid displacement x-range: [%.2f, %.2f]" \
-                              % (self.minDisp0, self.maxDisp0))
-                logging.debug("solid displacement y-range: [%.2f, %.2f]" \
-                              % (self.minDisp1, self.maxDisp1))
-                logging.debug("solid displacement z-range: [%.2f, %.2f]" \
-                              % (self.minDisp2, self.maxDisp2))
-            elif self.boolVarDispSpace.get() and self.boolShowOnReferenceS.get():
-                filename1 = self.baseDirectory \
-                    +self.dataFolder \
-                    +self.filenameSpaceS \
-                    +"1" \
-                    +self.filenameSuffix
-                if not(os.path.exists(filename1)):
-                    filename1 = self.baseDirectory \
-                        +self.dataFolder \
-                        +self.filenameSpaceS \
-                        +str(self.fromT) \
-                        +self.filenameSuffix
-                    if not(os.path.exists(filename1)):
-                        print "The following file does not exist:\n" \
-                            +filename1
-                        return -1
-                tempCoordS, self.numberOfDimensions = \
-                    readCheartData.readVectors(filename1)
-            else:
-                if self.boolShowOnReferenceS.get():
-                    logging.debug(str("SolidSpace-*.D" \
-                        +" is current configuration. Visualization of" \
-                        +" reference configuration is currently not supported."))
-                tempCoordS, self.numberOfDimensions = \
-                    readCheartData.readVectors(self.baseDirectory \
-                                               +self.dataFolder \
-                                               +self.filenameSpaceS \
-                                               +str(self.currentT) \
-                                               +self.filenameSuffix)
-            self.numberOfNodesQuadS = tempCoordS.shape[0]
-            pointsS.SetData(numpy_to_vtk(tempCoordS, \
+                    spaceQuadS, arg2 = readCheartData.readVectors(currname)
+                    tempCoordLinS = numpy.zeros((self.numberOfNodesLinS, 3), dtype=float)
+                    for i in range(0, self.numberOfNodesLinS, 1):
+                        tempCoordLinS[i][0:3:1] = \
+                            spaceQuadS[self.tempMappingLinQuadS[i]][0:3:1]
+            # set coordinate values to reference configuration
+            # where Space = SolidSpace + Disp   OR   Space = SolidSpace
+            elif self.boolShowOnReferenceS.get():
+                refname = self.baseDirectory + self.meshFolder + self.filenameLinXS
+                tempCoordLinS, arg2 = readCheartData.readVectors(refname)
+            # sanity check
+            if (tempCoordLinS.shape[0] != self.numberOfNodesLinS):
+                raise ValueError("Inconsistent number of nodes (solid, lin).")
+            pointsLinS.SetData(numpy_to_vtk(tempCoordLinS, \
                 deep=1, array_type=vtk.VTK_DOUBLE))
             # assign points
-            if not(self.ugridS == []):
-                self.ugridS.SetPoints(pointsS)
-                self.ugridCellsS.SetPoints(pointsS)
-                self.minXS, self.maxXS, self.minYS, self.maxYS, self.minZS, self.maxZS = \
-                    self.ugridS.GetPoints().GetBounds()
+            if not(self.ugridLinS == []):
+                self.ugridLinS.SetPoints(pointsLinS)
             else:
-                self.sgridS.SetPoints(pointsS)
-                self.sgridCellsS.SetPoints(pointsS)
+                self.sgridLinS.SetPoints(pointsLinS)
+            self.boolUpdateSpaceLinS = False
+        # end linear topology
+        ########################################################################
+        ########################################################################
+        # quadratic topology
+        logging.debug("update solid space (quad)")
+        # quadratic topology (sgrid for vtkBiQuadraticQuad, vtkTriQuadraticHexahedron)
+        if ((self.sgridQuadS == []) and \
+            ((self.meshTypeQuadS == vtk.vtkBiQuadraticQuad().GetCellType()) \
+             or (self.meshTypeQuadS == vtk.vtkTriQuadraticHexahedron().GetCellType()))):
+            # use unstructured grid here as well (for now?)
+            self.sgridQuadS = vtk.vtkUnstructuredGrid()
+            # vtkBiQuadraticQuad
+            if (self.meshTypeQuadS == vtk.vtkBiQuadraticQuad().GetCellType()):
+                if (self.tempMappingLinQuadS == []):
+                    self.tempMappingLinQuadS = readCheartData.findMappingQuad( \
+                        self.baseDirectory+self.meshFolder+self.filenameLinTS, \
+                        self.baseDirectory+self.meshFolder+self.filenameQuadTS)
+                divby = 10
+                # read topology
+                self.tempElemQuadS = readCheartData.readBiQuadraticQuad( \
+                    self.baseDirectory+self.meshFolder+self.filenameQuadTS)
+                # create cells for unstructured grid
+                tempElemQuadLinS, cellstypesQuadS, cellslocationsQuadS = \
+                    readCheartData.createTopologyBiQuadraticQuad(self.tempElemQuadS)
+            # vtkTriQuadraticHexahedron
+            elif (self.meshTypeQuadS == vtk.vtkTriQuadraticHexahedron().GetCellType()):
+                divby = 28
+                # read topology
+                self.tempElemQuadS = readCheartData.readTriQuadraticHexahedron( \
+                    self.baseDirectory+self.meshFolder+self.filenameQuadTS)
+                # create cells for unstructured grid
+                tempElemQuadLinS, cellstypesQuadS, cellslocationsQuadS = \
+                    readCheartData.createTopologyTriQuadraticHexahedron(self.tempElemQuadS)
+            # this is what we do for all cell types
+            cellsQuadS = vtk.vtkCellArray()
+            cellsQuadS.SetCells(int(tempElemQuadLinS.shape[0]/divby), \
+                numpy_to_vtk(tempElemQuadLinS, deep=1, \
+                array_type=vtk.vtkIdTypeArray().GetDataType()))
+            # assign cells
+            self.sgridQuadS.SetCells( \
+                numpy_to_vtk(cellstypesQuadS, deep=1, \
+                array_type=vtk.vtkUnsignedCharArray().GetDataType()), \
+                numpy_to_vtk(cellslocationsQuadS, deep = 1, \
+                array_type=vtk.vtkIdTypeArray().GetDataType()),
+                cellsQuadS)
+        # quadratic topology (ugrid for vtkQuadraticTriangle, vtkQuadraticTetra)
+        if ((self.ugridQuadS == []) and \
+            ((self.meshTypeQuadS == vtk.vtkQuadraticTriangle().GetCellType()) \
+             or (self.meshTypeQuadS == vtk.vtkQuadraticTetra().GetCellType()))):
+            self.ugridQuadS = vtk.vtkUnstructuredGrid()
+            # vtkQuadraticTriangle
+            if (self.meshTypeQuadS == vtk.vtkQuadraticTriangle().GetCellType()):
+                if (self.tempMappingLinQuadS == []):
+                    self.tempMappingLinQuadS = readCheartData.findMappingTriangle( \
+                        self.baseDirectory+self.meshFolder+self.filenameLinTS, \
+                        self.baseDirectory+self.meshFolder+self.filenameQuadTS)
+                divby = 7
+                # read topology
+                self.tempElemQuadS = readCheartData.readQuadraticTriangle( \
+                    self.baseDirectory+self.meshFolder+self.filenameQuadTS)
+                # create cells for unstructured grid
+                tempElemQuadLinS, cellstypesQuadS, cellslocationsQuadS = \
+                    readCheartData.createTopologyQuadraticTriangle(self.tempElemQuadS)
+            # vtkQuadraticTetra
+            elif (self.meshTypeQuadS == vtk.vtkQuadraticTetra().GetCellType()):
+                divby = 11
+                # read topology
+                self.tempElemQuadS = readCheartData.readQuadraticTetra( \
+                    self.baseDirectory+self.meshFolder+self.filenameQuadTS)
+                # create cells for unstructured grid
+                tempElemQuadLinS, cellstypesQuadS, cellslocationsQuadS = \
+                    readCheartData.createTopologyQuadraticTetra(self.tempElemQuadS)
+            # this is what we do for all cell types
+            cellsQuadS = vtk.vtkCellArray()
+            cellsQuadS.SetCells(int(tempElemQuadLinS.shape[0]/divby), \
+                numpy_to_vtk(tempElemQuadLinS, deep=1, \
+                array_type=vtk.vtkIdTypeArray().GetDataType()))
+            # assign cells
+            self.ugridQuadS.SetCells( \
+                numpy_to_vtk(cellstypesQuadS, deep=1, \
+                array_type=vtk.vtkUnsignedCharArray().GetDataType()), \
+                numpy_to_vtk(cellslocationsQuadS, deep = 1, \
+                array_type=vtk.vtkIdTypeArray().GetDataType()),
+                cellsQuadS)
+        if self.boolUpdateSpaceQuadS:
+            # read points
+            pointsQuadS = vtk.vtkPoints()
+            # set coordinate values to current configuration
+            # where Space = SolidSpace + Disp
+            if (self.boolVarDispSpace.get() \
+                and not(self.boolShowOnReferenceS.get())):
+                refname  = self.baseDirectory + self.meshFolder + self.filenameQuadXS
+                dispname = self.baseDirectory + self.dataFolder + self.filenameDisp \
+                    + str(self.currentT) + self.filenameSuffix
+                refSpaceQuadS, arg2 = readCheartData.readVectors(refname)
+                dispQuadS,     arg2 = readCheartData.readVectors(dispname)
+                boolDispWasUpdatedHere = True
+                tempCoordQuadS      = refSpaceQuadS + dispQuadS
+            # set coordinate values to current configuration
+            # where Space = SolidSpace
+            elif (not(self.boolVarDispSpace.get()) \
+                and not(self.boolShowOnReferenceS.get())):
+                refname  = self.baseDirectory + self.meshFolder + self.filenameQuadXS
+                currname = self.baseDirectory + self.dataFolder \
+                    + self.filenameSpaceS + "1" + self.filenameSuffix
+                if not(os.path.exists(currname)):
+                    logging.debug(">>>WARNING: file "+currname+" does not exist." \
+                        +" Defaulting to reference configuration.")
+                    tempCoordQuadS, arg2 = readCheartData.readVectors(refname)
+                else:
+                    tempCoordQuadS, arg2 = readCheartData.readVectors(currname)
+            # set coordinate values to reference configuration
+            # where Space = SolidSpace + Disp   OR   Space = SolidSpace
+            elif self.boolShowOnReferenceS.get():
+                refname = self.baseDirectory + self.meshFolder + self.filenameQuadXS
+                tempCoordQuadS, arg2 = readCheartData.readVectors(refname)
+            pointsQuadS.SetData(numpy_to_vtk(tempCoordQuadS, \
+                deep=1, array_type=vtk.VTK_DOUBLE))
+            # assign points
+            if not(self.ugridQuadS == []):
+                self.ugridQuadS.SetPoints(pointsQuadS)
+            else:
+                self.sgridQuadS.SetPoints(pointsQuadS)
+            # if the displacement field was updated here, set data
+            if boolDispWasUpdatedHere:
+                # assign vectors
+                if not(self.ugridQuadS == []):
+                    self.ugridQuadS.GetPointData().SetVectors( \
+                        organiseData.numpy2vtkDataArray(dispQuadS, "displacement"))
+                    self.minMagDisp, self.maxMagDisp = \
+                        self.ugridQuadS.GetPointData().GetVectors("displacement").GetRange(-1)
+                    self.minDisp0, self.maxDisp0 = \
+                        self.ugridQuadS.GetPointData().GetVectors("displacement").GetRange(0)
+                    self.minDisp1, self.maxDisp1 = \
+                        self.ugridQuadS.GetPointData().GetVectors("displacement").GetRange(1)
+                    self.minDisp2, self.maxDisp2 = \
+                        self.ugridQuadS.GetPointData().GetVectors("displacement").GetRange(2)
+                else:
+                    self.sgridQuadS.GetPointData().SetVectors( \
+                        organiseData.numpy2vtkDataArray(dispQuadS, "displacement"))
+                    self.minMagDisp, self.maxMagDisp = \
+                        self.sgridQuadS.GetPointData().GetVectors("displacement").GetRange(-1)
+                    self.minDisp0, self.maxDisp0 = \
+                        self.sgridQuadS.GetPointData().GetVectors("displacement").GetRange(0)
+                    self.minDisp1, self.maxDisp1 = \
+                        self.sgridQuadS.GetPointData().GetVectors("displacement").GetRange(1)
+                    self.minDisp2, self.maxDisp2 = \
+                        self.sgridQuadS.GetPointData().GetVectors("displacement").GetRange(2)
+                    logging.debug("solid displacement magnitude range: [%.2f, %.2f]" \
+                                  % (self.minMagDisp, self.maxMagDisp))
+                    logging.debug("solid displacement x-range: [%.2f, %.2f]" \
+                                  % (self.minDisp0, self.maxDisp0))
+                    logging.debug("solid displacement y-range: [%.2f, %.2f]" \
+                                  % (self.minDisp1, self.maxDisp1))
+                    logging.debug("solid displacement z-range: [%.2f, %.2f]" \
+                                  % (self.minDisp2, self.maxDisp2))
+                self.boolUpdateDisp = False
+            numNodesQuadS = tempCoordQuadS.shape[0]
+            if (numNodesQuadS != self.numberOfNodesQuadS):
+                raise ValueError("Inconsistent number of nodes (solid, quad).")
+            pointsQuadS.SetData(numpy_to_vtk(tempCoordQuadS, \
+                deep=1, array_type=vtk.VTK_DOUBLE))
+            # assign points
+            if not(self.ugridQuadS == []):
+                self.ugridQuadS.SetPoints(pointsQuadS)
                 self.minXS, self.maxXS, self.minYS, self.maxYS, self.minZS, self.maxZS = \
-                    self.sgridS.GetPoints().GetBounds()
+                    self.ugridQuadS.GetPoints().GetBounds()
+            else:
+                self.sgridQuadS.SetPoints(pointsQuadS)
+                self.minXS, self.maxXS, self.minYS, self.maxYS, self.minZS, self.maxZS = \
+                    self.sgridQuadS.GetPoints().GetBounds()
             logging.debug("solid space x-range: [%.2f, %.2f]" \
                           % (self.minXS, self.maxXS))
             logging.debug("solid space y-range: [%.2f, %.2f]" \
                           % (self.minYS, self.maxYS))
             logging.debug("solid space z-range: [%.2f, %.2f]" \
                           % (self.minZS, self.maxZS))
-            self.boolUpdateSpaceS = False
+            self.boolUpdateSpaceQuadS = False
+        # end quadratic topology
+        ########################################################################
+        ########################################################################
         logging.debug("update solid space completed")
     
     # update solid displacement
     def updateDisp(self):
         logging.debug("update solid displacement")
-        if ((self.ugridS == []) and (self.sgridS == [])) or self.boolUpdateSpaceS:
+        if ((self.ugridQuadS == []) and (self.sgridQuadS == [])) or self.boolUpdateSpaceQuadS:
             logging.debug("unstructured grid for solid will be updated first")
             self.updateSpaceS()
         if self.boolUpdateDisp:
@@ -3683,8 +3932,8 @@ class fsi(object):
                                            +self.filenameDisp \
                                            +str(self.currentT) \
                                            +self.filenameSuffix)
-            if not(self.ugridS == []):
-                self.ugridS.GetPointData().SetVectors( \
+            if not(self.ugridQuadS == []):
+                self.ugridQuadS.GetPointData().SetVectors( \
                     organiseData.numpy2vtkDataArray(tempDisp, "displacement"))
                 if self.numberOfDimensions != numberOfDimensions:
                     logging.debug("ERROR: number of dimensions of solid space is %i" \
@@ -3692,15 +3941,15 @@ class fsi(object):
                     logging.debug("ERROR: number of solid displacement components is %i" \
                                   % numberOfDimensions)
                 self.minMagDisp, self.maxMagDisp = \
-                    self.ugridS.GetPointData().GetVectors("displacement").GetRange(-1)
+                    self.ugridQuadS.GetPointData().GetVectors("displacement").GetRange(-1)
                 self.minDisp0, self.maxDisp0 = \
-                    self.ugridS.GetPointData().GetVectors("displacement").GetRange(0)
+                    self.ugridQuadS.GetPointData().GetVectors("displacement").GetRange(0)
                 self.minDisp1, self.maxDisp1 = \
-                    self.ugridS.GetPointData().GetVectors("displacement").GetRange(1)
+                    self.ugridQuadS.GetPointData().GetVectors("displacement").GetRange(1)
                 self.minDisp2, self.maxDisp2 = \
-                    self.ugridS.GetPointData().GetVectors("displacement").GetRange(2)
+                    self.ugridQuadS.GetPointData().GetVectors("displacement").GetRange(2)
             else:
-                self.sgridS.GetPointData().SetVectors( \
+                self.sgridQuadS.GetPointData().SetVectors( \
                     organiseData.numpy2vtkDataArray(tempDisp, "displacement"))
                 if self.numberOfDimensions != numberOfDimensions:
                     logging.debug("ERROR: number of dimensions of solid space is %i" \
@@ -3708,13 +3957,13 @@ class fsi(object):
                     logging.debug("ERROR: number of solid displacement components is %i" \
                                   % numberOfDimensions)
                 self.minMagDisp, self.maxMagDisp = \
-                    self.sgridS.GetPointData().GetVectors("displacement").GetRange(-1)
+                    self.sgridQuadS.GetPointData().GetVectors("displacement").GetRange(-1)
                 self.minDisp0, self.maxDisp0 = \
-                    self.sgridS.GetPointData().GetVectors("displacement").GetRange(0)
+                    self.sgridQuadS.GetPointData().GetVectors("displacement").GetRange(0)
                 self.minDisp1, self.maxDisp1 = \
-                    self.sgridS.GetPointData().GetVectors("displacement").GetRange(1)
+                    self.sgridQuadS.GetPointData().GetVectors("displacement").GetRange(1)
                 self.minDisp2, self.maxDisp2 = \
-                    self.sgridS.GetPointData().GetVectors("displacement").GetRange(2)
+                    self.sgridQuadS.GetPointData().GetVectors("displacement").GetRange(2)
             logging.debug("solid displacement magnitude range: [%.2f, %.2f]" \
                           % (self.minMagDisp, self.maxMagDisp))
             logging.debug("solid displacement x-range: [%.2f, %.2f]" \
@@ -3729,7 +3978,7 @@ class fsi(object):
     # update solid displacement
     def updateSolVel(self):
         logging.debug("update solid velocity")
-        if ((self.ugridS == []) or (self.sgridS == [])) or self.boolUpdateSpaceS:
+        if ((self.ugridQuadS == []) or (self.sgridQuadS == [])) or self.boolUpdateSpaceQuadS:
             logging.debug("unstructured grid for solid will be updated first")
             self.updateSpaceS()
         if self.boolUpdateSolVel \
@@ -3744,8 +3993,8 @@ class fsi(object):
                                            +self.filenameSolVel \
                                            +str(self.currentT) \
                                            +self.filenameSuffix)
-            if not(self.ugridS == []):
-                self.ugridS.GetPointData().AddArray( \
+            if not(self.ugridQuadS == []):
+                self.ugridQuadS.GetPointData().AddArray( \
                     organiseData.numpy2vtkDataArray(tempSolVel, "velocity"))
                 if self.numberOfDimensions != numberOfDimensions:
                     logging.debug("ERROR: number of dimensions of solid space is %i" \
@@ -3753,15 +4002,15 @@ class fsi(object):
                     logging.debug("ERROR: number of solid velocity components is %i" \
                                   % numberOfDimensions)
                 self.minMagSolVel, self.maxMagSolVel = \
-                    self.ugridS.GetPointData().GetVectors("velocity").GetRange(-1)
+                    self.ugridQuadS.GetPointData().GetVectors("velocity").GetRange(-1)
                 self.minSolVel0, self.maxSolVel0 = \
-                    self.ugridS.GetPointData().GetVectors("velocity").GetRange(0)
+                    self.ugridQuadS.GetPointData().GetVectors("velocity").GetRange(0)
                 self.minSolVel1, self.maxSolVel1 = \
-                    self.ugridS.GetPointData().GetVectors("velocity").GetRange(1)
+                    self.ugridQuadS.GetPointData().GetVectors("velocity").GetRange(1)
                 self.minSolVel2, self.maxSolVel2 = \
-                    self.ugridS.GetPointData().GetVectors("velocity").GetRange(2)
+                    self.ugridQuadS.GetPointData().GetVectors("velocity").GetRange(2)
             else:
-                self.sgridS.GetPointData().AddArray( \
+                self.sgridQuadS.GetPointData().AddArray( \
                     organiseData.numpy2vtkDataArray(tempSolVel, "velocity"))
                 if self.numberOfDimensions != numberOfDimensions:
                     logging.debug("ERROR: number of dimensions of solid space is %i" \
@@ -3769,13 +4018,13 @@ class fsi(object):
                     logging.debug("ERROR: number of solid velocity components is %i" \
                                   % numberOfDimensions)
                 self.minMagSolVel, self.maxMagSolVel = \
-                    self.sgridS.GetPointData().GetVectors("velocity").GetRange(-1)
+                    self.sgridQuadS.GetPointData().GetVectors("velocity").GetRange(-1)
                 self.minSolVel0, self.maxSolVel0 = \
-                    self.sgridS.GetPointData().GetVectors("velocity").GetRange(0)
+                    self.sgridQuadS.GetPointData().GetVectors("velocity").GetRange(0)
                 self.minSolVel1, self.maxSolVel1 = \
-                    self.sgridS.GetPointData().GetVectors("velocity").GetRange(1)
+                    self.sgridQuadS.GetPointData().GetVectors("velocity").GetRange(1)
                 self.minSolVel2, self.maxSolVel2 = \
-                    self.sgridS.GetPointData().GetVectors("velocity").GetRange(2)
+                    self.sgridQuadS.GetPointData().GetVectors("velocity").GetRange(2)
             logging.debug("solid velocity magnitude range: [%.2f, %.2f]" \
                           % (self.minMagSolVel, self.maxMagSolVel))
             logging.debug("solid velocity x-range: [%.2f, %.2f]" \
@@ -3790,116 +4039,54 @@ class fsi(object):
     # update solid pressure
     def updatePresS(self):
         logging.debug("update solid pressure")
+        if ((self.sgridLinS == []) \
+            or self.boolUpdateSpaceLinS):
+            logging.debug("unstructured grid for solid will be updated first")
+            self.updateSpaceS()
         if self.boolUpdatePresS:
-            if self.meshTypeS == 28:
-                logging.debug("Warning: biquadratic quadrilateral mesh for solid - pressure approximation might be inaccurate.")
-#                self.boolUpdatePresS = False
-#                return
-        if not(self.ugridS == []):
-            if self.tempMappingS == []:
-                self.tempMappingS = readCheartData.findMappingLinQuad( \
-                    self.baseDirectory \
-                    +self.meshFolder \
-                    +self.filenameTopoLinS, \
-                    self.baseDirectory \
-                    +self.meshFolder \
-                    +self.filenameTopoQuadS, \
-                    self.numberOfDimensions)
-            if self.boolUpdateSpaceS:
-                logging.debug("unstructured grid for solid will be updated first")
-                self.updateSpaceS()
-            if self.boolUpdatePresS:
+            if not(self.ugridLinS == []):
                 tempPresLinS = readCheartData.readScalars( \
                     self.baseDirectory \
                     +self.dataFolder \
                     +self.filenamePresS \
                     +str(self.currentT) \
                     +self.filenameSuffix)
-                tempPresQuadS = readCheartData.interpolateLinToQuad( \
-                    self.tempElemS, \
-                    vtk_to_numpy(self.ugridS.GetPoints().GetData()), \
-                    tempPresLinS, \
-                    self.tempMappingS, \
-                    self.numberOfDimensions)
                 if self.boolEffectiveG.get():
-                    tempPresQuadS = readCheartData.changeOfVariables( \
-                        vtk_to_numpy(self.ugridS.GetPoints().GetData()), \
-                        tempPresQuadS, self.densityF, \
+                    tempPresLinS = readCheartData.changeOfVariables( \
+                        vtk_to_numpy(self.ugridLinS.GetPoints().GetData()), \
+                        tempPresLinS, self.densityF, \
                         self.gravity_x, self.gravity_y, self.gravity_z, self.PO)
-                self.ugridS.GetPointData().SetScalars( \
-                    numpy_to_vtk(tempPresQuadS, deep=1, array_type=vtk.VTK_DOUBLE))
-                self.ugridS.GetPointData().GetScalars().SetName("pressure")
+                self.ugridLinS.GetPointData().SetScalars( \
+                    numpy_to_vtk(tempPresLinS, deep=1, array_type=vtk.VTK_DOUBLE))
+                self.ugridLinS.GetPointData().GetScalars().SetName("pressure")
                 self.minPressureS, self.maxPressureS = \
-                    self.ugridS.GetPointData().GetScalars().GetRange()
-                logging.debug("solid pressure range: [%.2f, %.2f]" \
-                              % (self.minPressureS, self.maxPressureS))
-                self.boolUpdatePresS = False
-        else:
-            if self.tempMappingS == []:
-                if self.meshTypeS == 28:
-                    # we trick the function to read a lin-quad mapping
-                    # for quadrilaterals by saying we have three dimensions
-                    # and thus pretending to have tets
-                    self.tempMappingS = readCheartData.findMappingLinQuad( \
-                        self.baseDirectory \
-                        +self.meshFolder \
-                        +self.filenameTopoLinS, \
-                        self.baseDirectory \
-                        +self.meshFolder \
-                        +self.filenameTopoQuadS, \
-                        3)
-                else:
-                    self.tempMappingS = readCheartData.findMappingLinQuad_Hex( \
-                        self.baseDirectory \
-                        +self.meshFolder \
-                        +self.filenameTopoLinS, \
-                        self.baseDirectory \
-                        +self.meshFolder \
-                        +self.filenameTopoQuadS)
-            if self.boolUpdateSpaceS:
-                logging.debug("structured grid for solid will be updated first")
-                self.updateSpaceS()
-            if self.boolUpdatePresS:
+                    self.ugridLinS.GetPointData().GetScalars().GetRange()
+            else:
                 tempPresLinS = readCheartData.readScalars( \
                     self.baseDirectory \
                     +self.dataFolder \
                     +self.filenamePresS \
                     +str(self.currentT) \
                     +self.filenameSuffix)
-                if self.meshTypeS == 28:
-                    # this is only a poor approximation for now!
-                    tempPresQuadS = readCheartData.interpolateLinToQuad_Quad( \
-                        self.tempElemS, \
-                        vtk_to_numpy(self.sgridS.GetPoints().GetData()), \
-                        tempPresLinS, \
-                        self.tempMappingS, \
-                        self.numberOfDimensions)
-                else:
-                    tempPresQuadS = readCheartData.interpolateLinToQuad_Hex( \
-                        self.tempElemS, \
-                        vtk_to_numpy(self.sgridS.GetPoints().GetData()), \
-                        tempPresLinS, \
-                        self.tempMappingS, \
-                        self.numberOfDimensions)
                 if self.boolEffectiveG.get():
-                    tempPresQuadS = readCheartData.changeOfVariables( \
-                        vtk_to_numpy(self.sgridS.GetPoints().GetData()), \
-                        tempPresQuadS, self.densityF, \
+                    tempPresLinS = readCheartData.changeOfVariables( \
+                        vtk_to_numpy(self.sgridLinS.GetPoints().GetData()), \
+                        tempPresLinS, self.densityF, \
                         self.gravity_x, self.gravity_y, self.gravity_z, self.PO)
-                self.sgridS.GetPointData().SetScalars( \
-                    numpy_to_vtk(tempPresQuadS, deep=1, array_type=vtk.VTK_DOUBLE))
-                self.sgridS.GetPointData().GetScalars().SetName("pressure")
+                self.sgridLinS.GetPointData().SetScalars( \
+                    numpy_to_vtk(tempPresLinS, deep=1, array_type=vtk.VTK_DOUBLE))
+                self.sgridLinS.GetPointData().GetScalars().SetName("pressure")
                 self.minPressureS, self.maxPressureS = \
-                    self.sgridS.GetPointData().GetScalars().GetRange()
-                logging.debug("solid pressure range: [%.2f, %.2f]" \
-                              % (self.minPressureS, self.maxPressureS))
-                self.boolUpdatePresS = False
+                    self.sgridLinS.GetPointData().GetScalars().GetRange()
+            logging.debug("solid pressure range: [%.2f, %.2f]" \
+                          % (self.minPressureS, self.maxPressureS))
+            self.boolUpdatePresS = False
         logging.debug("update solid pressure completed")
     
     # update solid Cauchy stress
     def updateCauchyStress(self):
         logging.debug("update solid Cauchy stress")
-        if ((self.ugridS == []) or (self.sgridS == [])) or self.boolUpdateSpaceS:
+        if ((self.ugridQuadS == []) or (self.sgridQuadS == [])) or self.boolUpdateSpaceQuadS:
             logging.debug("unstructured grid for solid will be updated first")
             self.updateSpaceS()
         if self.boolUpdateCauchyStress \
@@ -3914,8 +4101,8 @@ class fsi(object):
                                            +self.filenameCauchyStress \
                                            +str(self.currentT) \
                                            +self.filenameSuffix)
-            if not(self.ugridS == []):
-                self.ugridS.GetPointData().AddArray( \
+            if not(self.ugridQuadS == []):
+                self.ugridQuadS.GetPointData().AddArray( \
                     organiseData.numpy2vtkDataArray(tempCauchyStress, "cauchy"))
                 if self.numberOfDimensions != numberOfDimensions:
                     logging.debug("ERROR: number of dimensions of solid space is %i" \
@@ -3924,15 +4111,15 @@ class fsi(object):
                                   % numberOfDimensions)
                     logging.debug("ERROR: we only read the first three components for now")
                 self.minMagCauchyStress, self.maxMagCauchyStress = \
-                    self.ugridS.GetPointData().GetVectors("cauchy").GetRange(-1)
+                    self.ugridQuadS.GetPointData().GetVectors("cauchy").GetRange(-1)
                 self.minCauchyStress0, self.maxCauchyStress0 = \
-                    self.ugridS.GetPointData().GetVectors("cauchy").GetRange(0)
+                    self.ugridQuadS.GetPointData().GetVectors("cauchy").GetRange(0)
                 self.minCauchyStress1, self.maxCauchyStress1 = \
-                    self.ugridS.GetPointData().GetVectors("cauchy").GetRange(1)
+                    self.ugridQuadS.GetPointData().GetVectors("cauchy").GetRange(1)
                 self.minCauchyStress2, self.maxCauchyStress2 = \
-                    self.ugridS.GetPointData().GetVectors("cauchy").GetRange(2)
+                    self.ugridQuadS.GetPointData().GetVectors("cauchy").GetRange(2)
             else:
-                self.sgridS.GetPointData().AddArray( \
+                self.sgridQuadS.GetPointData().AddArray( \
                     organiseData.numpy2vtkDataArray(tempCauchyStress, "cauchy"))
                 if self.numberOfDimensions != numberOfDimensions:
                     logging.debug("ERROR: number of dimensions of solid space is %i" \
@@ -3941,13 +4128,13 @@ class fsi(object):
                                   % numberOfDimensions)
                     logging.debug("ERROR: we only read the first three components for now")
                 self.minMagCauchyStress, self.maxMagCauchyStress = \
-                    self.sgridS.GetPointData().GetVectors("cauchy").GetRange(-1)
+                    self.sgridQuadS.GetPointData().GetVectors("cauchy").GetRange(-1)
                 self.minCauchyStress0, self.maxCauchyStress0 = \
-                    self.sgridS.GetPointData().GetVectors("cauchy").GetRange(0)
+                    self.sgridQuadS.GetPointData().GetVectors("cauchy").GetRange(0)
                 self.minCauchyStress1, self.maxCauchyStress1 = \
-                    self.sgridS.GetPointData().GetVectors("cauchy").GetRange(1)
+                    self.sgridQuadS.GetPointData().GetVectors("cauchy").GetRange(1)
                 self.minCauchyStress2, self.maxCauchyStress2 = \
-                    self.sgridS.GetPointData().GetVectors("cauchy").GetRange(2)
+                    self.sgridQuadS.GetPointData().GetVectors("cauchy").GetRange(2)
             logging.debug("solid Cauchy stress magnitude range (xx, yy, zz): [%.2f, %.2f]" \
                           % (self.minMagCauchyStress, self.maxMagCauchyStress))
             logging.debug("solid Cauchy stress xx-range: [%.2f, %.2f]" \
@@ -4378,95 +4565,124 @@ class fsi(object):
         getNumberOfDimensions.close()
         temp = firstLine.split()
         self.numberOfDimensions = int(temp[1])
-        # secondly, get mesh type (tri/tet or quad/hex)
-        # -- obtained from linear topology
+        
+        def getMeshType(fnameT, fnameB):
+            fopenT = open(str(fnameT), 'r')
+            fopenB = open(str(fnameB), 'r')
+            firstLineT = fopenT.readline()
+            firstLineT = fopenT.readline()
+            firstLineB = fopenB.readline()
+            firstLineB = fopenB.readline()
+            fopenT.close()
+            fopenB.close()
+            tempT = firstLineT.split()
+            tempB = firstLineB.split()
+            lenT = len(tempT)
+            lenB = len(tempB) - 2 # omit element number and patch label
+            if ((lenT == 2) and (lenB == 1)):
+                return vtk.vtkLine().GetCellType()
+            elif ((lenT == 3) and (lenB == 1)):
+                return vtk.vtkQuadraticEdge().GetCellType()
+            elif ((lenT == 3) and (lenB == 2)):
+                return vtk.vtkTriangle().GetCellType()
+            elif ((lenT == 6) and (lenB == 3)):
+                return vtk.vtkQuadraticTriangle().GetCellType()
+            elif ((lenT == 4) and (lenB == 2)):
+                return vtk.vtkQuad().GetCellType()
+            elif ((lenT == 9) and (lenB == 3)):
+                return vtk.vtkBiQuadraticQuad().GetCellType()
+            elif ((lenT == 4) and (lenB == 3)):
+                return vtk.vtkTetra().GetCellType()
+            elif ((lenT == 10) and (lenB == 6)):
+                return vtk.vtkQuadraticTetra().GetCellType()
+            elif ((lenT == 8) and (lenB == 4)):
+                return vtk.vtkHexahedron().GetCellType()
+            elif ((lenT == 27) and (lenB == 9)):
+                return vtk.vtkTriQuadraticHexahedron().GetCellType()
+            else:
+                raise ValueError("Unknown or invalid cell type with " \
+                    +"lenT = "+str(lenT)+", lenB = "+str(lenB)+".")
+        
+        def getNumberOfNodes(fnameX):
+            fopenX = open(str(fnameX), 'r')
+            firstLineX = fopenX.readline().split()
+            fopenX.close()
+            # convert list of strings to integer array
+            firstLineX = [int(i) for i in firstLineX]
+            numberOfNodes      = firstLineX[0]
+            numberOfComponents = firstLineX[1]
+            return numberOfNodes, numberOfComponents
+        
         print " mesh types:"
         if self.visualizeFluid.get():
-            getMeshType = open(str(self.baseDirectory \
-                + self.meshFolder \
-                + self.filenameTopoLinF), 'r')
-            firstLine = getMeshType.readline()
-            firstLine = getMeshType.readline()
-            getMeshType.close()
-            temp = firstLine.split()
-            if len(temp) == 2:
-                self.meshTypeF = 21
-                print "  F: "+str(self.meshTypeF)+" (line)"
-            elif len(temp) == 3:
-                self.meshTypeF = 22
-                print "  F: "+str(self.meshTypeF)+" (tri)"
-            elif len(temp) == 4 and self.numberOfDimensions == 2:
-                self.meshTypeF = 23
-                print "  F: "+str(self.meshTypeF)+" (quad)"
-            elif len(temp) == 4 and self.numberOfDimensions == 3:
-                getMeshType = open(str(self.baseDirectory \
-                    + self.meshFolder \
-                    + self.filenameTopoQuadF), 'r')
-                firstLine = getMeshType.readline()
-                firstLine = getMeshType.readline()
-                getMeshType.close()
-                temp = firstLine.split()
-                if len(temp) == 4:
-                    self.meshTypeF = 10
-                else:
-                    self.meshTypeF = 24
-                print "  F: "+str(self.meshTypeF)+" (tet)"
-            elif len(temp) == 8 and self.numberOfDimensions == 3:
-                self.meshTypeF = 25
-                print "  F: "+str(self.meshTypeF)+" (hex)"
-        if self.visualizeSolid.get():
-            getMeshType = open(str(self.baseDirectory \
-                + self.meshFolder \
-                + self.filenameTopoLinS), 'r')
-            firstLine = getMeshType.readline()
-            firstLine = getMeshType.readline()
-            getMeshType.close()
-            temp = firstLine.split()
-            # lines
-            if len(temp) == 2:
-                self.meshTypeS = 21
-                print "  S: "+str(self.meshTypeS)+" (line)"
-            # tris
-            elif len(temp) == 3:
-                self.meshTypeS = 22
-                print "  S: "+str(self.meshTypeS)+" (tri)"
-            # quads
-            elif len(temp) == 4 and self.numberOfDimensions == 2:
-                self.meshTypeS = 28
-                print "  S: "+str(self.meshTypeS)+" (quad)"
-            # tets
-            elif len(temp) == 4 and self.numberOfDimensions == 3:
-                self.meshTypeS = 24
-                print "  S: "+str(self.meshTypeS)+" (tet)"
-            elif len(temp) == 8 and self.numberOfDimensions == 3:
-                self.meshTypeS = 29
-                print "  S: "+str(self.meshTypeS)+" (hex)"
-        if self.visualizeInterface.get():
-            getMeshType = open(str(self.baseDirectory \
-                + self.meshFolder \
-                + self.filenameTopoQuadI), 'r')
-            firstLine = getMeshType.readline()
-            firstLine = getMeshType.readline()
-            getMeshType.close()
-            temp = firstLine.split()
-            # quad lines
-            if len(temp) == 3 and self.numberOfDimensions == 2:
-                self.meshTypeI = 21
-                print "  I: "+str(self.meshTypeI)+" (line)"
-            elif len(temp) == 3 and self.numberOfDimensions == 3:
-                self.meshTypeI = 5
-                print "  I: "+str(self.meshTypeI)+" (tri)"
-            # quad tris
-            elif len(temp) == 6:
-                self.meshTypeI = 22
-                print "  I: "+str(self.meshTypeI)+" (tri)"
-            elif len(temp) == 8:
-                self.meshTypeI = 23
-                print "  I: "+str(self.meshTypeI)+" (hex)"
-            # else
+            # lin
+            fnameX = self.baseDirectory + self.meshFolder + self.filenameLinXF
+            fnameT = self.baseDirectory + self.meshFolder + self.filenameLinTF
+            fnameB = self.baseDirectory + self.meshFolder + self.filenameLinBF
+            self.meshTypeLinF            = getMeshType(fnameT, fnameB)
+            self.numberOfNodesLinF, arg2 = getNumberOfNodes(fnameX)
+            if (arg2 != self.numberOfDimensions):
+                raise ValueError("Inconsistent number of dimensions.")
+            # quad
+            fnameX = self.baseDirectory + self.meshFolder + self.filenameQuadXF
+            fnameT = self.baseDirectory + self.meshFolder + self.filenameQuadTF
+            fnameB = self.baseDirectory + self.meshFolder + self.filenameQuadBF
+            if os.path.exists(fnameT):
+                self.meshTypeQuadF            = getMeshType(fnameT, fnameB)
+                self.numberOfNodesQuadF, arg2 = getNumberOfNodes(fnameX)
+                if (arg2 != self.numberOfDimensions):
+                    raise ValueError("Inconsistent number of dimensions.")
             else:
-                self.meshTypeI = 14000
-                print "  I: -1 (unknown)"
+                self.meshTypeQuadF = -1 # this indicates
+                                        # that interpolation order is one less
+                                        # --> self.meshTypeLinF
+                self.numberOfNodesQuadF = -1
+            print "   F : "+str(self.meshTypeLinF)+" "+str(self.meshTypeQuadF)
+        
+        if self.visualizeSolid.get():
+            # lin
+            fnameX = self.baseDirectory + self.meshFolder + self.filenameLinXS
+            fnameT = self.baseDirectory + self.meshFolder + self.filenameLinTS
+            fnameB = self.baseDirectory + self.meshFolder + self.filenameLinBS
+            self.meshTypeLinS            = getMeshType(fnameT, fnameB)
+            self.numberOfNodesLinS, arg2 = getNumberOfNodes(fnameX)
+            if (arg2 != self.numberOfDimensions):
+                raise ValueError("Inconsistent number of dimensions.")
+            # quad
+            fnameX = self.baseDirectory + self.meshFolder + self.filenameQuadXS
+            fnameT = self.baseDirectory + self.meshFolder + self.filenameQuadTS
+            fnameB = self.baseDirectory + self.meshFolder + self.filenameQuadBS
+            self.meshTypeQuadS            = getMeshType(fnameT, fnameB)
+            self.numberOfNodesQuadS, arg2 = getNumberOfNodes(fnameX)
+            if (arg2 != self.numberOfDimensions):
+                raise ValueError("Inconsistent number of dimensions.")
+            print "   S : "+str(self.meshTypeLinS)+" "+str(self.meshTypeQuadS)
+        
+        if self.visualizeInterface.get():
+            fnameT = self.baseDirectory + self.meshFolder + self.filenameQuadTI
+            if os.path.exists(fnameT):
+                # quad
+                self.filenameXI = self.filenameQuadXI
+                self.filenameTI = self.filenameQuadTI
+                self.filenameBI = self.filenameQuadBI
+            else:
+                # lin
+                self.filenameXI = self.filenameLinXI
+                self.filenameTI = self.filenameLinTI
+                self.filenameBI = self.filenameLinBI
+            fnameX = self.baseDirectory + self.meshFolder + self.filenameXI
+            fnameT = self.baseDirectory + self.meshFolder + self.filenameTI
+            fnameB = self.baseDirectory + self.meshFolder + self.filenameBI
+            self.meshTypeI            = getMeshType(fnameT, fnameB)
+            self.numberOfNodesI, arg2 = getNumberOfNodes(fnameX)
+            if (arg2 != self.numberOfDimensions):
+                raise ValueError("Inconsistent number of dimensions.")
+            print "   I : "+str(self.meshTypeI)
+        
+        print " number of nodes:"
+        print "   F : "+str(self.numberOfNodesLinF)+" "+str(self.numberOfNodesQuadF)
+        print "   S : "+str(self.numberOfNodesLinS)+" "+str(self.numberOfNodesQuadS)
+        print "   I : "+str(self.numberOfNodesI)
         
         self.timeLabelText.set(str(self.currentT))
         logging.debug("current time step: %i" % self.currentT)
