@@ -1117,7 +1117,7 @@ def readTriangle(str filename):
     s0, s1 = splitLine2(line)
     numberOfElements = int(s0)
     numberOfNodes = int(s1)
-    elements = numpy.empty((numberOfElements, 4)).astype(int)
+    elements = numpy.empty((numberOfElements, 3)).astype(int)
     # read all subsequent lines
     for i in range(numberOfElements):
         read = getline(&line, &l, cfile)

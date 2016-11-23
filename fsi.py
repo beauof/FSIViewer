@@ -3274,11 +3274,8 @@ class fsi(object):
                 self.cellTypesF = vtk.vtkQuadraticTriangle().GetCellType()
                 divby = 7
                 # read triangles
-                self.tempElemF = readCheartData.readTriQuadAsLin( \
-                    self.baseDirectory \
-                    +self.meshFolder \
-                    +self.filenameQuadTF, \
-                    self.numberOfDimensions)
+                self.tempElemF = readCheartData.readQuadraticTriangle( \
+                    self.baseDirectory+self.meshFolder+self.filenameQuadTF)
                 # create cells for unstructured grid
                 tempElemLinF, cellstypesF, cellslocationsF = \
                     readCheartData.createTopologyQuadraticTriangle( \
@@ -3297,10 +3294,12 @@ class fsi(object):
                 ## create a linear triangle mesh too for cell quality
                 ct = vtk.vtkTriangle().GetCellType()
                 divby = 4
+                # read triangles
+                blob = readCheartData.readTriangle( \
+                    self.baseDirectory+self.meshFolder+self.filenameLinTF)
                 # create cells for unstructured grid
                 tempElemLinF, cellstypesF, cellslocationsF = \
-                    readCheartData.createTopology2D(self.tempElemF, \
-                    ct)
+                    readCheartData.createTopologyTriangle(blob)
                 cellsF = vtk.vtkCellArray()
                 cellsF.SetCells(int(tempElemLinF.shape[0]/divby), \
                     numpy_to_vtk(tempElemLinF, deep=1, \
@@ -3686,6 +3685,7 @@ class fsi(object):
                 array_type=vtk.vtkIdTypeArray().GetDataType()),
                 cellsLinS)
         if self.boolUpdateSpaceLinS:
+            logging.debug("  update points (lin)")
             # read points
             pointsLinS = vtk.vtkPoints()
             # set coordinate values to current configuration
