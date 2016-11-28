@@ -1,9 +1,9 @@
 installTo = $(PWD)
 
 default:
-	python setup.py build_ext --inplace
+	python setup.py build_ext --inplace && mv readCheartData*so lib/readCheartData.so
 opt:
-	python setup-opt.py build_ext --inplace
+	python setup-opt.py build_ext --inplace && mv readCheartData*so lib/readCheartData.so
 user:
 	echo "$(installTo)/" > config/$(USER).config
 	echo "$(installTo)/testing/3D/" >> config/$(USER).config

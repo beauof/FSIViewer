@@ -2,7 +2,6 @@ import Tkinter
 import ttk
 import tkFileDialog
 import tkColorChooser
-import readCheartData
 import organiseData
 import vtk
 import numpy
@@ -13,8 +12,9 @@ import time
 import subprocess
 import os.path
 import tkMessageBox
-
+sys.path.append("lib/")
 sys.dont_write_bytecode = True
+import readCheartData
 
 # provides a class that contains variables for FSI visualizations
 class fsi(object):
