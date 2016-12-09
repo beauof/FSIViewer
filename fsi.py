@@ -39,12 +39,13 @@ class fsi(object):
         self.boolUpdateDisp   = True
         self.boolUpdateSolVel = True
         self.boolUpdatePresS  = True
-        self.boolUpdateCauchyStress = True
-        self.boolUpdateSpaceLinS  = True
-        self.boolUpdateSpaceQuadS = True
-        self.boolUpdateQualityF = True
-        self.boolUpdateQualityLinS  = True
-        self.boolUpdateQualityQuadS = True
+        self.boolUpdateCauchyStress     = True
+        self.boolUpdateSpaceLinS        = True
+        self.boolUpdateSpaceQuadS       = True
+        self.boolUpdateQualityF         = True
+        self.boolUpdateQualityLinS      = True
+        self.boolUpdateQualityQuadS     = True
+        self.boolUpdateMeshTubesLinS    = True
         self.boolUpdateSpaceI = True
         self.boolUpdateLMult  = True
         self.DEBUG            = True
@@ -1478,14 +1479,15 @@ class fsi(object):
             self.boolUpdateQualityF = True
             self.boolUpdatePhiF     = True
         if self.visualizeSolid.get():
-            self.boolUpdateDisp         = True
-            self.boolUpdateSolVel       = True
-            self.boolUpdatePresS        = True
-            self.boolUpdateCauchyStress = True
-            self.boolUpdateSpaceLinS    = True
-            self.boolUpdateSpaceQuadS   = True
-            self.boolUpdateQualityLinS  = True
-            self.boolUpdateQualityQuadS = True
+            self.boolUpdateDisp             = True
+            self.boolUpdateSolVel           = True
+            self.boolUpdatePresS            = True
+            self.boolUpdateCauchyStress     = True
+            self.boolUpdateSpaceLinS        = True
+            self.boolUpdateSpaceQuadS       = True
+            self.boolUpdateQualityLinS      = True
+            self.boolUpdateQualityQuadS     = True
+            self.boolUpdateMeshTubesLinS    = True
         if self.visualizeInterface.get():
             self.boolUpdateSpaceI = True
             self.boolUpdateLMult  = True
@@ -1515,6 +1517,7 @@ class fsi(object):
             self.progress.update()
             if self.showS.get() == "disp":      self.updateDisp()
             if not(self.showS.get() == "none"): self.updateNodeS()
+            if not(self.showS.get() == "none"): self.meshTubesOnOffS()
             self.progress["value"] = 90
             self.progress.update()
             if self.showS.get() == "vel":       self.updateSolVel()
@@ -1578,6 +1581,11 @@ class fsi(object):
     
     # show/hide element edges as thick lines
     def meshTubesOnOffS(self):
+        if not(self.boolUpdateMeshTubesLinS):
+            return
+        if (self.boolUpdateSpaceLinS or self.boolUpdateSpaceQuadS):
+            logging.debug("unstructured grid for solid will be updated first")
+            self.updateSpaceS()
         firstTimeUse = False
         if (self.meshTubesS == []):
             firstTimeUse = True
@@ -1691,6 +1699,7 @@ class fsi(object):
             self.renderer.AddActor(self.meshTubesActorS)
         else:
             self.renderer.RemoveActor(self.meshTubesActorS)
+        self.boolUpdateMeshTubesLinS = False
         self.renderWindow.Render()
     
     # show/hide element edges
@@ -4716,10 +4725,23 @@ class fsi(object):
             self.showS = "none"
         else:
             self.updateSpaceS()
+            self.progress["value"] = 20
+            self.progress.update()
             self.updateDisp()
+            self.progress["value"] = 30
+            self.progress.update()
             self.updateSolVel()
+            self.progress["value"] = 40
+            self.progress.update()
             self.updateCauchyStress()
+            self.progress["value"] = 50
+            self.progress.update()
             self.updatePresS()
+            self.progress["value"] = 60
+            self.progress.update()
+            self.meshTubesOnOffS()
+            self.progress["value"] = 70
+            self.progress.update()
             self.updateNodeS()
             self.progress["value"] = 80
             self.progress.update()
