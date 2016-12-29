@@ -3279,46 +3279,83 @@ class fsi(object):
                                array_type=vtk.vtkIdTypeArray().GetDataType()),
                                cellsF)
             else:
-                # quadratic triangle mesh
-                self.cellTypesF = vtk.vtkQuadraticTriangle().GetCellType()
-                divby = 7
-                # read triangles
-                self.tempElemF = readCheartData.readQuadraticTriangle( \
-                    self.baseDirectory+self.meshFolder+self.filenameQuadTF)
-                # create cells for unstructured grid
-                tempElemLinF, cellstypesF, cellslocationsF = \
-                    readCheartData.createTopologyQuadraticTriangle( \
-                    self.tempElemF)
-                cellsF = vtk.vtkCellArray()
-                cellsF.SetCells(int(tempElemLinF.shape[0]/divby), \
-                    numpy_to_vtk(tempElemLinF, deep=1, \
-                    array_type=vtk.vtkIdTypeArray().GetDataType()))
-                # assign cells
-                self.ugridF.SetCells(numpy_to_vtk(cellstypesF, deep=1, \
-                    array_type=vtk.vtkUnsignedCharArray().GetDataType()),
-                               numpy_to_vtk(cellslocationsF, deep = 1, \
-                               array_type=vtk.vtkIdTypeArray().GetDataType()),
-                               cellsF)
-                
-                ## create a linear triangle mesh too for cell quality
-                ct = vtk.vtkTriangle().GetCellType()
-                divby = 4
-                # read triangles
-                blob = readCheartData.readTriangle( \
-                    self.baseDirectory+self.meshFolder+self.filenameLinTF)
-                # create cells for unstructured grid
-                tempElemLinF, cellstypesF, cellslocationsF = \
-                    readCheartData.createTopologyTriangle(blob)
-                cellsF = vtk.vtkCellArray()
-                cellsF.SetCells(int(tempElemLinF.shape[0]/divby), \
-                    numpy_to_vtk(tempElemLinF, deep=1, \
-                    array_type=vtk.vtkIdTypeArray().GetDataType()))
-                # assign cells
-                self.ugridCellsF.SetCells(numpy_to_vtk(cellstypesF, deep=1, \
-                    array_type=vtk.vtkUnsignedCharArray().GetDataType()),
-                               numpy_to_vtk(cellslocationsF, deep = 1, \
-                               array_type=vtk.vtkIdTypeArray().GetDataType()),
-                               cellsF)
+                # vtkQuadraticTriangle
+                if (self.meshTypeQuadF == vtk.vtkQuadraticTriangle().GetCellType()):
+                    # quadratic triangle mesh
+                    self.cellTypesF = vtk.vtkQuadraticTriangle().GetCellType()
+                    divby = 7
+                    # read triangles
+                    self.tempElemF = readCheartData.readQuadraticTriangle( \
+                        self.baseDirectory+self.meshFolder+self.filenameQuadTF)
+                    # create cells for unstructured grid
+                    tempElemLinF, cellstypesF, cellslocationsF = \
+                        readCheartData.createTopologyQuadraticTriangle( \
+                        self.tempElemF)
+                    cellsF = vtk.vtkCellArray()
+                    cellsF.SetCells(int(tempElemLinF.shape[0]/divby), \
+                        numpy_to_vtk(tempElemLinF, deep=1, \
+                        array_type=vtk.vtkIdTypeArray().GetDataType()))
+                    # assign cells
+                    self.ugridF.SetCells(numpy_to_vtk(cellstypesF, deep=1, \
+                        array_type=vtk.vtkUnsignedCharArray().GetDataType()), \
+                        numpy_to_vtk(cellslocationsF, deep = 1, \
+                        array_type=vtk.vtkIdTypeArray().GetDataType()), \
+                        cellsF)
+                # vtkBiQuadraticQuad
+                if (self.meshTypeQuadF == vtk.vtkBiQuadraticQuad().GetCellType()):
+                    self.cellTypesF = vtk.vtkQuadraticTriangle().GetCellType()
+                    divby = 10
+                    self.tempElemF = readCheartData.readBiQuadraticQuad( \
+                        self.baseDirectory+self.meshFolder+self.filenameQuadTF)
+                    tempElemLinF, cellstypesF, cellslocationsF = \
+                        readCheartData.createTopologyBiQuadraticQuad(self.tempElemF)
+                    cellsF = vtk.vtkCellArray()
+                    cellsF.SetCells(int(tempElemLinF.shape[0]/divby), \
+                        numpy_to_vtk(tempElemLinF, deep=1, \
+                        array_type=vtk.vtkIdTypeArray().GetDataType()))
+                    self.ugridF.SetCells(numpy_to_vtk(cellstypesF, deep=1, \
+                        array_type=vtk.vtkUnsignedCharArray().GetDataType()), \
+                        numpy_to_vtk(cellslocationsF, deep = 1, \
+                        array_type=vtk.vtkIdTypeArray().GetDataType()), \
+                        cellsF)
+                # vtkTriangle
+                if (self.meshTypeLinF == vtk.vtkTriangle().GetCellType()):
+                    ## create a linear triangle mesh too for cell quality
+                    ct = vtk.vtkTriangle().GetCellType()
+                    divby = 4
+                    # read triangles
+                    blob = readCheartData.readTriangle( \
+                        self.baseDirectory+self.meshFolder+self.filenameLinTF)
+                    # create cells for unstructured grid
+                    tempElemLinF, cellstypesF, cellslocationsF = \
+                        readCheartData.createTopologyTriangle(blob)
+                    cellsF = vtk.vtkCellArray()
+                    cellsF.SetCells(int(tempElemLinF.shape[0]/divby), \
+                        numpy_to_vtk(tempElemLinF, deep=1, \
+                        array_type=vtk.vtkIdTypeArray().GetDataType()))
+                    # assign cells
+                    self.ugridCellsF.SetCells(numpy_to_vtk(cellstypesF, deep=1, \
+                        array_type=vtk.vtkUnsignedCharArray().GetDataType()), \
+                        numpy_to_vtk(cellslocationsF, deep = 1, \
+                        array_type=vtk.vtkIdTypeArray().GetDataType()), \
+                        cellsF)
+                # vtkQuad
+                if (self.meshTypeLinF == vtk.vtkQuad().GetCellType()):
+                    ct = vtk.vtkQuad().GetCellType()
+                    divby = 5
+                    blob = readCheartData.readQuad( \
+                        self.baseDirectory+self.meshFolder+self.filenameLinTF)
+                    tempElemLinF, cellstypesF, cellslocationsF = \
+                        readCheartData.createTopologyQuad(blob)
+                    cellsF = vtk.vtkCellArray()
+                    cellsF.SetCells(int(tempElemLinF.shape[0]/divby), \
+                        numpy_to_vtk(tempElemLinF, deep=1, \
+                        array_type=vtk.vtkIdTypeArray().GetDataType()))
+                    self.ugridCellsF.SetCells(numpy_to_vtk(cellstypesF, deep=1, \
+                        array_type=vtk.vtkUnsignedCharArray().GetDataType()), \
+                        numpy_to_vtk(cellslocationsF, deep = 1, \
+                        array_type=vtk.vtkIdTypeArray().GetDataType()), \
+                        cellsF)
         if self.boolUpdateSpaceF:
             # read points
             pointsF = vtk.vtkPoints()
