@@ -9,7 +9,7 @@ Make sure that the following packages are installed: <br />
 gcc <br />
 python2.x <br />
 python-tk <br />
-python-imaging-tk <br />
+python-imaging-tk (or: python-pil.imagetk) <br />
 python-dev <br />
 python-numpy <br />
 cython <br />
