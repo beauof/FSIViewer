@@ -13,6 +13,6 @@ cython-test:
 cython-test-opt:
 	cython -X boundscheck=False -X wraparound=False -X cdivision=False -a readCheartData.pyx
 clean:
-	rm *.so
+	rm -rf *.so lib/*.so
 distclean:
 	rm -r build/

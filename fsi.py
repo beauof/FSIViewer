@@ -148,14 +148,14 @@ class fsi(object):
         self.renderWindow     = []
         self.renderWidget     = []
         self.numberOfDimensions = 3
-        self.ugridF           = []
+        self.ugridLinF        = []
+        self.ugridQuadF       = []
         self.ugridLinS        = []
         self.ugridQuadS       = []
         self.ugridI           = []
         self.sgridF           = []
         self.sgridLinS        = []
         self.sgridQuadS       = []
-        self.ugridCellsF      = []
         self.cellTypesF       = []
         self.cellTypesVort    = []
         self.cellTypesS       = []
@@ -356,11 +356,13 @@ class fsi(object):
         self.currentCTFF      = []
         self.currentCTFS      = []
         self.currentCTFI      = []
-        self.dataSetMapperF   = []
+        self.dataSetMapperLinF  = []
+        self.dataSetMapperQuadF = []
         self.dataSetMapperLinS  = []
         self.dataSetMapperQuadS = []
         self.dataSetMapperI   = []
-        self.dataSetActorF    = []
+        self.dataSetActorLinF  = []
+        self.dataSetActorQuadF = []
         self.dataSetActorLinS  = []
         self.dataSetActorQuadS = []
         self.dataSetActorI    = []
@@ -383,17 +385,20 @@ class fsi(object):
         self.outlineI         = []
         self.outlineMapperI   = []
         self.outlineActorI    = []
-        self.extractF               = []
+        self.extractLinF            = []
+        self.extractQuadF           = []
         self.extractLinS            = []
         self.extractQuadS           = []
         self.triangleFilterLinS     = []
         self.triangleFilterQuadS    = []
         self.extractI               = []
-        self.linearSubdivisionF     = []
+        self.linearSubdivisionLinF  = []
+        self.linearSubdivisionQuadF = []
         self.linearSubdivisionLinS  = []
         self.linearSubdivisionQuadS = []
         self.linearSubdivisionI     = []
-        self.dsmFnumberOfSubdivisions     = 2
+        self.dsmLinFnumberOfSubdivisions  = 2
+        self.dsmQuadFnumberOfSubdivisions = 2
         self.dsmLinSnumberOfSubdivisions  = 2
         self.dsmQuadSnumberOfSubdivisions = 2
         self.dsmInumberOfSubdivisions     = 2
@@ -635,9 +640,9 @@ class fsi(object):
         if self.planeCutF == []:
             self.planeCutF = vtk.vtkCutter()
         if (self.vtkVersionMajor == 5):
-            self.planeCutF.SetInput(self.ugridF)
+            self.planeCutF.SetInput(self.ugridQuadF)
         elif (self.vtkVersionMajor == 6):
-            self.planeCutF.SetInputData(self.ugridF)
+            self.planeCutF.SetInputData(self.ugridQuadF)
         self.planeCutF.SetCutFunction(self.slicePlaneF)
         self.planeCutF.Update()
         if self.linearSubdivisionSliceF == []:
@@ -740,9 +745,9 @@ class fsi(object):
         if self.surfaceF == []:
             self.surfaceF = vtk.vtkDataSetSurfaceFilter()
         if (self.vtkVersionMajor == 5):
-            self.surfaceF.SetInput(self.ugridF)
+            self.surfaceF.SetInput(self.ugridQuadF)
         elif (self.vtkVersionMajor == 6):
-            self.surfaceF.SetInputData(self.ugridF)
+            self.surfaceF.SetInputData(self.ugridQuadF)
         # get enclosed sample points
         if self.enclosedSamplePointsF == []:
             self.enclosedSamplePointsF = vtk.vtkSelectEnclosedPoints()
@@ -788,7 +793,7 @@ class fsi(object):
         # probe data set to get scalar data
         if self.probeFilterF == []:
             self.probeFilterF = vtk.vtkProbeFilter()
-            self.probeFilterF.SetSource(self.ugridF)
+            self.probeFilterF.SetSource(self.ugridQuadF)
             self.probeFilterF.SetInputConnection(self.pointsInsideF.GetOutputPort())
         self.probeFilterF.Update()
         
@@ -1042,9 +1047,9 @@ class fsi(object):
         # extract surface of volume
         surfaceF = vtk.vtkDataSetSurfaceFilter()
         if (self.vtkVersionMajor == 5):
-            surfaceF.SetInput(self.ugridF)
+            surfaceF.SetInput(self.ugridQuadF)
         elif (self.vtkVersionMajor == 6):
-            surfaceF.SetInputData(self.ugridF)
+            surfaceF.SetInputData(self.ugridQuadF)
         # get enclosed sample points
         logging.debug("select enclosed points")
         enclosedSamplePointsF = vtk.vtkSelectEnclosedPoints()
@@ -1074,9 +1079,9 @@ class fsi(object):
         logging.debug("probe")
         probeFilterF = vtk.vtkProbeFilter()
         if (self.vtkVersionMajor == 5):
-            probeFilterF.SetSource(self.ugridF)
+            probeFilterF.SetSource(self.ugridQuadF)
         elif (self.vtkVersionMajor == 6):
-            probeFilterF.SetSourceData(self.ugridF)
+            probeFilterF.SetSourceData(self.ugridQuadF)
         if self.allProbeVel:
             probeFilterF.SetInputData(phaseIPolyDataF)
         else:
@@ -1153,15 +1158,15 @@ class fsi(object):
         if self.extractGridClipF == []:
             self.extractGridClipF = vtk.vtkBoxClipDataSet()
         if (self.vtkVersionMajor == 5):
-            self.extractGridClipF.SetInput(self.ugridF)
+            self.extractGridClipF.SetInput(self.ugridQuadF)
         elif (self.vtkVersionMajor == 6):
-            self.extractGridClipF.SetInputData(self.ugridF)
+            self.extractGridClipF.SetInputData(self.ugridQuadF)
             
         #    clippingPlaneF = vtk.vtkPlane()
         #    clippingPlaneF.SetOrigin(self.currentPlaneOriginX, 0, 0)
         #    clippingPlaneF.SetNormal(1.0, 0.0, 0.0)
         #    clipF = vtk.vtkClipDataSet()
-        #    clipF.SetInputData(self.ugridF)
+        #    clipF.SetInputData(self.ugridQuadF)
         #    clipF.SetClipFunction(clippingPlaneF)
         #    clipF.InsideOutOn()
         #    #clipF.SetMergeTolerance(1.0e-9)
@@ -1244,9 +1249,9 @@ class fsi(object):
         if self.extractGridClipFpreserve == []:
             self.extractGridClipFpreserve = vtk.vtkExtractGeometry()
             if (self.vtkVersionMajor == 5):
-                self.extractGridClipFpreserve.SetInput(self.ugridF)
+                self.extractGridClipFpreserve.SetInput(self.ugridQuadF)
             elif (self.vtkVersionMajor == 6):
-                self.extractGridClipFpreserve.SetInputData(self.ugridF)
+                self.extractGridClipFpreserve.SetInputData(self.ugridQuadF)
             self.extractGridClipFpreserve.SetImplicitFunction(self.clippingPlaneF)
             self.extractGridClipFpreserve.ExtractInsideOff()
         if self.extractClipFpreserve == []:
@@ -1258,7 +1263,7 @@ class fsi(object):
             self.linearSubdivisionClipFpreserve.SetInputConnection( \
                 self.extractClipFpreserve.GetOutputPort())
         self.linearSubdivisionClipFpreserve.SetNumberOfSubdivisions( \
-            self.dsmFnumberOfSubdivisions)
+            self.dsmQuadFnumberOfSubdivisions)
         if self.clipMapperFpreserve == []:
             self.clipMapperFpreserve = vtk.vtkDataSetMapper()
             self.clipMapperFpreserve.SetInputConnection( \
@@ -1299,13 +1304,16 @@ class fsi(object):
             self.meshQualityF = vtk.vtkMeshQuality()
             logging.debug("set input for fluid mesh quality")
             logging.debug("number of cells (lin): %i" \
-                % self.ugridCellsF.GetNumberOfCells())
+                % self.ugridLinF.GetNumberOfCells())
             if (self.vtkVersionMajor == 5):
-                self.meshQualityF.SetInput(self.ugridCellsF)
+                self.meshQualityF.SetInput(self.ugridLinF)
             elif (self.vtkVersionMajor == 6):
-                self.meshQualityF.SetInputData(self.ugridCellsF)
+                self.meshQualityF.SetInputData(self.ugridLinF)
             logging.debug("set fluid mesh quality measure")
             self.meshQualityF.SetTriangleQualityMeasureToRadiusRatio()
+            self.meshQualityF.SetQuadQualityMeasureToRadiusRatio()
+            self.meshQualityF.SetTetQualityMeasureToRadiusRatio()
+            self.meshQualityF.SetHexQualityMeasureToEdgeRatio()
         if self.boolUpdateQualityF:
             logging.debug("compute tet quality (fluid)")
             if self.numberOfDimensions == 3:
@@ -1316,7 +1324,7 @@ class fsi(object):
                     +self.filenameSuffix
                 if not(os.path.exists(filename)):
                     tempQualityF = readCheartData.computeTetQuality( \
-                        vtk_to_numpy(self.ugridF.GetPoints().GetData()), \
+                        vtk_to_numpy(self.ugridLinF.GetPoints().GetData()), \
                         self.tempElemF, \
                         self.qualityMeasureF)
                     readCheartData.writeScalars(tempQualityF, filename)
@@ -1324,19 +1332,19 @@ class fsi(object):
                     tempQualityF = readCheartData.readScalars(filename)
                 logging.debug("compute tet quality (fluid) complete")
                 self.boolUpdateQualityF = False
-                self.ugridF.GetCellData().AddArray( \
+                self.ugridLinF.GetCellData().AddArray( \
                     organiseData.numpy2vtkDataArray1(tempQualityF, "Quality"))
             elif self.numberOfDimensions == 2:
                 self.meshQualityF.Update()
                 self.boolUpdateQualityF = False
                 logging.debug("assign fluid mesh quality")
-                self.ugridF.GetCellData().AddArray( \
+                self.ugridLinF.GetCellData().AddArray( \
                     self.meshQualityF.GetOutput().GetCellData().GetArray("Quality"))
             logging.debug("get range of fluid mesh quality values")
             self.minQualityF, self.maxQualityF = \
-                self.ugridF.GetCellData().GetArray("Quality").GetRange()
+                self.ugridLinF.GetCellData().GetArray("Quality").GetRange()
             self.numberOfCellsF = \
-                self.ugridF.GetCellData().GetArray("Quality").GetNumberOfTuples()
+                self.ugridLinF.GetCellData().GetArray("Quality").GetNumberOfTuples()
             logging.debug("number of cells: %i" % self.numberOfCellsF)
             logging.debug("fluid cell quality range: [%.2f, %.2f]" \
                 % (self.minQualityF, self.maxQualityF))
@@ -1568,8 +1576,11 @@ class fsi(object):
     
     # show/hide element edges
     def edgesOnOffF(self):
-        if not(self.dataSetActorF == []):
-            self.dataSetActorF.GetProperty().SetEdgeVisibility( \
+        if not(self.dataSetActorLinF == []):
+            self.dataSetActorLinF.GetProperty().SetEdgeVisibility( \
+                self.boolEdgesF.get())
+        if not(self.dataSetActorQuadF == []):
+            self.dataSetActorQuadF.GetProperty().SetEdgeVisibility( \
                 self.boolEdgesF.get())
         if not(self.clipActorF == []):
             self.clipActorF.GetProperty().SetEdgeVisibility( \
@@ -1771,8 +1782,10 @@ class fsi(object):
     # update fluid data set mapper
     def updateFluid(self):
         if self.showF.get() == "none":
-            if not(self.dataSetActorF == []):
-                self.renderer.RemoveActor(self.dataSetActorF)
+            if not(self.dataSetActorLinF == []):
+                self.renderer.RemoveActor(self.dataSetActorLinF)
+            if not(self.dataSetActorQuadF == []):
+                self.renderer.RemoveActor(self.dataSetActorQuadF)
             if not(self.clipActorFpreserve == []):
                 self.renderer.RemoveActor(self.clipActorFpreserve)
             if not(self.clipActorF == []):
@@ -1851,13 +1864,18 @@ class fsi(object):
                     self.renderer.RemoveActor(self.probeActorF)
                 if not(self.vortexSphereActor == []):
                     self.renderer.RemoveActor(self.vortexSphereActor)
-                self.renderer.AddActor(self.dataSetActorF)
+                if (self.boolShowPresF or self.boolShowQualityF):
+                    self.renderer.RemoveActor(self.dataSetActorQuadF)
+                    self.renderer.AddActor(self.dataSetActorLinF)
+                else:
+                    self.renderer.RemoveActor(self.dataSetActorLinF)
+                    self.renderer.AddActor(self.dataSetActorQuadF)
             elif (self.clipFnormal.get() == "xe") \
                  or (self.clipFnormal.get() == "ye") \
                  or (self.clipFnormal.get() == "ze"):
                 self.clipFxyzPreserveElements()
-                if not(self.dataSetActorF == []):
-                    self.renderer.RemoveActor(self.dataSetActorF)
+                if not(self.dataSetActorQuadF == []):
+                    self.renderer.RemoveActor(self.dataSetActorQuadF)
                 if not(self.clipActorF == []):
                     self.renderer.RemoveActor(self.clipActorF)
                 if not(self.cutActorF == []):
@@ -1871,8 +1889,8 @@ class fsi(object):
                  or (self.clipFnormal.get() == "y") \
                  or (self.clipFnormal.get() == "z"):
                 self.clipFxyz()
-                if not(self.dataSetActorF == []):
-                    self.renderer.RemoveActor(self.dataSetActorF)
+                if not(self.dataSetActorQuadF == []):
+                    self.renderer.RemoveActor(self.dataSetActorQuadF)
                 if not(self.clipActorFpreserve == []):
                     self.renderer.RemoveActor(self.clipActorFpreserve)
                 if not(self.cutActorF == []):
@@ -1886,8 +1904,8 @@ class fsi(object):
                  or (self.clipFnormal.get() == "b") \
                  or (self.clipFnormal.get() == "c"):
                 self.sliceFxyz()
-                if not(self.dataSetActorF == []):
-                    self.renderer.RemoveActor(self.dataSetActorF)
+                if not(self.dataSetActorQuadF == []):
+                    self.renderer.RemoveActor(self.dataSetActorQuadF)
                 if not(self.clipActorFpreserve == []):
                     self.renderer.RemoveActor(self.clipActorFpreserve)
                 if not(self.clipActorF == []):
@@ -1901,8 +1919,8 @@ class fsi(object):
                  or (self.clipFnormal.get() == "j") \
                  or (self.clipFnormal.get() == "k"):
                 self.structuredGridSliceF()
-                if not(self.dataSetActorF == []):
-                    self.renderer.RemoveActor(self.dataSetActorF)
+                if not(self.dataSetActorQuadF == []):
+                    self.renderer.RemoveActor(self.dataSetActorQuadF)
                 if not(self.clipActorFpreserve == []):
                     self.renderer.RemoveActor(self.clipActorFpreserve)
                 if not(self.clipActorF == []):
@@ -1921,18 +1939,18 @@ class fsi(object):
                     self.renderer.RemoveActor(self.cutActorF)
                 if not(self.probeActorF == []):
                     self.renderer.RemoveActor(self.probeActorF)
-                if not(self.dataSetActorF == []):
-                    self.renderer.RemoveActor(self.dataSetActorF)
+                if not(self.dataSetActorQuadF == []):
+                    self.renderer.RemoveActor(self.dataSetActorQuadF)
                 self.updateVortex()
                 
                 vortexPoints = vtk.vtkPoints()
-                vortexPoints.SetData(self.ugridF.GetPoints().GetData())
+                vortexPoints.SetData(self.ugridQuadF.GetPoints().GetData())
                 
                 vortexThreshold = vtk.vtkThresholdPoints()
                 if (self.vtkVersionMajor == 5):
-                    vortexThreshold.SetInput(self.ugridF)
+                    vortexThreshold.SetInput(self.ugridQuadF)
                 elif (self.vtkVersionMajor == 6):
-                    vortexThreshold.SetInputData(self.ugridF)
+                    vortexThreshold.SetInputData(self.ugridQuadF)
                 vortexThreshold.SetInputArrayToProcess(0, 0, 0, \
                     vtk.vtkDataObject.FIELD_ASSOCIATION_POINTS, "vortex_structure")
                 vortexThreshold.ThresholdByUpper(1)
@@ -2071,36 +2089,61 @@ class fsi(object):
     
     # create data set mapper for fluid
     def createDataSetMapperF(self):
-        if self.extractF == []:
-            self.extractF = vtk.vtkGeometryFilter()
+        if self.extractQuadF == []:
+            self.extractLinF = vtk.vtkGeometryFilter()
+            self.extractQuadF = vtk.vtkGeometryFilter()
+            self.triangleFilterLinF = vtk.vtkTriangleFilter()
+            self.triangleFilterQuadF = vtk.vtkTriangleFilter()
         if (self.vtkVersionMajor == 5):
-            self.extractF.SetInput(self.ugridF)
+            self.extractLinF.SetInput(self.ugridLinF)
+            self.extractQuadF.SetInput(self.ugridQuadF)
         elif (self.vtkVersionMajor == 6):
-            self.extractF.SetInputData(self.ugridF)
+            self.extractLinF.SetInputData(self.ugridLinF)
+            self.extractQuadF.SetInputData(self.ugridQuadF)
         else:
             sys.exit("Incompatible VTK version " \
                 +str(vtk.vtkVersion().GetVTKVersion()) \
                 +". Must use 5.x.x or 6.x.x!")
-        if self.linearSubdivisionF == []:
-            self.linearSubdivisionF = vtk.vtkLinearSubdivisionFilter()
-        self.linearSubdivisionF.SetInputConnection(self.extractF.GetOutputPort())
-        self.linearSubdivisionF.SetNumberOfSubdivisions( \
-            self.dsmFnumberOfSubdivisions)
-        if self.dataSetMapperF == []:
-            self.dataSetMapperF = vtk.vtkDataSetMapper()
-        self.dataSetMapperF.SetInputConnection( \
-            self.linearSubdivisionF.GetOutputPort())
-        if self.currentCTFF == []:
+        self.triangleFilterLinF.SetInputConnection( \
+            self.extractLinF.GetOutputPort())
+        self.triangleFilterQuadF.SetInputConnection( \
+            self.extractQuadF.GetOutputPort())
+        self.triangleFilterLinF.Update()
+        self.triangleFilterQuadF.Update()
+        if (self.linearSubdivisionQuadF == []):
+            self.linearSubdivisionLinF  = vtk.vtkLinearSubdivisionFilter()
+            self.linearSubdivisionQuadF = vtk.vtkLinearSubdivisionFilter()
+        self.linearSubdivisionLinF.SetInputConnection( \
+            self.triangleFilterLinF.GetOutputPort())
+        self.linearSubdivisionQuadF.SetInputConnection( \
+            self.triangleFilterQuadF.GetOutputPort())
+        self.linearSubdivisionLinF.SetNumberOfSubdivisions( \
+            self.dsmLinFnumberOfSubdivisions)
+        self.linearSubdivisionQuadF.SetNumberOfSubdivisions( \
+            self.dsmQuadFnumberOfSubdivisions)
+        if self.dataSetMapperQuadF == []:
+            self.dataSetMapperLinF  = vtk.vtkDataSetMapper()
+            self.dataSetMapperQuadF = vtk.vtkDataSetMapper()
+        self.dataSetMapperLinF.SetInputConnection( \
+            self.linearSubdivisionLinF.GetOutputPort())
+        self.dataSetMapperQuadF.SetInputConnection( \
+            self.linearSubdivisionQuadF.GetOutputPort())
+        if (self.currentCTFF == []):
             self.scalarBarOnOffF()
-        self.dataSetMapperF.SetLookupTable(self.currentCTFF)
-        if self.dataSetActorF == []:
-            self.dataSetActorF = vtk.vtkActor()
-        self.dataSetActorF.SetMapper(self.dataSetMapperF)
-        self.dataSetActorF.GetProperty().SetEdgeVisibility( \
-            self.boolEdgesF.get())
-        self.dataSetActorF.GetProperty().SetInterpolationToGouraud()
+        self.dataSetMapperLinF.SetLookupTable(self.currentCTFF)
+        self.dataSetMapperQuadF.SetLookupTable(self.currentCTFF)
+        if self.dataSetActorQuadF == []:
+            self.dataSetActorLinF  = vtk.vtkActor()
+            self.dataSetActorQuadF = vtk.vtkActor()
+        self.dataSetActorLinF.SetMapper(self.dataSetMapperLinF)
+        self.dataSetActorQuadF.SetMapper(self.dataSetMapperQuadF)
+        self.dataSetActorLinF.GetProperty().SetEdgeVisibility(False)
+        self.dataSetActorQuadF.GetProperty().SetEdgeVisibility(False)
+        self.dataSetActorLinF.GetProperty().SetInterpolationToGouraud()
+        self.dataSetActorQuadF.GetProperty().SetInterpolationToGouraud()
         self.selectColorArrayF()
-        self.renderer.AddActor(self.dataSetActorF)
+        #self.renderer.AddActor(self.dataSetActorLinF)
+        self.renderer.AddActor(self.dataSetActorQuadF)
         self.renderWindow.Render()
     
     # create data set mapper for solid
@@ -2212,8 +2255,8 @@ class fsi(object):
     # select variable for color map
     def selectColorArrayF(self):
         if self.boolShowVel:
-            self.dataSetMapperF.SetScalarModeToUsePointFieldData()
-            self.dataSetMapperF.SelectColorArray("velocity")
+            self.dataSetMapperQuadF.SetScalarModeToUsePointFieldData()
+            self.dataSetMapperQuadF.SelectColorArray("velocity")
             if not(self.clipMapperFpreserve == []):
                 self.clipMapperFpreserve.SetScalarModeToUsePointFieldData()
                 self.clipMapperFpreserve.SelectColorArray("velocity")
@@ -2223,9 +2266,10 @@ class fsi(object):
             if not(self.cutMapperF == []):
                 self.cutMapperF.SetScalarModeToUsePointFieldData()
                 self.cutMapperF.SelectColorArray("velocity")
+            self.dataSetMapperQuadF.SetLookupTable(self.currentCTFF)
         elif self.boolShowWel:
-            self.dataSetMapperF.SetScalarModeToUsePointFieldData()
-            self.dataSetMapperF.SelectColorArray("welocity")
+            self.dataSetMapperQuadF.SetScalarModeToUsePointFieldData()
+            self.dataSetMapperQuadF.SelectColorArray("welocity")
             if not(self.clipMapperFpreserve == []):
                 self.clipMapperFpreserve.SetScalarModeToUsePointFieldData()
                 self.clipMapperFpreserve.SelectColorArray("welocity")
@@ -2235,9 +2279,11 @@ class fsi(object):
             if not(self.cutMapperF == []):
                 self.cutMapperF.SetScalarModeToUsePointFieldData()
                 self.cutMapperF.SelectColorArray("welocity")
+            self.dataSetMapperQuadF.SetLookupTable(self.currentCTFF)
         elif self.boolShowPresF:
-            self.dataSetMapperF.SetScalarModeToUsePointData()
-            self.dataSetMapperF.SetUseLookupTableScalarRange(True)
+            self.dataSetMapperLinF.SetScalarModeToUsePointData()
+            #self.dataSetMapperLinF.SetUseLookupTableScalarRange(True)
+            self.dataSetMapperLinF.SelectColorArray("pressure")
             if not(self.clipMapperFpreserve == []):
                 self.clipMapperFpreserve.SetScalarModeToUsePointData()
                 self.clipMapperFpreserve.SetUseLookupTableScalarRange(True)
@@ -2247,9 +2293,10 @@ class fsi(object):
             if not(self.cutMapperF == []):
                 self.cutMapperF.SetScalarModeToUsePointData()
                 self.cutMapperF.SetUseLookupTableScalarRange(True)
+            self.dataSetMapperLinF.SetLookupTable(self.currentCTFF)
         elif self.boolShowVort:
-            self.dataSetMapperF.SetScalarModeToUsePointFieldData()
-            self.dataSetMapperF.SelectColorArray("vorticity")
+            self.dataSetMapperQuadF.SetScalarModeToUsePointFieldData()
+            self.dataSetMapperQuadF.SelectColorArray("vorticity")
             if not(self.clipMapperFpreserve == []):
                 self.clipMapperFpreserve.SetScalarModeToUsePointFieldData()
                 self.clipMapperFpreserve.SelectColorArray("vorticity")
@@ -2259,10 +2306,11 @@ class fsi(object):
             if not(self.cutMapperF == []):
                 self.cutMapperF.SetScalarModeToUsePointFieldData()
                 self.cutMapperF.SelectColorArray("vorticity")
+            self.dataSetMapperQuadF.SetLookupTable(self.currentCTFF)
         elif self.boolShowQualityF:
-            self.dataSetMapperF.SetScalarModeToUseCellFieldData()
-            self.dataSetMapperF.SelectColorArray("Quality")
-            self.dataSetMapperF.SetUseLookupTableScalarRange(True)
+            self.dataSetMapperLinF.SetScalarModeToUseCellFieldData()
+            self.dataSetMapperLinF.SelectColorArray("Quality")
+            self.dataSetMapperLinF.SetUseLookupTableScalarRange(True)
             if not(self.clipMapperFpreserve == []):
                 self.clipMapperFpreserve.SetScalarModeToUseCellFieldData()
                 self.clipMapperFpreserve.SelectColorArray("Quality")
@@ -2275,10 +2323,11 @@ class fsi(object):
                 self.cutMapperF.SetScalarModeToUseCellFieldData()
                 self.cutMapperF.SelectColorArray("Quality")
                 self.cutMapperF.SetUseLookupTableScalarRange(True)
+            self.dataSetMapperLinF.SetLookupTable(self.currentCTFF)
         elif self.boolShowPhiF:
-            self.dataSetMapperF.SetScalarModeToUsePointFieldData()
-            self.dataSetMapperF.SelectColorArray("phi")
-            self.dataSetMapperF.SetUseLookupTableScalarRange(True)
+            self.dataSetMapperQuadF.SetScalarModeToUsePointFieldData()
+            self.dataSetMapperQuadF.SelectColorArray("phi")
+            self.dataSetMapperQuadF.SetUseLookupTableScalarRange(True)
             if not(self.clipMapperFpreserve == []):
                 self.clipMapperFpreserve.SetScalarModeToUsePointFieldData()
                 self.clipMapperFpreserve.SelectColorArray("phi")
@@ -2291,7 +2340,7 @@ class fsi(object):
                 self.cutMapperF.SetScalarModeToUsePointFieldData()
                 self.cutMapperF.SelectColorArray("phi")
                 self.cutMapperF.SetUseLookupTableScalarRange(True)
-        self.dataSetMapperF.SetLookupTable(self.currentCTFF)
+            self.dataSetMapperQuadF.SetLookupTable(self.currentCTFF)
         if not(self.clipMapperFpreserve == []):
             self.clipMapperFpreserve.SetLookupTable(self.currentCTFF)
         if not(self.clipMapperF == []):
@@ -2341,9 +2390,9 @@ class fsi(object):
         if self.outlineF == []:
             self.outlineF = vtk.vtkOutlineFilter()
             if (self.vtkVersionMajor == 5):
-                self.outlineF.SetInput(self.ugridF)
+                self.outlineF.SetInput(self.ugridQuadF)
             elif (self.vtkVersionMajor == 6):
-                self.outlineF.SetInputData(self.ugridF)
+                self.outlineF.SetInputData(self.ugridQuadF)
             self.outlineMapperF = vtk.vtkPolyDataMapper()
             self.outlineMapperF.SetInputConnection(self.outlineF.GetOutputPort())
             self.outlineActorF = vtk.vtkActor()
@@ -2895,7 +2944,8 @@ class fsi(object):
         self.filenameSolVel     = config[28]
         self.scalarBarNormalizedHeight = float(config[29])
         self.scalarBarFontFamily = str(config[30])
-        self.dsmFnumberOfSubdivisions = int(config[31])
+        self.dsmLinFnumberOfSubdivisions = int(config[31])
+        self.dsmQuadFnumberOfSubdivisions = int(config[31])
         self.dsmLinSnumberOfSubdivisions  = int(config[32])
         self.dsmQuadSnumberOfSubdivisions = int(config[32])
         self.dsmInumberOfSubdivisions = int(config[33])
@@ -2960,7 +3010,8 @@ class fsi(object):
             self.scalarBarNormalizedHeight = float(config[29])
             self.scalarBarFontFamily = str(config[30])
             self.scalarBarFont()
-            self.dsmFnumberOfSubdivisions = int(config[31])
+            self.dsmLinFnumberOfSubdivisions = int(config[31])
+            self.dsmQuadFnumberOfSubdivisions = int(config[31])
             self.dsmLinSnumberOfSubdivisions  = int(config[32])
             self.dsmQuadSnumberOfSubdivisions = int(config[32])
             self.dsmInumberOfSubdivisions = int(config[33])
@@ -2970,9 +3021,12 @@ class fsi(object):
             self.meshTubesSOnTopo = int(config[38])
             self.meshQualityOnFTopo = int(config[39])
             self.meshQualityOnSTopo = int(config[40])
-            if not(self.linearSubdivisionF == []):
-                self.linearSubdivisionF.SetNumberOfSubdivisions( \
-                    self.dsmFnumberOfSubdivisions)
+            if not(self.linearSubdivisionLinF == []):
+                self.linearSubdivisionLinF.SetNumberOfSubdivisions( \
+                    self.dsmLinFnumberOfSubdivisions)
+            if not(self.linearSubdivisionQuadF == []):
+                self.linearSubdivisionQuadF.SetNumberOfSubdivisions( \
+                    self.dsmQuadFnumberOfSubdivisions)
             if not(self.linearSubdivisionLinS == []):
                 self.linearSubdivisionLinS.SetNumberOfSubdivisions( \
                     self.dsmLinSnumberOfSubdivisions)
@@ -3150,9 +3204,9 @@ class fsi(object):
                                            +self.filenameSpaceF \
                                            +str(self.currentT) \
                                            +self.filenameSuffix)
-        if self.ugridF == []:
-            self.ugridF      = vtk.vtkUnstructuredGrid()
-            self.ugridCellsF = vtk.vtkUnstructuredGrid()
+        if self.ugridQuadF == []:
+            self.ugridLinF  = vtk.vtkUnstructuredGrid()
+            self.ugridQuadF = vtk.vtkUnstructuredGrid()
             if self.numberOfDimensions == 3:
                 if self.meshTypeQuadF == vtk.vtkQuadraticTetra().GetCellType():
                     # quadratic tetrahedral mesh
@@ -3222,7 +3276,7 @@ class fsi(object):
                     numpy_to_vtk(tempElemLinF, deep=1, \
                     array_type=vtk.vtkIdTypeArray().GetDataType()))
                 # assign cells
-                self.ugridF.SetCells(numpy_to_vtk(cellstypesF, deep=1, \
+                self.ugridQuadF.SetCells(numpy_to_vtk(cellstypesF, deep=1, \
                     array_type=vtk.vtkUnsignedCharArray().GetDataType()),
                                numpy_to_vtk(cellslocationsF, deep = 1, \
                                array_type=vtk.vtkIdTypeArray().GetDataType()),
@@ -3273,7 +3327,7 @@ class fsi(object):
                     numpy_to_vtk(tempElemLinF, deep=1, \
                     array_type=vtk.vtkIdTypeArray().GetDataType()))
                 # assign cells
-                self.ugridCellsF.SetCells(numpy_to_vtk(cellstypesF, deep=1, \
+                self.ugridLinF.SetCells(numpy_to_vtk(cellstypesF, deep=1, \
                     array_type=vtk.vtkUnsignedCharArray().GetDataType()),
                                numpy_to_vtk(cellslocationsF, deep = 1, \
                                array_type=vtk.vtkIdTypeArray().GetDataType()),
@@ -3296,7 +3350,7 @@ class fsi(object):
                         numpy_to_vtk(tempElemLinF, deep=1, \
                         array_type=vtk.vtkIdTypeArray().GetDataType()))
                     # assign cells
-                    self.ugridF.SetCells(numpy_to_vtk(cellstypesF, deep=1, \
+                    self.ugridQuadF.SetCells(numpy_to_vtk(cellstypesF, deep=1, \
                         array_type=vtk.vtkUnsignedCharArray().GetDataType()), \
                         numpy_to_vtk(cellslocationsF, deep = 1, \
                         array_type=vtk.vtkIdTypeArray().GetDataType()), \
@@ -3313,7 +3367,7 @@ class fsi(object):
                     cellsF.SetCells(int(tempElemLinF.shape[0]/divby), \
                         numpy_to_vtk(tempElemLinF, deep=1, \
                         array_type=vtk.vtkIdTypeArray().GetDataType()))
-                    self.ugridF.SetCells(numpy_to_vtk(cellstypesF, deep=1, \
+                    self.ugridQuadF.SetCells(numpy_to_vtk(cellstypesF, deep=1, \
                         array_type=vtk.vtkUnsignedCharArray().GetDataType()), \
                         numpy_to_vtk(cellslocationsF, deep = 1, \
                         array_type=vtk.vtkIdTypeArray().GetDataType()), \
@@ -3334,7 +3388,7 @@ class fsi(object):
                         numpy_to_vtk(tempElemLinF, deep=1, \
                         array_type=vtk.vtkIdTypeArray().GetDataType()))
                     # assign cells
-                    self.ugridCellsF.SetCells(numpy_to_vtk(cellstypesF, deep=1, \
+                    self.ugridLinF.SetCells(numpy_to_vtk(cellstypesF, deep=1, \
                         array_type=vtk.vtkUnsignedCharArray().GetDataType()), \
                         numpy_to_vtk(cellslocationsF, deep = 1, \
                         array_type=vtk.vtkIdTypeArray().GetDataType()), \
@@ -3351,7 +3405,7 @@ class fsi(object):
                     cellsF.SetCells(int(tempElemLinF.shape[0]/divby), \
                         numpy_to_vtk(tempElemLinF, deep=1, \
                         array_type=vtk.vtkIdTypeArray().GetDataType()))
-                    self.ugridCellsF.SetCells(numpy_to_vtk(cellstypesF, deep=1, \
+                    self.ugridLinF.SetCells(numpy_to_vtk(cellstypesF, deep=1, \
                         array_type=vtk.vtkUnsignedCharArray().GetDataType()), \
                         numpy_to_vtk(cellslocationsF, deep = 1, \
                         array_type=vtk.vtkIdTypeArray().GetDataType()), \
@@ -3365,10 +3419,10 @@ class fsi(object):
             if (numNodesQuadF != self.numberOfNodesQuadF):
                 raise ValueError("Inconsistent number of nodes (fluid, quad).")
             # assign points
-            self.ugridF.SetPoints(pointsF)
-            self.ugridCellsF.SetPoints(pointsF)
+            self.ugridQuadF.SetPoints(pointsF)
+            self.ugridLinF.SetPoints(pointsF)
             self.minXF, self.maxXF, self.minYF, self.maxYF, self.minZF, self.maxZF = \
-                self.ugridF.GetPoints().GetBounds()
+                self.ugridQuadF.GetPoints().GetBounds()
             logging.debug("fluid space x-range: [%.2f, %.2f]" \
                           % (self.minXF, self.maxXF))
             logging.debug("fluid space y-range: [%.2f, %.2f]" \
@@ -3391,7 +3445,7 @@ class fsi(object):
     # update fluid velocity
     def updateVel(self):
         logging.debug("update fluid velocity")
-        if self.ugridF == [] or self.boolUpdateSpaceF:
+        if self.ugridQuadF == [] or self.boolUpdateSpaceF:
             logging.debug("unstructured grid for fluid will be updated first")
             self.updateSpaceF()
         if self.boolUpdateVel \
@@ -3406,7 +3460,7 @@ class fsi(object):
                                            +self.filenameVel \
                                            +str(self.currentT) \
                                            +self.filenameSuffix)
-            self.ugridF.GetPointData().SetVectors( \
+            self.ugridQuadF.GetPointData().SetVectors( \
                 organiseData.numpy2vtkDataArray(tempVel, "velocity"))
             if self.numberOfDimensions != numberOfDimensions:
                 logging.debug("ERROR: number of dimensions of fluid space is %i" \
@@ -3414,13 +3468,13 @@ class fsi(object):
                 logging.debug("ERROR: number of fluid velocity components is %i" \
                               % numberOfDimensions)
             self.minMagVel, self.maxMagVel = \
-                self.ugridF.GetPointData().GetVectors("velocity").GetRange(-1)
+                self.ugridQuadF.GetPointData().GetVectors("velocity").GetRange(-1)
             self.minVel0, self.maxVel0 = \
-                self.ugridF.GetPointData().GetVectors("velocity").GetRange(0)
+                self.ugridQuadF.GetPointData().GetVectors("velocity").GetRange(0)
             self.minVel1, self.maxVel1 = \
-                self.ugridF.GetPointData().GetVectors("velocity").GetRange(1)
+                self.ugridQuadF.GetPointData().GetVectors("velocity").GetRange(1)
             self.minVel2, self.maxVel2 = \
-                self.ugridF.GetPointData().GetVectors("velocity").GetRange(2)
+                self.ugridQuadF.GetPointData().GetVectors("velocity").GetRange(2)
             logging.debug("fluid velocity magnitude range: [%.2f, %.2f]" \
                           % (self.minMagVel, self.maxMagVel))
             logging.debug("fluid velocity x-range: [%.2f, %.2f]" \
@@ -3435,7 +3489,7 @@ class fsi(object):
     # update fluid domain velocity
     def updateWel(self):
         logging.debug("update fluid domain velocity")
-        if self.ugridF == [] or self.boolUpdateSpaceF:
+        if self.ugridQuadF == [] or self.boolUpdateSpaceF:
             logging.debug("unstructured grid for fluid will be updated first")
             self.updateSpaceF()
         if self.boolUpdateWel \
@@ -3450,7 +3504,7 @@ class fsi(object):
                                            +self.filenameWel \
                                            +str(self.currentT) \
                                            +self.filenameSuffix)
-            self.ugridF.GetPointData().AddArray( \
+            self.ugridQuadF.GetPointData().AddArray( \
                 organiseData.numpy2vtkDataArray(tempWel, "welocity"))
             if self.numberOfDimensions != numberOfDimensions:
                 logging.debug("ERROR: number of dimensions of fluid space is %i" \
@@ -3458,13 +3512,13 @@ class fsi(object):
                 logging.debug("ERROR: number of fluid domain velocity components is %i" \
                               % numberOfDimensions)
             self.minMagWel, self.maxMagWel = \
-                self.ugridF.GetPointData().GetVectors("welocity").GetRange(-1)
+                self.ugridQuadF.GetPointData().GetVectors("welocity").GetRange(-1)
             self.minWel0, self.maxWel0 = \
-                self.ugridF.GetPointData().GetVectors("welocity").GetRange(0)
+                self.ugridQuadF.GetPointData().GetVectors("welocity").GetRange(0)
             self.minWel1, self.maxWel1 = \
-                self.ugridF.GetPointData().GetVectors("welocity").GetRange(1)
+                self.ugridQuadF.GetPointData().GetVectors("welocity").GetRange(1)
             self.minWel2, self.maxWel2 = \
-                self.ugridF.GetPointData().GetVectors("welocity").GetRange(2)
+                self.ugridQuadF.GetPointData().GetVectors("welocity").GetRange(2)
             logging.debug("fluid domain velocity magnitude range: [%.2f, %.2f]" \
                           % (self.minMagWel, self.maxMagWel))
             logging.debug("fluid domain velocity x-range: [%.2f, %.2f]" \
@@ -3496,9 +3550,9 @@ class fsi(object):
                 if self.gradientFilterF == []:
                     self.gradientFilterF = vtk.vtkGradientFilter()
                     if (self.vtkVersionMajor == 5):
-                        self.gradientFilterF.SetInput(self.ugridF)
+                        self.gradientFilterF.SetInput(self.ugridQuadF)
                     elif (self.vtkVersionMajor == 6):
-                        self.gradientFilterF.SetInputData(self.ugridF)
+                        self.gradientFilterF.SetInputData(self.ugridQuadF)
                     self.gradientFilterF.SetInputArrayToProcess(0, 0, 0, 0, "velocity")
                     self.gradientFilterF.SetResultArrayName("vorticity")
                     self.gradientFilterF.ComputeVorticityOn()
@@ -3507,21 +3561,21 @@ class fsi(object):
                     vtk_to_numpy( \
                     self.gradientFilterF.GetOutput().GetPointData().GetVectors("vorticity")), \
                     filename)
-            #tempVort =  readCheartData.calculateVorticity3D(vtk_to_numpy(self.ugridF.GetPoints().GetData()), self.tempElemF, vtk_to_numpy(self.ugridF.GetPointData().GetVectors("velocity")))
+            #tempVort =  readCheartData.calculateVorticity3D(vtk_to_numpy(self.ugridQuadF.GetPoints().GetData()), self.tempElemF, vtk_to_numpy(self.ugridQuadF.GetPointData().GetVectors("velocity")))
             #for i in range(100):
             #    print tempVort[i, 0], tempVort[i, 1], tempVort[i, 2]
             tempVort, numberOfDimensionsVort = \
                 readCheartData.readVectors(filename)
-            self.ugridF.GetPointData().AddArray( \
+            self.ugridQuadF.GetPointData().AddArray( \
                 organiseData.numpy2vtkDataArray(tempVort, "vorticity"))
             self.minMagVort, self.maxMagVort = \
-                self.ugridF.GetPointData().GetVectors("vorticity").GetRange(-1)
+                self.ugridQuadF.GetPointData().GetVectors("vorticity").GetRange(-1)
             self.minVort0, self.maxVort0 = \
-                self.ugridF.GetPointData().GetVectors("vorticity").GetRange(0)
+                self.ugridQuadF.GetPointData().GetVectors("vorticity").GetRange(0)
             self.minVort1, self.maxVort1 = \
-                self.ugridF.GetPointData().GetVectors("vorticity").GetRange(1)
+                self.ugridQuadF.GetPointData().GetVectors("vorticity").GetRange(1)
             self.minVort2, self.maxVort2 = \
-                self.ugridF.GetPointData().GetVectors("vorticity").GetRange(2)
+                self.ugridQuadF.GetPointData().GetVectors("vorticity").GetRange(2)
             logging.debug("fluid vorticity magnitude range: [%.2f, %.2f]" \
                           % (self.minMagVort, self.maxMagVort))
             logging.debug("fluid vorticity x-range: [%.2f, %.2f]" \
@@ -3536,7 +3590,8 @@ class fsi(object):
     # update fluid pressure
     def updatePresF(self):
         logging.debug("update fluid pressure")
-        if self.tempMappingF == [] and not(self.meshTypeQuadF == 10):
+        if ((self.tempMappingF == []) and (self.meshTypeQuadF == 24)):
+            logging.debug(" find mapping")
             self.tempMappingF = readCheartData.findMappingTetra( \
                 self.baseDirectory+self.meshFolder+self.filenameLinTF, \
                 self.baseDirectory+self.meshFolder+self.filenameQuadTF)
@@ -3549,37 +3604,28 @@ class fsi(object):
                  +self.filenamePresF \
                  +str(self.currentT) \
                  +self.filenameSuffix)):
+            logging.debug(" read pressure data")
             tempPresLinF = readCheartData.readScalars( \
                 self.baseDirectory \
                 +self.dataFolder \
                 +self.filenamePresF \
                 +str(self.currentT) \
                 +self.filenameSuffix)
-            if not(self.meshTypeQuadF == 10):
-                tempPresQuadF = readCheartData.interpolateLinToQuad( \
-                    self.tempElemF, \
-                    vtk_to_numpy(self.ugridF.GetPoints().GetData()), \
-                    tempPresLinF, \
-                    self.tempMappingF, \
-                    self.numberOfDimensions)
-                if self.boolEffectiveG.get():
-                    tempPresQuadF = readCheartData.changeOfVariables( \
-                        vtk_to_numpy(self.ugridF.GetPoints().GetData()), \
-                        tempPresQuadF, self.densityF, \
-                        self.gravity_x, self.gravity_y, self.gravity_z, self.PO)
+            if self.boolEffectiveG.get():
+                tempPresQuadF = readCheartData.changeOfVariables( \
+                    vtk_to_numpy(self.ugridLinF.GetPoints().GetData()), \
+                    tempPresLinF, self.densityF, \
+                    self.gravity_x, self.gravity_y, self.gravity_z, self.PO)
             else:
-                if self.boolEffectiveG.get():
-                    tempPresQuadF = readCheartData.changeOfVariables( \
-                        vtk_to_numpy(self.ugridF.GetPoints().GetData()), \
-                        tempPresLinF, self.densityF, \
-                        self.gravity_x, self.gravity_y, self.gravity_z, self.PO)
-                else:
-                    tempPresQuadF = tempPresLinF
-            self.ugridF.GetPointData().SetScalars( \
+                tempPresQuadF = tempPresLinF
+            logging.debug(" set scalars")
+            self.ugridLinF.GetPointData().SetScalars( \
                 numpy_to_vtk(tempPresQuadF, deep=1, array_type=vtk.VTK_DOUBLE))
-            self.ugridF.GetPointData().GetScalars().SetName("pressure")
+            logging.debug(" set name")
+            self.ugridLinF.GetPointData().GetScalars().SetName("pressure")
+            logging.debug(" set min/max")
             self.minPressureF, self.maxPressureF = \
-                self.ugridF.GetPointData().GetScalars().GetRange()
+                self.ugridLinF.GetPointData().GetScalars().GetRange()
             logging.debug("fluid pressure range: [%.2f, %.2f]" \
                           % (self.minPressureF, self.maxPressureF))
             self.boolUpdatePresF = False
@@ -3603,7 +3649,7 @@ class fsi(object):
                 +self.filenameVortex \
                 +str(self.currentT) \
                 +self.filenameSuffix)
-            self.ugridF.GetPointData().AddArray( \
+            self.ugridQuadF.GetPointData().AddArray( \
                 organiseData.numpy2vtkDataArray1(tempVortex, "vortex_structure"))
             self.boolUpdateVortex = False
         logging.debug("update fluid vortex structures completed")
@@ -3626,10 +3672,10 @@ class fsi(object):
                 +self.filenamePhiF \
                 +str(self.currentT) \
                 +self.filenameSuffix)
-            self.ugridF.GetPointData().AddArray( \
+            self.ugridQuadF.GetPointData().AddArray( \
                 organiseData.numpy2vtkDataArray1(tempPhiF, "phi"))
             self.minPhiF, self.maxPhiF = \
-                self.ugridF.GetPointData().GetVectors("phi").GetRange()
+                self.ugridQuadF.GetPointData().GetVectors("phi").GetRange()
             logging.debug("directional scalars (fluid) range: [%.2f, %.2f]" \
                           % (self.minPhiF, self.maxPhiF))
             self.boolUpdatePhiF = False
@@ -4447,12 +4493,12 @@ class fsi(object):
             self.pngWriter = vtk.vtkPNGWriter()
         if self.boolMagnification == False:
             screenshotFilename = self.baseDirectory + self.screenshotFolderStr.get() \
-                + ("timestep_%05d.png" % (self.currentT))
+                + ("timestep_%010d.png" % (self.currentT))
             self.pngWriter.SetInputConnection(self.window2imageFilter.GetOutputPort())
         else:
             # TODO always resizes to initial window size..
             screenshotFilename = self.baseDirectory + self.screenshotFolderStr.get() \
-                + ("large_timestep_%05d.png" % (self.currentT))
+                + ("large_timestep_%010d.png" % (self.currentT))
             #self.renderLarge.SetInputData(self.renderer)
         self.window2imageFilter.Modified()
         self.pngWriter.SetFileName(screenshotFilename)
