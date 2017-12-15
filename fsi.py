@@ -640,9 +640,11 @@ class fsi(object):
         if self.planeCutF == []:
             self.planeCutF = vtk.vtkCutter()
         if (self.vtkVersionMajor == 5):
-            self.planeCutF.SetInput(self.ugridQuadF)
+            if self.boolShowPresF: self.planeCutF.SetInput(self.ugridLinF)
+            else:                  self.planeCutF.SetInput(self.ugridQuadF)
         elif (self.vtkVersionMajor == 6):
-            self.planeCutF.SetInputData(self.ugridQuadF)
+            if self.boolShowPresF: self.planeCutF.SetInputData(self.ugridLinF)
+            else:                  self.planeCutF.SetInputData(self.ugridQuadF)
         self.planeCutF.SetCutFunction(self.slicePlaneF)
         self.planeCutF.Update()
         if self.linearSubdivisionSliceF == []:
@@ -1158,10 +1160,11 @@ class fsi(object):
         if self.extractGridClipF == []:
             self.extractGridClipF = vtk.vtkBoxClipDataSet()
         if (self.vtkVersionMajor == 5):
-            self.extractGridClipF.SetInput(self.ugridQuadF)
+            if self.boolShowPresF: self.extractGridClipF.SetInput(self.ugridLinF)
+            else:                  self.extractGridClipF.SetInput(self.ugridQuadF)
         elif (self.vtkVersionMajor == 6):
-            self.extractGridClipF.SetInputData(self.ugridQuadF)
-            
+            if self.boolShowPresF: self.extractGridClipF.SetInputData(self.ugridLinF)
+            else:                  self.extractGridClipF.SetInputData(self.ugridQuadF)
         #    clippingPlaneF = vtk.vtkPlane()
         #    clippingPlaneF.SetOrigin(self.currentPlaneOriginX, 0, 0)
         #    clippingPlaneF.SetNormal(1.0, 0.0, 0.0)
@@ -1249,9 +1252,11 @@ class fsi(object):
         if self.extractGridClipFpreserve == []:
             self.extractGridClipFpreserve = vtk.vtkExtractGeometry()
             if (self.vtkVersionMajor == 5):
-                self.extractGridClipFpreserve.SetInput(self.ugridQuadF)
+                if self.boolShowPresF: self.extractGridClipFpreserve.SetInput(self.ugridLinF)
+                else:                  self.extractGridClipFpreserve.SetInput(self.ugridQuadF)
             elif (self.vtkVersionMajor == 6):
-                self.extractGridClipFpreserve.SetInputData(self.ugridQuadF)
+                if self.boolShowPresF: self.extractGridClipFpreserve.SetInputData(self.ugridLinF)
+                else:                  self.extractGridClipFpreserve.SetInputData(self.ugridQuadF)
             self.extractGridClipFpreserve.SetImplicitFunction(self.clippingPlaneF)
             self.extractGridClipFpreserve.ExtractInsideOff()
         if self.extractClipFpreserve == []:
@@ -3590,7 +3595,8 @@ class fsi(object):
     # update fluid pressure
     def updatePresF(self):
         logging.debug("update fluid pressure")
-        if ((self.tempMappingF == []) and (self.meshTypeQuadF == 24)):
+        if ((self.tempMappingF == []) \
+            and (self.meshTypeQuadF == vtk.vtkQuadraticTetra().GetCellType())):
             logging.debug(" find mapping")
             self.tempMappingF = readCheartData.findMappingTetra( \
                 self.baseDirectory+self.meshFolder+self.filenameLinTF, \
@@ -3605,22 +3611,28 @@ class fsi(object):
                  +str(self.currentT) \
                  +self.filenameSuffix)):
             logging.debug(" read pressure data")
+            # the pressure data only lives on the linear topology
             tempPresLinF = readCheartData.readScalars( \
                 self.baseDirectory \
                 +self.dataFolder \
                 +self.filenamePresF \
                 +str(self.currentT) \
                 +self.filenameSuffix)
+            # let's move the data to the quadratic topology
+            tempPresQuadF = numpy.zeros(self.numberOfNodesQuadF).astype(float)
+            for i in range(tempPresLinF.shape[0]):
+                tempPresQuadF[self.tempMappingF[i]] = tempPresLinF[i]
             if self.boolEffectiveG.get():
-                tempPresQuadF = readCheartData.changeOfVariables( \
+                logging.debug("  with change-of-variables")
+                presQuadF = readCheartData.changeOfVariables( \
                     vtk_to_numpy(self.ugridLinF.GetPoints().GetData()), \
-                    tempPresLinF, self.densityF, \
+                    tempPresQuadF, self.densityF, \
                     self.gravity_x, self.gravity_y, self.gravity_z, self.PO)
             else:
-                tempPresQuadF = tempPresLinF
+                presQuadF = tempPresQuadF
             logging.debug(" set scalars")
             self.ugridLinF.GetPointData().SetScalars( \
-                numpy_to_vtk(tempPresQuadF, deep=1, array_type=vtk.VTK_DOUBLE))
+                numpy_to_vtk(presQuadF, deep=1, array_type=vtk.VTK_DOUBLE))
             logging.debug(" set name")
             self.ugridLinF.GetPointData().GetScalars().SetName("pressure")
             logging.debug(" set min/max")
