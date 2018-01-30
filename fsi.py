@@ -640,11 +640,13 @@ class fsi(object):
         if self.planeCutF == []:
             self.planeCutF = vtk.vtkCutter()
         if (self.vtkVersionMajor == 5):
-            if self.boolShowPresF: self.planeCutF.SetInput(self.ugridLinF)
-            else:                  self.planeCutF.SetInput(self.ugridQuadF)
+            if self.boolShowPresF:      self.planeCutF.SetInput(self.ugridLinF)
+            elif self.boolShowQualityF: self.planeCutF.SetInput(self.ugridLinF)
+            else:                       self.planeCutF.SetInput(self.ugridQuadF)
         elif (self.vtkVersionMajor == 6):
-            if self.boolShowPresF: self.planeCutF.SetInputData(self.ugridLinF)
-            else:                  self.planeCutF.SetInputData(self.ugridQuadF)
+            if self.boolShowPresF:      self.planeCutF.SetInputData(self.ugridLinF)
+            elif self.boolShowQualityF: self.planeCutF.SetInputData(self.ugridLinF)
+            else:                       self.planeCutF.SetInputData(self.ugridQuadF)
         self.planeCutF.SetCutFunction(self.slicePlaneF)
         self.planeCutF.Update()
         if self.linearSubdivisionSliceF == []:
@@ -678,8 +680,9 @@ class fsi(object):
             self.cutMapperF.SetScalarModeToUsePointFieldData()
             self.cutMapperF.SelectColorArray("phi")
             self.cutMapperF.SetUseLookupTableScalarRange(True)
-        self.cutActorF = vtk.vtkActor()
-        self.cutActorF.SetMapper(self.cutMapperF)
+        if self.cutActorF == []:
+            self.cutActorF = vtk.vtkActor()
+            self.cutActorF.SetMapper(self.cutMapperF)
     
     # slice a 3D volume but sample data with regular set of points
     def structuredGridSliceF(self):
@@ -1160,11 +1163,13 @@ class fsi(object):
         if self.extractGridClipF == []:
             self.extractGridClipF = vtk.vtkBoxClipDataSet()
         if (self.vtkVersionMajor == 5):
-            if self.boolShowPresF: self.extractGridClipF.SetInput(self.ugridLinF)
-            else:                  self.extractGridClipF.SetInput(self.ugridQuadF)
+            if self.boolShowPresF:      self.extractGridClipF.SetInput(self.ugridLinF)
+            elif self.boolShowQualityF: self.extractGridClipF.SetInput(self.ugridLinF)
+            else:                       self.extractGridClipF.SetInput(self.ugridQuadF)
         elif (self.vtkVersionMajor == 6):
-            if self.boolShowPresF: self.extractGridClipF.SetInputData(self.ugridLinF)
-            else:                  self.extractGridClipF.SetInputData(self.ugridQuadF)
+            if self.boolShowPresF:      self.extractGridClipF.SetInputData(self.ugridLinF)
+            elif self.boolShowQualityF: self.extractGridClipF.SetInputData(self.ugridLinF)
+            else:                       self.extractGridClipF.SetInputData(self.ugridQuadF)
         #    clippingPlaneF = vtk.vtkPlane()
         #    clippingPlaneF.SetOrigin(self.currentPlaneOriginX, 0, 0)
         #    clippingPlaneF.SetNormal(1.0, 0.0, 0.0)
@@ -1251,14 +1256,16 @@ class fsi(object):
             self.clippingPlaneF.SetNormal(0.0, 0.0, 1.0)
         if self.extractGridClipFpreserve == []:
             self.extractGridClipFpreserve = vtk.vtkExtractGeometry()
-            if (self.vtkVersionMajor == 5):
-                if self.boolShowPresF: self.extractGridClipFpreserve.SetInput(self.ugridLinF)
-                else:                  self.extractGridClipFpreserve.SetInput(self.ugridQuadF)
-            elif (self.vtkVersionMajor == 6):
-                if self.boolShowPresF: self.extractGridClipFpreserve.SetInputData(self.ugridLinF)
-                else:                  self.extractGridClipFpreserve.SetInputData(self.ugridQuadF)
-            self.extractGridClipFpreserve.SetImplicitFunction(self.clippingPlaneF)
-            self.extractGridClipFpreserve.ExtractInsideOff()
+        if (self.vtkVersionMajor == 5):
+            if self.boolShowPresF:      self.extractGridClipFpreserve.SetInput(self.ugridLinF)
+            elif self.boolShowQualityF: self.extractGridClipFpreserve.SetInput(self.ugridLinF)
+            else:                       self.extractGridClipFpreserve.SetInput(self.ugridQuadF)
+        elif (self.vtkVersionMajor == 6):
+            if self.boolShowPresF:      self.extractGridClipFpreserve.SetInputData(self.ugridLinF)
+            elif self.boolShowQualityF: self.extractGridClipFpreserve.SetInputData(self.ugridLinF)
+            else:                       self.extractGridClipFpreserve.SetInputData(self.ugridQuadF)
+        self.extractGridClipFpreserve.SetImplicitFunction(self.clippingPlaneF)
+        self.extractGridClipFpreserve.ExtractInsideOff()
         if self.extractClipFpreserve == []:
             self.extractClipFpreserve = vtk.vtkGeometryFilter()
             self.extractClipFpreserve.SetInputConnection( \
@@ -1384,12 +1391,11 @@ class fsi(object):
             if self.boolUpdateQualityLinS:
                 self.meshQualityLinS.Update()
                 self.boolUpdateQualityLinS = False
-                if not(self.ugridLinS == []):
-                    self.ugridLinS.GetCellData().AddArray( \
-                        self.meshQualityLinS.GetOutput().GetCellData().GetArray("Quality"))
-                elif not(self.sgridLinS == []):
-                    self.sgridLinS.GetCellData().AddArray( \
-                        self.meshQualityLinS.GetOutput().GetCellData().GetArray("Quality"))
+                numpyArray  = 1.0 / vtk_to_numpy(self.meshQualityLinS.GetOutput().GetCellData().GetArray("Quality"))
+                vtkArray    = numpy_to_vtk(numpyArray, deep=1, array_type=vtk.VTK_DOUBLE)
+                vtkArray.SetName("Quality")
+                if not(self.ugridLinS == []):   self.ugridLinS.GetCellData().AddArray(vtkArray)
+                elif not(self.sgridLinS == []): self.sgridLinS.GetCellData().AddArray(vtkArray)
                 if not(self.ugridLinS == []):
                     self.minQualityS, self.maxQualityS = \
                         self.ugridLinS.GetCellData().GetArray("Quality").GetRange()
@@ -1427,12 +1433,11 @@ class fsi(object):
             if self.boolUpdateQualityQuadS:
                 self.meshQualityQuadS.Update()
                 self.boolUpdateQualityQuadS = False
-                if not(self.ugridQuadS == []):
-                    self.ugridQuadS.GetCellData().AddArray( \
-                        self.meshQualityQuadS.GetOutput().GetCellData().GetArray("Quality"))
-                elif not(self.sgridQuadS == []):
-                    self.sgridQuadS.GetCellData().AddArray( \
-                        self.meshQualityQuadS.GetOutput().GetCellData().GetArray("Quality"))
+                numpyArray  = 1.0 / vtk_to_numpy(self.meshQualityQuadS.GetOutput().GetCellData().GetArray("Quality"))
+                vtkArray    = numpy_to_vtk(numpyArray, deep=1, array_type=vtk.VTK_DOUBLE)
+                vtkArray.SetName("Quality")
+                if not(self.ugridQuadS == []):    self.ugridQuadS.GetCellData().AddArray(vtkArray)
+                elif not(self.sgridQuadS == []):  self.sgridQuadS.GetCellData().AddArray(vtkArray)
                 if not(self.ugridQuadS == []):
                     self.minQualityS, self.maxQualityS = \
                         self.ugridQuadS.GetCellData().GetArray("Quality").GetRange()
@@ -2530,6 +2535,12 @@ class fsi(object):
                 self.scalarBarF.SetTitle("Fluid mesh quality")
             elif self.boolShowPhiF:
                 self.scalarBarF.SetTitle("Fluid directional scalar")
+            if not(self.scalarBarI == []):
+                self.boolShowScalarBarI.set(False)
+                self.renderer.RemoveActor(self.scalarBarI)
+            if not(self.scalarBarS == []):
+                self.boolShowScalarBarS.set(False)
+                self.renderer.RemoveActor(self.scalarBarS)
             self.renderer.AddActor(self.scalarBarF)
         else:
             self.renderer.RemoveActor(self.scalarBarF)
@@ -2566,6 +2577,12 @@ class fsi(object):
                 self.scalarBarS.SetTitle("Solid pressure")
             elif self.boolShowQualityS:
                 self.scalarBarS.SetTitle("Solid mesh quality")
+            if not(self.scalarBarF == []):
+                self.boolShowScalarBarF.set(False)
+                self.renderer.RemoveActor(self.scalarBarF)
+            if not(self.scalarBarI == []):
+                self.boolShowScalarBarI.set(False)
+                self.renderer.RemoveActor(self.scalarBarI)
             self.renderer.AddActor(self.scalarBarS)
         else:
             self.renderer.RemoveActor(self.scalarBarS)
@@ -2594,6 +2611,12 @@ class fsi(object):
         if self.boolShowScalarBarI.get():
             if self.boolShowLMult:
                 self.scalarBarI.SetTitle("Lagrange multiplier")
+            if not(self.scalarBarF == []):
+                self.boolShowScalarBarF.set(False)
+                self.renderer.RemoveActor(self.scalarBarF)
+            if not(self.scalarBarS == []):
+                self.boolShowScalarBarS.set(False)
+                self.renderer.RemoveActor(self.scalarBarS)
             self.renderer.AddActor(self.scalarBarI)
         else:
             self.renderer.RemoveActor(self.scalarBarI)
@@ -4378,7 +4401,7 @@ class fsi(object):
     # configure vtk renderer
     def configureRenderer(self):
         self.renderer.SetBackground(1.0, 1.0, 1.0)
-        self.renderer.SetBackground2(0.0, 0.0, 0.0)
+        self.renderer.SetBackground2(1.0, 1.0, 1.0)
         self.renderer.GradientBackgroundOn()
         self.renderer.SetActiveCamera(self.camera)
         self.renderer.ResetCamera()

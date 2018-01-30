@@ -559,7 +559,7 @@ def main():
         ('black background', 'black-white background', \
          'white background', 'white-black background', \
          'custom background', 'custom-white background')
-    visualization.backgroundDropDown.set('black-white background')
+    visualization.backgroundDropDown.set('white background')
     ttk.Button(window.subframeV, \
         command=lambda:visualization.modifyCamera(window), \
         text="Modify camera view", style='My.TButton').grid(column=0, row = 2, \
