@@ -2154,7 +2154,6 @@ class fsi(object):
         self.selectColorArrayF()
         #self.renderer.AddActor(self.dataSetActorLinF)
         self.renderer.AddActor(self.dataSetActorQuadF)
-        self.renderWindow.Render()
     
     # create data set mapper for solid
     def createDataSetMapperS(self):
@@ -2225,7 +2224,6 @@ class fsi(object):
         self.selectColorArrayS()
         #self.renderer.AddActor(self.dataSetActorLinS)
         self.renderer.AddActor(self.dataSetActorQuadS)
-        self.renderWindow.Render()
     
     # create data set mapper for solid
     def createDataSetMapperI(self):
@@ -2260,7 +2258,6 @@ class fsi(object):
         self.dataSetActorI.GetProperty().SetInterpolationToGouraud()
         self.selectColorArrayI()
         self.renderer.AddActor(self.dataSetActorI)
-        self.renderWindow.Render()
     
     # select variable for color map
     def selectColorArrayF(self):
@@ -4392,6 +4389,7 @@ class fsi(object):
             self.currentT = self.fromT
             self.importData(win)
             self.createDataSetMappers()
+            self.cameraUpdate()
             self.popup.destroy()
         
         importOKButton = ttk.Button(toolbarDispOK, text = "Update & exit", \
@@ -4458,27 +4456,29 @@ class fsi(object):
         self.camera.SetPosition( \
             self.cameraPos0, self.cameraPos1, self.cameraPos2)
     
+    # update camera view
+    def cameraUpdate(self):
+        self.cameraUp0 = float(self.cameraUp0Str.get())
+        self.cameraUp1 = float(self.cameraUp1Str.get())
+        self.cameraUp2 = float(self.cameraUp2Str.get())
+        self.cameraPos0 = float(self.cameraPos0Str.get())
+        self.cameraPos1 = float(self.cameraPos1Str.get())
+        self.cameraPos2 = float(self.cameraPos2Str.get())
+        logging.debug("Setting camera position: [%.2f, %.2f %.2f]" \
+            % (self.cameraPos0, self.cameraPos1, self.cameraPos2))
+        logging.debug("Setting camera up: [%.2f, %.2f %.2f]" \
+            % (self.cameraUp0, self.cameraUp1, self.cameraUp2))
+        self.camera.SetViewUp( \
+            self.cameraUp0, self.cameraUp1, self.cameraUp2)
+        self.camera.SetPosition( \
+            self.cameraPos0, self.cameraPos1, self.cameraPos2)
+        self.camera.SetParallelProjection(self.parallelProjection.get())
+        self.renderer.SetActiveCamera(self.camera)
+        self.renderer.ResetCamera()
+        self.renderWindow.Render()
+    
     # modify camera position and view-up
     def modifyCamera(self, win):
-        def cameraUpdate():
-            self.cameraUp0 = float(self.cameraUp0Str.get())
-            self.cameraUp1 = float(self.cameraUp1Str.get())
-            self.cameraUp2 = float(self.cameraUp2Str.get())
-            self.cameraPos0 = float(self.cameraPos0Str.get())
-            self.cameraPos1 = float(self.cameraPos1Str.get())
-            self.cameraPos2 = float(self.cameraPos2Str.get())
-            logging.debug("Setting camera position: [%.2f, %.2f %.2f]" \
-                % (self.cameraPos0, self.cameraPos1, self.cameraPos2))
-            logging.debug("Setting camera up: [%.2f, %.2f %.2f]" \
-                % (self.cameraUp0, self.cameraUp1, self.cameraUp2))
-            self.camera.SetViewUp( \
-                self.cameraUp0, self.cameraUp1, self.cameraUp2)
-            self.camera.SetPosition( \
-                self.cameraPos0, self.cameraPos1, self.cameraPos2)
-            self.camera.SetParallelProjection(self.parallelProjection.get())
-            self.renderer.SetActiveCamera(self.camera)
-            self.renderer.ResetCamera()
-            self.renderWindow.Render()
         def cameraExit():
             self.cameraWindow.destroy()
         self.cameraWindow = Tkinter.Toplevel(win.root)
@@ -4513,7 +4513,7 @@ class fsi(object):
         parallelProjectionOnOff.grid(column = 1, row = 3)
         if self.parallelProjection.get():
             parallelProjectionOnOff.state(["selected"])
-        ttk.Button(localFrame, text = "Update", command=cameraUpdate, \
+        ttk.Button(localFrame, text = "Update", command=self.cameraUpdate, \
             style='My.TButton').grid(column = 2, row = 3)
         ttk.Button(localFrame, text = "Exit", command=cameraExit, \
             style='My.TButton').grid(column = 3, row = 3)
@@ -4896,7 +4896,6 @@ class fsi(object):
         self.configureCamera()
         self.renderer.SetActiveCamera(self.camera)
         self.renderer.ResetCamera()
-        self.renderWindow.Render()
         logging.debug("initial rendering completed")
     
     # settings for phase I or II probing, i.e. extracting data at given points

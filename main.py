@@ -745,6 +745,7 @@ def main():
     
     # render scene
     visualization.renderWidget.Render()
+    visualization.cameraUpdate()
     
     # start main loop
     window.root.mainloop()
