@@ -3615,12 +3615,24 @@ class fsi(object):
     # update fluid pressure
     def updatePresF(self):
         logging.debug("update fluid pressure")
-        if ((self.tempMappingF == []) \
-            and (self.meshTypeQuadF == vtk.vtkQuadraticTetra().GetCellType())):
+        if (self.tempMappingF == []):
             logging.debug(" find mapping")
-            self.tempMappingF = readCheartData.findMappingTetra( \
-                self.baseDirectory+self.meshFolder+self.filenameLinTF, \
-                self.baseDirectory+self.meshFolder+self.filenameQuadTF)
+            if (self.meshTypeQuadF == vtk.vtkQuadraticTriangle().GetCellType()):
+                self.tempMappingF = readCheartData.findMappingTriangle( \
+                    self.baseDirectory+self.meshFolder+self.filenameLinTF, \
+                    self.baseDirectory+self.meshFolder+self.filenameQuadTF)
+            elif (self.meshTypeQuadF == vtk.vtkBiQuadraticQuad().GetCellType()):
+                self.tempMappingF = readCheartData.findMappingQuad( \
+                    self.baseDirectory+self.meshFolder+self.filenameLinTF, \
+                    self.baseDirectory+self.meshFolder+self.filenameQuadTF)
+            elif (self.meshTypeQuadF == vtk.vtkQuadraticTetra().GetCellType()):
+                self.tempMappingF = readCheartData.findMappingTetra( \
+                    self.baseDirectory+self.meshFolder+self.filenameLinTF, \
+                    self.baseDirectory+self.meshFolder+self.filenameQuadTF)
+            elif (self.meshTypeQuadF == vtk.vtkTriQuadraticHexahedron().GetCellType()):
+                self.tempMappingF = readCheartData.findMappingHexahedron( \
+                    self.baseDirectory+self.meshFolder+self.filenameLinTF, \
+                    self.baseDirectory+self.meshFolder+self.filenameQuadTF)
         if self.boolUpdateSpaceF:
             logging.debug("unstructured grid for fluid will be updated first")
             self.updateSpaceF()
