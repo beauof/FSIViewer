@@ -7,6 +7,7 @@ The software has only been tested with Linux operating systems. <br />
  <br />
 Make sure that the following packages are installed: <br />
 gcc <br />
+build_essential <br />
 python2.x <br />
 python-tk <br />
 python-imaging-tk (or: python-pil.imagetk) <br />
